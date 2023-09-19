@@ -42,3 +42,9 @@ ul {
     border-radius: 50%;
     font-size: 20px;
 }
+
+.recording-border {
+    height: 100%;
+    border: 3px solid #00ff00;
+    box-sizing: border-box;
+}

@@ -1,20 +1,12 @@
-import { useState } from 'react'
-import { ipcCloseWindow } from '../utils/ipc'
+import './count-down.css'
+interface CountDownProps {
+    count: number
+}
 
-export const CountDown = function App(): JSX.Element {
-    const [count, setCount] = useState(3)
-
-    const timer = setInterval(() => {
-        setCount(count - 1)
-        if (count < 0) {
-            clearInterval(timer)
-            ipcCloseWindow()
-        }
-    }, 1000)
-
+export const CountDown: React.FC<CountDownProps> = ({ count }: CountDownProps) => {
     return (
         <div className="recording-container">
-            <div>{count}</div>
+            <div className="count-down">{count}</div>
         </div>
     )
 }

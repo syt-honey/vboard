@@ -5,6 +5,11 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 
 let mainWindow: BrowserWindow | null = null
 
+const winURL =
+    process.env.NODE_ENV === 'development'
+        ? 'http://localhost:5173'
+        : `file://${__dirname}/index.html`
+
 function createWindow(): void {
     mainWindow = new BrowserWindow({
         width: 900,
@@ -24,7 +29,7 @@ function createWindow(): void {
 
     let subWindow: BrowserWindow | null = null
 
-    ipcMain.on('create-window', () => {
+    ipcMain.on('create-window', (_, { url }) => {
         // @TODO: this area is incorrect.
         // We expect the window width and height to be the same as the full screen width and height, including nav and dock height.
         // But the maxHeight of this window seemingly not includes nav and dock height.
@@ -33,23 +38,22 @@ function createWindow(): void {
         subWindow = new BrowserWindow({
             x: 0,
             y: 0,
-            parent: mainWindow!,
-            modal: true,
             width,
             height,
             frame: false,
             transparent: true,
-            webPreferences: { nodeIntegration: true }
+            webPreferences: {
+                nodeIntegration: true,
+                preload: join(__dirname, '../preload/index.js'),
+                sandbox: false
+            }
         })
 
-        // @TODO: there are two ways to load html file.
-        // the one is use path which is a page component of renderer app, and the other one is use preload.
-        // See: https://electron-vite.org/guide/dev.html#multiple-windows-app
-        // subWindow.loadFile(join(__dirname, '../renderer/recording.html'))
+        // we use page component of renderer app
+        subWindow.loadURL(winURL + url)
     })
 
     ipcMain.on('recording-end', () => {
-        console.log('recording-end')
         subWindow!.close()
     })
 
@@ -79,6 +83,7 @@ function createWindow(): void {
     mainWindow.on('ready-to-show', () => {
         mainWindow!.show()
 
+        // @TODO: we should check the audio&video permissions before using them
         // try {
         //     // prompt for permissions on macOS
         //     const types = ["camera", "microphone", "screen"]

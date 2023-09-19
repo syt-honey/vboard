@@ -26,7 +26,8 @@
     "antd": "^5.9.0",
     "electron-updater": "^6.1.1",
     "mobx": "^6.10.2",
-    "mobx-react-lite": "^4.0.4"
+    "mobx-react-lite": "^4.0.4",
+    "react-router-dom": "^6.16.0"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^1.0.1",

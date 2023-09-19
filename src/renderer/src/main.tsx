@@ -7,7 +7,7 @@ import App from './App'
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <React.StrictMode>
         <StoreProvider>
-            <App key={null} type={undefined} props={undefined} />
+            <App />
         </StoreProvider>
     </React.StrictMode>
 )

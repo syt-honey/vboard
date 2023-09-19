@@ -10,8 +10,8 @@ export const ipcSyncByApp = <
     return window.electron.ipcRenderer.invoke(action, args) as ReturnType<ipc.AppActionSync[T]>
 }
 
-export const ipcCreateWindow = (): void => {
-    return window.electron.ipcRenderer.send('create-window')
+export const ipcCreateSubWindow = ({ url }: { url: string }): void => {
+    return window.electron.ipcRenderer.send('create-window', { url })
 }
 
 export const ipcCloseWindow = (): void => {
