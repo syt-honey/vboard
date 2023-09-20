@@ -1,4 +1,5 @@
-import './count-down.css'
+import './index.css'
+
 interface CountDownProps {
     count: number
 }

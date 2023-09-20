@@ -102,9 +102,12 @@ export class Recorder {
                 this._streamList.push(userCameraStream)
                 this._streamList.push(userScreenStream)
 
+                // @TODO:
+                // we set this video to show user camera,
+                // but it means canvas stream can not capture screen stream which is not we want. we should fix it.
                 const video = document.getElementById('preview') as HTMLVideoElement
                 if (video) {
-                    video.srcObject = stream
+                    video.srcObject = userCameraStream
                 }
 
                 const _recorder = new MediaRecorder(stream, { mimeType: this.miniType })

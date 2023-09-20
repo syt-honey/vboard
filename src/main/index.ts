@@ -30,6 +30,10 @@ function createWindow(): void {
     let subWindow: BrowserWindow | null = null
 
     ipcMain.on('create-window', (_, { url }) => {
+        if (subWindow) {
+            return
+        }
+
         // @TODO: this area is incorrect.
         // We expect the window width and height to be the same as the full screen width and height, including nav and dock height.
         // But the maxHeight of this window seemingly not includes nav and dock height.
@@ -49,7 +53,7 @@ function createWindow(): void {
             }
         })
 
-        // we use page component of renderer app
+        // we use page component of renderer app to show child window
         subWindow.loadURL(winURL + url)
     })
 

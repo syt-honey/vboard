@@ -1,0 +1,12 @@
+.camera {
+    display: inline-block;
+    height: 200px;
+    width: 200px;
+    overflow: hidden;
+}
+
+.camera video {
+    width: 267px;
+    height: 200px;
+    object-fit: cover;
+}

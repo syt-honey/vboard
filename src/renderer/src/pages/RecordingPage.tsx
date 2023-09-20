@@ -1,10 +1,7 @@
-import React from 'react'
-import { useContext, useState, useEffect } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 
-import { RecorderContext, MediaContext } from '../components/StoreProvider'
-import CountDown from '../components/CountDown'
-import ToolBox from '../components/ToolBox'
+import { RecorderContext, MediaContext, CountDown, ToolBox, Camera } from '../components'
 
 const COUNTDOWN = 3
 
@@ -37,14 +34,12 @@ export const RecordingPage = observer<React.FC>(() => {
         }, 1000)
 
         if (count < 0) {
-            // const startRecording = async (): Promise<void> => {
-            //     if (recorderStore.isIdle) {
-            //         await recorderStore.start()
-            //     } else {
-            //         recorderStore.stop()
-            //     }
-            // }
-            // startRecording()
+            const startRecording = async (): Promise<void> => {
+                if (recorderStore.isIdle) {
+                    await recorderStore.start()
+                }
+            }
+            startRecording()
         }
 
         return (): void => clearInterval(timer)
@@ -52,10 +47,14 @@ export const RecordingPage = observer<React.FC>(() => {
 
     return (
         <div className="recording-border">
-            {count > 0 ? <CountDown count={count} /> : <ToolBox />}
-
-            {/* show camera */}
-            {/* <video width="400" height="300" id="preview" autoPlay></video> */}
+            {count > 0 ? (
+                <CountDown count={count} />
+            ) : (
+                <>
+                    <ToolBox />
+                    <Camera />
+                </>
+            )}
         </div>
     )
 })
