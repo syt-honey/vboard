@@ -1,0 +1,33 @@
+.tool-box {
+    display: inline-grid;
+    grid-template-columns: 1fr;
+    grid-gap: 20px;
+    padding: 20px 10px;
+    color: #E8E9EA;
+    background-color: #18222E;
+    border-radius: 8px;
+}
+
+.tool-box .ant-btn.ant-btn-link {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    color: #E8E9EA;
+}
+
+.tool-box .ant-btn .ant-btn-icon .anticon {
+    font-size: 20px;
+}
+
+.tool-box .ant-btn.ant-btn-link.stop-btn {
+    background-color: #F04037;
+    border-radius: 6px;
+}
+
+.tool-box .ant-btn.ant-btn-link.stop-btn-recording {
+    background-color: #F04037;
+}
+
+.tool-box .ant-btn.ant-btn-link.stop-btn-pausing {
+    background-color: #DE8B50;
+}

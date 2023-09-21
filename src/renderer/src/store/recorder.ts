@@ -37,6 +37,14 @@ export class Recorder {
         return this._status === RecorderStatus.Starting || this._status === RecorderStatus.Saving
     }
 
+    public get isRecording(): boolean {
+        return this._status === RecorderStatus.Recording
+    }
+
+    public get isPaused(): boolean {
+        return this._status === RecorderStatus.Paused
+    }
+
     public async start(): Promise<void> {
         runInAction(() => {
             this._status = RecorderStatus.Starting
@@ -44,6 +52,45 @@ export class Recorder {
         this._recorder = await this._createRecorder()
         runInAction(() => {
             this._status = this._recorder ? RecorderStatus.Recording : RecorderStatus.Idle
+        })
+    }
+
+    public pause(): void {
+        if (this._recorder) {
+            this._recorder.pause()
+            runInAction(() => {
+                this._status = RecorderStatus.Paused
+            })
+        }
+    }
+
+    public resume(): void {
+        if (this._recorder) {
+            this._recorder.resume()
+            runInAction(() => {
+                this._status = RecorderStatus.Recording
+            })
+        }
+    }
+
+    // clear data and do not saving
+    public cancel(): void {
+        if (this._recorder) {
+            this._recorder.stream.getAudioTracks().forEach((t) => t.stop())
+            this._streamList.forEach((s) => s.getTracks().forEach((t) => t.stop()))
+        }
+
+        if (this._playerCanvas) {
+            this._playerCanvas.stop()
+        }
+
+        this._id = ''
+        this._recorder = null
+        this._chunks = []
+        this._streamList = []
+
+        runInAction(() => {
+            this._status = RecorderStatus.Idle
         })
     }
 
@@ -164,6 +211,7 @@ export enum RecorderStatus {
     Idle = 'Idle',
     Starting = 'Starting',
     Recording = 'Recording',
+    Paused = 'Paused',
     Saving = 'Saving'
 }
 
