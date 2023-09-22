@@ -6,6 +6,7 @@
     color: #E8E9EA;
     background-color: #18222E;
     border-radius: 8px;
+    -webkit-app-region: no-drag;
 }
 
 .tool-box .ant-btn.ant-btn-link {

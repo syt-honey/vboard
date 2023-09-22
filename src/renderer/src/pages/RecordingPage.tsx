@@ -1,60 +1,38 @@
-import React, { useContext, useState, useEffect } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 
-import { RecorderContext, MediaContext, CountDown, ToolBox, Camera } from '../components'
-
-const COUNTDOWN = 3
+import { ipcCreateCameraWindow } from '../utils'
+import { RecorderContext, MediaContext, ToolBox } from '../components'
 
 export const RecordingPage = observer<React.FC>(() => {
     const recorderStore = useContext(RecorderContext)
     const mediaStore = useContext(MediaContext)
-    const [media, setMedia] = useState<Electron.DesktopCapturerSource | null>(null)
-    const [count, setCount] = useState(COUNTDOWN)
 
     useEffect(() => {
         const checkMedia = async (): Promise<void> => {
             if (!mediaStore.getMedia()) {
                 await mediaStore.initMedia()
-                setMedia(mediaStore.getMedia())
-                if (media) {
-                    recorderStore.setId(media.id)
+                if (mediaStore.getMedia()) {
+                    recorderStore.setId(mediaStore.getMedia().id)
                 }
+
+                const startRecording = async (): Promise<void> => {
+                    if (recorderStore.isIdle) {
+                        await recorderStore.start()
+                    }
+                }
+
+                startRecording()
+                ipcCreateCameraWindow({ url: '/camera' })
             }
         }
 
         checkMedia()
     }, [])
 
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setCount(count - 1)
-            if (count < 0) {
-                clearInterval(timer)
-            }
-        }, 1000)
-
-        if (count < 0) {
-            const startRecording = async (): Promise<void> => {
-                if (recorderStore.isIdle) {
-                    await recorderStore.start()
-                }
-            }
-            startRecording()
-        }
-
-        return (): void => clearInterval(timer)
-    }, [count])
-
     return (
-        <div className="recording-border">
-            {count > 0 ? (
-                <CountDown count={count} />
-            ) : (
-                <>
-                    <ToolBox />
-                    <Camera />
-                </>
-            )}
+        <div className="recording-page">
+            <ToolBox />
         </div>
     )
 })

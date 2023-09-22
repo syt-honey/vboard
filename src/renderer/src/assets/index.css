@@ -28,7 +28,7 @@ ul {
     list-style: none;
 }
 
-.container {
+.main-page {
     height: 100%;
     display: flex;
     align-items: center;
@@ -36,15 +36,35 @@ ul {
     flex-direction: column;
 }
 
-.container .ant-btn {
+.main-page .ant-btn {
     width: 150px;
     height: 150px;
     border-radius: 50%;
     font-size: 20px;
 }
 
-.recording-border {
+.recording-page {
     height: 100%;
+    box-sizing: border-box;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -webkit-app-region: drag;
+}
+
+.counter-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    background-color: rgba(0, 0, 0, .2);
     border: 3px solid #00ff00;
     box-sizing: border-box;
+}
+
+.camera-page {
+    height: 100%;
+    box-sizing: border-box;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -webkit-app-region: drag;
 }

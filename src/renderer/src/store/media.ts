@@ -11,7 +11,9 @@ export class Media {
     }
 
     public getMedia(): Electron.DesktopCapturerSource {
-        return this._mediaList?.[0]
+        return (
+            this._mediaList.find((source) => source.name === 'Entire Screen') || this._mediaList[0]
+        )
     }
 }
 

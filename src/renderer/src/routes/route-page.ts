@@ -1,9 +1,13 @@
 import HomePage from '../pages/HomePage'
 import RecordingPage from '../pages/RecordingPage'
+import CounterPage from '../pages/CounterPage'
+import CameraPage from '../pages/CameraPage'
 
 export enum RouteNameType {
     HomePage = 'HomePage',
-    RecordingPage = 'RecordingPage'
+    RecordingPage = 'RecordingPage',
+    CounterPage = 'CounterPage',
+    CameraPage = 'CameraPage'
 }
 
 export type RouterPages = {
@@ -26,5 +30,15 @@ export const routePages: RouterPages = {
         title: 'RecordingPage',
         component: RecordingPage,
         path: '/recording'
+    },
+    [RouteNameType.CounterPage]: {
+        title: 'CounterPage',
+        component: CounterPage,
+        path: '/counter'
+    },
+    [RouteNameType.CameraPage]: {
+        title: 'CameraPage',
+        component: CameraPage,
+        path: '/camera'
     }
 }

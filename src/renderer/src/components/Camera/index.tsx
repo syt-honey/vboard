@@ -1,8 +1,8 @@
 import './index.css'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { observer } from 'mobx-react-lite'
-
+import { LoadingOutlined } from '@ant-design/icons'
 export interface CameraProps {
     // support px and precent(%)
     width?: string
@@ -10,6 +10,7 @@ export interface CameraProps {
     // if shape equals 'circle' and the width and height are not equal,
     // then we will set width and height to the minimum value of them
     shape?: 'circle' | 'rect'
+    stream: MediaStream | null
 }
 
 // default camera ratio. we should use this ratio to calculate circle width
@@ -20,7 +21,9 @@ export const replaceDigital = (origin: string, v: string): string => {
 }
 
 export const Camera = observer(
-    ({ width = '267px', height = '200px', shape = 'circle' }: CameraProps) => {
+    ({ width = '267px', height = '200px', shape = 'circle', stream }: CameraProps) => {
+        const [loading, setLoading] = useState<boolean>(true)
+        const camera = useRef<HTMLVideoElement>(null)
         // keep default ratio
         const [videoStyle, setVideoStyle] = useState({ width, height })
 
@@ -30,6 +33,17 @@ export const Camera = observer(
             height,
             borderRadius: ''
         })
+
+        useEffect(() => {
+            if (stream) {
+                setLoading(false)
+            }
+
+            if (camera.current && stream) {
+                camera.current.srcObject = stream
+                camera.current.play()
+            }
+        }, [camera.current, stream, setLoading])
 
         useEffect(() => {
             if (shape === 'circle') {
@@ -49,7 +63,11 @@ export const Camera = observer(
 
         return (
             <div className="camera" style={{ ...containerStyle }}>
-                <video style={{ ...videoStyle }} id="preview" autoPlay></video>
+                {loading ? (
+                    <LoadingOutlined />
+                ) : (
+                    <video ref={camera} style={{ ...videoStyle }} id="preview" autoPlay></video>
+                )}
             </div>
         )
     }

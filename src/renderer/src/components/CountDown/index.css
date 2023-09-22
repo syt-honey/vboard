@@ -1,14 +1,4 @@
-.recording-container {
-    height: 100%;
-    border: 3px solid #00ff00;
-    box-sizing: border-box;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: rgba(0, 0, 0, .2);
-}
-
-.recording-container .count-down {
+.count-down {
     display: inline-block;
     width: 150px;
     height: 150px;

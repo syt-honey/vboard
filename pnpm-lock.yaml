@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@ant-design/icons':
+    specifier: ^5.2.6
+    version: registry.npmmirror.com/@ant-design/icons@5.2.6(react-dom@18.2.0)(react@18.2.0)
   '@electron-toolkit/preload':
     specifier: ^2.0.0
     version: registry.npmmirror.com/@electron-toolkit/preload@2.0.0(electron@25.6.0)

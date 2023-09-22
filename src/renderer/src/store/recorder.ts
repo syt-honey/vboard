@@ -1,18 +1,11 @@
-import { ipcSyncByApp } from '../utils/ipc'
 import { makeAutoObservable, runInAction } from 'mobx'
-import { PlayerCanvas } from './canvas'
+import { getUserAudioStream, getUserScreenStream, ipcSyncByApp } from '../utils'
 
 export class Recorder {
-    private readonly miniType: string = 'video/webm;codecs=vp8,opus'
+    private readonly miniType: string = 'video/webm'
 
     private _id: string = ''
     private _recorder: MediaRecorder | null = null
-
-    // save camera & screen stream for stop
-    private _streamList: MediaStream[] = []
-
-    // handle camera & screen stream to a single stream
-    private _playerCanvas: PlayerCanvas | null = null
 
     // save audio/video & screen stream
     private _chunks: Blob[] = []
@@ -32,17 +25,8 @@ export class Recorder {
         return this._status === RecorderStatus.Idle
     }
 
-    // we say pending status indicates starting to record or starting to save
-    public get isPending(): boolean {
-        return this._status === RecorderStatus.Starting || this._status === RecorderStatus.Saving
-    }
-
     public get isRecording(): boolean {
         return this._status === RecorderStatus.Recording
-    }
-
-    public get isPaused(): boolean {
-        return this._status === RecorderStatus.Paused
     }
 
     public async start(): Promise<void> {
@@ -73,21 +57,15 @@ export class Recorder {
         }
     }
 
-    // clear data and do not saving
     public cancel(): void {
         if (this._recorder) {
             this._recorder.stream.getAudioTracks().forEach((t) => t.stop())
-            this._streamList.forEach((s) => s.getTracks().forEach((t) => t.stop()))
-        }
-
-        if (this._playerCanvas) {
-            this._playerCanvas.stop()
+            this._recorder.stream.getVideoTracks().forEach((t) => t.stop())
         }
 
         this._id = ''
         this._recorder = null
         this._chunks = []
-        this._streamList = []
 
         runInAction(() => {
             this._status = RecorderStatus.Idle
@@ -95,92 +73,59 @@ export class Recorder {
     }
 
     public async stop(): Promise<void> {
-        if (this._recorder && this._playerCanvas) {
+        if (this._recorder) {
             this._recorder.stream.getAudioTracks().forEach((t) => t.stop())
-            this._streamList.forEach((s) => s.getTracks().forEach((t) => t.stop()))
-
-            this._playerCanvas.stop()
-            this._recorder.stop()
+            this._recorder.stream.getVideoTracks().forEach((t) => t.stop())
         }
 
         this._id = ''
         this._recorder = null
         this._chunks = []
-        this._streamList = []
     }
 
     private async _createRecorder(): Promise<MediaRecorder | null> {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise(async (resolve, reject) => {
-            if (navigator.mediaDevices) {
-                // main stream
-                const stream = new MediaStream()
-                const userCameraStream = await navigator.mediaDevices.getUserMedia({
-                    video: true,
-                    audio: false
-                })
-                const userScreenStream = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        mandatory: {
-                            chromeMediaSource: 'desktop',
-                            chromeMediaSourceId: this._id
-                        }
-                    },
-                    audio: false
-                })
-                const userAudioStream = await navigator.mediaDevices.getUserMedia({
-                    video: false,
-                    audio: true
-                })
-
-                this._playerCanvas = new PlayerCanvas()
-                this._playerCanvas.setCameraVideo(this._createVideoEle(userCameraStream))
-                this._playerCanvas.setScreenVideo(this._createVideoEle(userScreenStream))
-
-                // merge canvas stream and audio stream to main stream
-                this._playerCanvas.canvas
-                    .captureStream(30)
-                    .getTracks()
-                    .forEach((t) => stream.addTrack(t))
-                userAudioStream.getAudioTracks().forEach((t) => stream.addTrack(t))
-
-                this._streamList.push(userCameraStream)
-                this._streamList.push(userScreenStream)
-
-                // @TODO:
-                // we set this video to show user camera,
-                // but it means canvas stream can not capture screen stream which is not we want. we should fix it.
-                const video = document.getElementById('preview') as HTMLVideoElement
-                if (video) {
-                    video.srcObject = userCameraStream
-                }
-
-                const _recorder = new MediaRecorder(stream, { mimeType: this.miniType })
+            try {
+                const _recorder = new MediaRecorder(
+                    new MediaStream([
+                        ...(await getUserAudioStream()).getAudioTracks(),
+                        ...(await getUserScreenStream(this._id)).getVideoTracks()
+                    ]),
+                    {
+                        audioBitsPerSecond: 128000,
+                        mimeType: this.miniType
+                    }
+                )
                 _recorder.start(5000)
                 _recorder.onerror = reject
-
-                _recorder.ondataavailable = (e): void => {
-                    if (e.data.size > 0) {
-                        console.log(`start to save chunck every 5s...., size: ${e.data.size}`)
-                        this._chunks.push(e.data)
-                    }
-                }
-
-                _recorder.onstop = async (): Promise<void> => {
-                    runInAction(() => {
-                        this._status = RecorderStatus.Saving
-                    })
-                    await this._saveMedia(new Blob([...this._chunks], { type: this.miniType }))
-                    runInAction(() => {
-                        this._status = RecorderStatus.Idle
-                    })
-                }
+                _recorder.ondataavailable = this._dataAvailable.bind(this)
+                _recorder.onstop = this._stop.bind(this)
 
                 resolve(_recorder)
+            } catch (e) {
+                // not support
+                console.error(e)
+                resolve(null)
             }
-            resolve(null)
+        })
+    }
+
+    // @FIXME: video will can not play when more than x chuncks
+    private _dataAvailable(e): void {
+        if (e.data.size > 0) {
+            console.log(`start to save chunck every 5s...., size: ${e.data.size}`)
+            this._chunks.push(e.data)
+        }
+    }
+
+    private async _stop(): Promise<void> {
+        runInAction(() => {
+            this._status = RecorderStatus.Saving
+        })
+        await this._saveMedia(new Blob([...this._chunks], { type: this.miniType }))
+        runInAction(() => {
+            this._status = RecorderStatus.Idle
         })
     }
 
@@ -197,13 +142,6 @@ export class Recorder {
             reader.onerror = reject
             reader.readAsArrayBuffer(blob)
         })
-    }
-
-    private _createVideoEle(stream: MediaStream): HTMLVideoElement {
-        const video = document.createElement('video')
-        video.autoplay = true
-        video.srcObject = stream
-        return video
     }
 }
 

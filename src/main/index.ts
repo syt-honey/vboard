@@ -3,62 +3,17 @@ import { join } from 'path'
 import fs from 'fs'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 
-let mainWindow: BrowserWindow | null = null
-
 const winURL =
     process.env.NODE_ENV === 'development'
         ? 'http://localhost:5173'
         : `file://${__dirname}/index.html`
 
-function createWindow(): void {
-    mainWindow = new BrowserWindow({
-        width: 900,
-        height: 670,
-        show: false,
-        autoHideMenuBar: true,
-        webPreferences: {
-            nodeIntegration: true,
-            preload: join(__dirname, '../preload/index.js'),
-            sandbox: false
-        }
-    })
+function createMainWindow(): void {
+    let mainWindow: BrowserWindow | null = null
+    mainWindow = createWindow({ width: 900, height: 670, show: false, autoHideMenuBar: true })
 
     ipcMain.on('minimize-main-window', () => {
         mainWindow!.minimize()
-    })
-
-    let subWindow: BrowserWindow | null = null
-
-    ipcMain.on('create-window', (_, { url }) => {
-        if (subWindow) {
-            return
-        }
-
-        // @TODO: this area is incorrect.
-        // We expect the window width and height to be the same as the full screen width and height, including nav and dock height.
-        // But the maxHeight of this window seemingly not includes nav and dock height.
-        const primaryDisplay = screen.getPrimaryDisplay()
-        const { width, height } = primaryDisplay.workAreaSize
-        subWindow = new BrowserWindow({
-            x: 0,
-            y: 0,
-            width,
-            height,
-            frame: false,
-            transparent: true,
-            webPreferences: {
-                nodeIntegration: true,
-                preload: join(__dirname, '../preload/index.js'),
-                sandbox: false
-            }
-        })
-
-        // we use page component of renderer app to show child window
-        subWindow.loadURL(winURL + url)
-    })
-
-    ipcMain.on('recording-end', () => {
-        subWindow!.close()
     })
 
     ipcMain.handle('get-media', async () => {
@@ -116,6 +71,94 @@ function createWindow(): void {
     }
 }
 
+function createCameraWindow(): void {
+    let cameraWindow: BrowserWindow | null = null
+
+    ipcMain.on('create-camera-window', (_, { url }) => {
+        if (cameraWindow) {
+            return
+        }
+
+        const primaryDisplay = screen.getPrimaryDisplay()
+        const { height } = primaryDisplay.workAreaSize
+        cameraWindow = createWindow({
+            x: 0,
+            y: height - 200,
+            width: 200,
+            height: 200,
+            frame: false,
+            transparent: true,
+            resizable: false,
+            url: winURL + url
+        })
+    })
+
+    ipcMain.on('close-camera-window', () => {
+        cameraWindow?.close()
+        cameraWindow = null
+    })
+}
+
+function createCounterWindow(): void {
+    let counterWindow: BrowserWindow | null = null
+
+    ipcMain.on('create-counter-window', (_, { url }) => {
+        if (counterWindow) {
+            return
+        }
+
+        const primaryDisplay = screen.getPrimaryDisplay()
+        const { width, height } = primaryDisplay.workAreaSize
+        counterWindow = createWindow({
+            x: 0,
+            y: 0,
+            width,
+            height,
+            frame: false,
+            transparent: true,
+            url: winURL + url
+        })
+    })
+
+    ipcMain.on('close-counter-window', () => {
+        counterWindow?.close()
+        counterWindow = null
+    })
+}
+
+function createRecordingWindow(): void {
+    let recordingWindow: BrowserWindow | null = null
+
+    ipcMain.on('create-recording-window', (_, { url }) => {
+        if (recordingWindow) {
+            return
+        }
+
+        // @TODO: those width and height shoud be auto
+        const primaryDisplay = screen.getPrimaryDisplay()
+        const { height } = primaryDisplay.workAreaSize
+        recordingWindow = createWindow({
+            x: 0,
+            y: height / 2 - 50,
+            width: 40,
+            height: 140,
+            frame: false,
+            transparent: true,
+            resizable: false,
+            url: winURL + url
+        })
+    })
+
+    ipcMain.on('recording-window-resize', (_, { width, height }) => {
+        recordingWindow?.setSize(width, height)
+    })
+
+    ipcMain.on('close-recording-window', () => {
+        recordingWindow?.close()
+        recordingWindow = null
+    })
+}
+
 app.whenReady().then(() => {
     electronApp.setAppUserModelId('com.electron')
 
@@ -123,10 +166,13 @@ app.whenReady().then(() => {
         optimizer.watchWindowShortcuts(window)
     })
 
-    createWindow()
+    createMainWindow()
+    createCameraWindow()
+    createCounterWindow()
+    createRecordingWindow()
 
     app.on('activate', function () {
-        if (BrowserWindow.getAllWindows().length === 0) createWindow()
+        if (BrowserWindow.getAllWindows().length === 0) createMainWindow()
     })
 })
 
@@ -135,3 +181,32 @@ app.on('window-all-closed', () => {
         app.quit()
     }
 })
+
+const createWindow = ({ width, height, x, y, url, ...restProps }: IWindow): BrowserWindow => {
+    const options = { width, height } as IWindow
+
+    typeof x === 'number' && (options.x = x)
+    typeof y === 'number' && (options.y = y)
+    url && (options.url = url)
+
+    const window = new BrowserWindow({
+        ...options,
+        ...restProps,
+        webPreferences: {
+            nodeIntegration: true,
+            preload: join(__dirname, '../preload/index.js'),
+            sandbox: false
+        }
+    })
+
+    // if there is url, we will use page component of renderer app to show child window
+    if (url) {
+        window.loadURL(url)
+    }
+
+    return window
+}
+
+interface IWindow extends Electron.BrowserWindowConstructorOptions {
+    url?: string
+}

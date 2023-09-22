@@ -1,15 +1,26 @@
 import './index.css'
 
+import React, { useState } from 'react'
+import useInterval from './useInterval'
+
+const COUNTDOWN = 3
+
 interface CountDownProps {
-    count: number
+    finished: () => void
 }
 
-export const CountDown: React.FC<CountDownProps> = ({ count }: CountDownProps) => {
-    return (
-        <div className="recording-container">
-            <div className="count-down">{count}</div>
-        </div>
-    )
+export const CountDown: React.FC<CountDownProps> = ({ finished }: CountDownProps) => {
+    const [count, setCount] = useState(COUNTDOWN)
+
+    useInterval(() => {
+        const n = count - 1
+        if (n === 0) {
+            finished()
+        }
+        setCount(n)
+    })
+
+    return <div className="count-down">{count}</div>
 }
 
 export default CountDown

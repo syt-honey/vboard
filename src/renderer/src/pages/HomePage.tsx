@@ -1,15 +1,15 @@
 import { Button } from 'antd'
 import { observer } from 'mobx-react-lite'
-import { ipcCreateSubWindow, ipcHideMainWindow } from '../utils/ipc'
+import { ipcCreateCounterWindow, ipcHideMainWindow } from '../utils/ipc'
 
 export const HomePage = observer<React.FC>(() => {
     const callRecording = (): void => {
         ipcHideMainWindow()
-        ipcCreateSubWindow({ url: '/recording' })
+        ipcCreateCounterWindow({ url: '/counter' })
     }
 
     return (
-        <div className="container">
+        <div className="main-page">
             <Button onClick={callRecording}>Start</Button>
         </div>
     )
