@@ -16,6 +16,7 @@ export const CountDown: React.FC<CountDownProps> = ({ finished }: CountDownProps
         const n = count - 1
         if (n === 0) {
             finished()
+            return
         }
         setCount(n)
     })

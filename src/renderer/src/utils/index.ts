@@ -33,3 +33,28 @@ export const getUserScreenStream = async (id: string): Promise<MediaStream> => {
 
     return navigator.mediaDevices.getUserMedia(constraints)
 }
+
+export const mergeAudioStream = (userScreenStream, userAudioStream): MediaStreamTrack[] | [] => {
+    const context = new AudioContext()
+    const destination = context.createMediaStreamDestination()
+    let hasAudio = false
+
+    if (userScreenStream?.getAudioTracks().length > 0) {
+        // If you don't want to share Audio from the desktop it should still work with just the voice.
+        const screenSource = context.createMediaStreamSource(userScreenStream)
+        const screenGain = context.createGain()
+        screenGain.gain.value = 0.7
+        screenSource.connect(screenGain).connect(destination)
+        hasAudio = true
+    }
+
+    if (userAudioStream?.getAudioTracks().length > 0) {
+        const audioSource = context.createMediaStreamSource(userAudioStream)
+        const audioGain = context.createGain()
+        audioGain.gain.value = 0.7
+        audioSource.connect(audioGain).connect(destination)
+        hasAudio = true
+    }
+
+    return hasAudio ? destination.stream.getAudioTracks() : []
+}
