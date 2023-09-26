@@ -1,19 +1,45 @@
 .tool-box {
+    width: 100%;
+    height: 100%;
     display: inline-grid;
     grid-template-columns: 1fr;
-    grid-gap: 20px;
-    padding: 20px 10px;
+    grid-gap: 15px;
+    justify-items: center;
+    padding: 20px 0;
     color: #E8E9EA;
     background-color: #18222E;
     border-radius: 8px;
-    -webkit-app-region: no-drag;
+    box-sizing: border-box;
+}
+
+.tool-box .text {
+    display: inline-block;
+    position: relative;
+    width: 52px;
+    padding-bottom: 10px;
+    font-size: 12px;
+    text-align: center;
+}
+
+.tool-box .text::after {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    content: '';
+    display: inline-block;
+    width: 50%;
+    height: 1px;
+    background-color: #6a6a6b;
 }
 
 .tool-box .ant-btn.ant-btn-link {
-    width: 20px;
-    height: 20px;
+    line-height: 0;
+    width: auto;
+    height: auto;
     padding: 0;
     color: #E8E9EA;
+    -webkit-app-region: no-drag;
 }
 
 .tool-box .ant-btn .ant-btn-icon .anticon {
@@ -21,6 +47,8 @@
 }
 
 .tool-box .ant-btn.ant-btn-link.stop-btn {
+    width: 20px;
+    height: 20px;
     background-color: #F04037;
     border-radius: 6px;
 }

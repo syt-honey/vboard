@@ -140,10 +140,11 @@ function createRecordingWindow(): void {
         const { height } = primaryDisplay.workAreaSize
         recordingWindow = createWindow({
             x: 0,
-            y: height / 2 - 50,
-            width: 40,
-            height: 140,
+            y: height / 2 - 130,
+            width: 60,
+            height: 250,
             frame: false,
+            alwaysOnTop: true,
             transparent: true,
             resizable: false,
             url: winURL + url

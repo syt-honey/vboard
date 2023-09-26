@@ -14,7 +14,7 @@ export class Recorder {
     // indicate recorder status
     private _status: RecorderStatus = RecorderStatus.Idle
 
-    private _startTime: number = 0
+    public startTime: number = 0
 
     constructor() {
         makeAutoObservable(this)
@@ -93,7 +93,7 @@ export class Recorder {
                             mimeType: this.miniType
                         }
                     )
-                    this._startTime = Date.now()
+                    this.startTime = Date.now()
                     _recorder.start(5000)
                     _recorder.onerror = reject
                     _recorder.ondataavailable = this._dataAvailable.bind(this)
@@ -129,7 +129,7 @@ export class Recorder {
         return new Promise((resolve, reject) => {
             try {
                 ;(async (): Promise<void> => {
-                    const duration = Date.now() - this._startTime
+                    const duration = Date.now() - this.startTime
                     window.ysFixWebmDuration?.(blob, duration, async (fixedBlob) => {
                         const arrayBuffer = await fixedBlob.arrayBuffer()
                         await ipcSyncByApp('save-file', {
