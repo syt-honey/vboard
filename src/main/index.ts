@@ -28,7 +28,8 @@ function createMainWindow(): void {
     })
 
     // @TODO: there is a max size 2GB limit of blob.
-    ipcMain.handle('save-file', async (_, { stream, name }) => {
+    ipcMain.handle('save-file', async (_, { arrayBuffer, name }) => {
+        const stream = Buffer.from(arrayBuffer)
         const { filePath } = await dialog.showSaveDialog({ defaultPath: name, title: name })
         if (filePath) {
             fs.writeFile(filePath, stream, (err) => {

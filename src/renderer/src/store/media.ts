@@ -1,11 +1,18 @@
+import { makeAutoObservable, runInAction } from 'mobx'
 import { ipcSyncByApp } from '../utils/ipc'
 
 export class Media {
     private _mediaList: Electron.DesktopCapturerSource[] = []
 
+    constructor() {
+        makeAutoObservable(this)
+    }
+
     public async initMedia(): Promise<Electron.DesktopCapturerSource> {
         return await ipcSyncByApp('get-media').then((sources) => {
-            this._mediaList = sources
+            runInAction(() => {
+                this._mediaList = sources
+            })
             return this.getMedia()
         })
     }

@@ -1,5 +1,6 @@
 import { makeAutoObservable, runInAction } from 'mobx'
 import { getUserAudioStream, getUserScreenStream, ipcSyncByApp } from '../utils'
+import '../../../../lib/fix-webm-duration'
 
 export class Recorder {
     private readonly miniType: string = 'video/webm'
@@ -12,6 +13,8 @@ export class Recorder {
 
     // indicate recorder status
     private _status: RecorderStatus = RecorderStatus.Idle
+
+    private _startTime: number = 0
 
     constructor() {
         makeAutoObservable(this)
@@ -29,6 +32,7 @@ export class Recorder {
         return this._status === RecorderStatus.Recording
     }
 
+    // @TODO: we should clear all status before starting recording
     public async start(): Promise<void> {
         runInAction(() => {
             this._status = RecorderStatus.Starting
@@ -62,11 +66,6 @@ export class Recorder {
             this._recorder.stream.getAudioTracks().forEach((t) => t.stop())
             this._recorder.stream.getVideoTracks().forEach((t) => t.stop())
         }
-
-        this._id = ''
-        this._recorder = null
-        this._chunks = []
-
         runInAction(() => {
             this._status = RecorderStatus.Idle
         })
@@ -77,32 +76,30 @@ export class Recorder {
             this._recorder.stream.getAudioTracks().forEach((t) => t.stop())
             this._recorder.stream.getVideoTracks().forEach((t) => t.stop())
         }
-
-        this._id = ''
-        this._recorder = null
-        this._chunks = []
     }
 
     private async _createRecorder(): Promise<MediaRecorder | null> {
-        // eslint-disable-next-line no-async-promise-executor
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             try {
-                const _recorder = new MediaRecorder(
-                    new MediaStream([
-                        ...(await getUserAudioStream()).getAudioTracks(),
-                        ...(await getUserScreenStream(this._id)).getVideoTracks()
-                    ]),
-                    {
-                        audioBitsPerSecond: 128000,
-                        mimeType: this.miniType
-                    }
-                )
-                _recorder.start(5000)
-                _recorder.onerror = reject
-                _recorder.ondataavailable = this._dataAvailable.bind(this)
-                _recorder.onstop = this._stop.bind(this)
-
-                resolve(_recorder)
+                ;(async (): Promise<void> => {
+                    const _recorder = new MediaRecorder(
+                        new MediaStream([
+                            ...(await getUserAudioStream()).getAudioTracks(),
+                            ...(await getUserScreenStream(this._id)).getVideoTracks()
+                        ]),
+                        {
+                            audioBitsPerSecond: 128000,
+                            videoBitsPerSecond: 2500000,
+                            mimeType: this.miniType
+                        }
+                    )
+                    this._startTime = Date.now()
+                    _recorder.start(5000)
+                    _recorder.onerror = reject
+                    _recorder.ondataavailable = this._dataAvailable.bind(this)
+                    _recorder.onstop = this._stop.bind(this)
+                    resolve(_recorder)
+                })()
             } catch (e) {
                 // not support
                 console.error(e)
@@ -111,10 +108,9 @@ export class Recorder {
         })
     }
 
-    // @FIXME: video will can not play when more than x chuncks
     private _dataAvailable(e): void {
         if (e.data.size > 0) {
-            console.log(`start to save chunck every 5s...., size: ${e.data.size}`)
+            console.log(`[vboard]: start to save chunck every 5s...., size: ${e.data.size}`)
             this._chunks.push(e.data)
         }
     }
@@ -129,18 +125,24 @@ export class Recorder {
         })
     }
 
-    private _saveMedia(blob): Promise<boolean> {
+    private _saveMedia(blob: Blob): Promise<boolean> {
         return new Promise((resolve, reject) => {
-            const reader = new FileReader()
-            reader.onload = async (): Promise<void> => {
-                await ipcSyncByApp('save-file', {
-                    stream: new Uint8Array(reader.result as ArrayBuffer),
-                    name: `vboard-${(Math.random() * 10).toString().substring(5)}.webm`
-                })
-                resolve(true)
+            try {
+                ;(async (): Promise<void> => {
+                    const duration = Date.now() - this._startTime
+                    window.ysFixWebmDuration?.(blob, duration, async (fixedBlob) => {
+                        const arrayBuffer = await fixedBlob.arrayBuffer()
+                        await ipcSyncByApp('save-file', {
+                            arrayBuffer,
+                            name: `vboard-${Date.now()}.webm`
+                        })
+                        resolve(true)
+                    })
+                })()
+            } catch (e) {
+                console.error(e)
+                reject(e)
             }
-            reader.onerror = reject
-            reader.readAsArrayBuffer(blob)
         })
     }
 }
