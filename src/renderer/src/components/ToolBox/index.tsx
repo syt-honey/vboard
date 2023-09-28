@@ -22,6 +22,7 @@ export const ToolBox = observer(() => {
     const [cameraMuted, setCameraMuted] = useState(false)
 
     useEffect(() => {
+        // @FIXME: timer should be paused
         const timer = setTimeout(() => {
             setDuration(duration + 1)
         }, 1000)

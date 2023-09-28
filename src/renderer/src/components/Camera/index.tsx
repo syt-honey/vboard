@@ -15,13 +15,14 @@ export interface CameraProps {
 
 // default camera ratio. we should use this ratio to calculate circle width
 const RATIO = 4 / 3
+const CIRCLE_WIDTH = '267px'
 
 export const replaceDigital = (origin: string, v: string): string => {
     return origin.replace(/\d+/, v)
 }
 
 export const Camera = observer(
-    ({ width = '267px', height = '200px', shape = 'circle', stream }: CameraProps) => {
+    ({ width = '200px', height = '200px', shape = 'circle', stream }: CameraProps) => {
         const [loading, setLoading] = useState<boolean>(true)
         const camera = useRef<HTMLVideoElement>(null)
         // keep default ratio
@@ -47,6 +48,7 @@ export const Camera = observer(
 
         useEffect(() => {
             if (shape === 'circle') {
+                width = CIRCLE_WIDTH
                 const min = Math.ceil(Math.min(parseInt(width), parseInt(height)))
 
                 setVideoStyle({
