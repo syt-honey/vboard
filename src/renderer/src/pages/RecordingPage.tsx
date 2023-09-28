@@ -1,7 +1,6 @@
 import React, { useContext, useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 
-import { ipcCreateCameraWindow } from '../utils'
 import { RecorderContext, MediaContext, ToolBox } from '../components'
 
 export const RecordingPage = observer<React.FC>(() => {
@@ -23,7 +22,6 @@ export const RecordingPage = observer<React.FC>(() => {
                 }
 
                 startRecording()
-                ipcCreateCameraWindow({ url: '/camera' })
             }
         }
 

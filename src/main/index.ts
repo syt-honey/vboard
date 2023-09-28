@@ -1,16 +1,41 @@
 import { app, shell, BrowserWindow, desktopCapturer, ipcMain, dialog, screen } from 'electron'
+import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { join } from 'path'
 import fs from 'fs'
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 
-const winURL =
-    process.env.NODE_ENV === 'development'
-        ? 'http://localhost:5173'
-        : `file://${__dirname}/index.html`
+import { createWindow, WindowType, winURL } from './utils'
+
+// manage all windows
+const windows = new Map<WindowType, BrowserWindow>()
+
+app.whenReady().then(() => {
+    electronApp.setAppUserModelId('com.electron')
+
+    app.on('browser-window-created', (_, window) => {
+        optimizer.watchWindowShortcuts(window)
+    })
+
+    createMainWindow()
+    createCameraWindow()
+    createCounterWindow()
+    createRecordingWindow()
+
+    app.on('activate', function () {
+        if (BrowserWindow.getAllWindows().length === 0) createMainWindow()
+    })
+})
+
+app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') {
+        app.quit()
+    }
+})
 
 function createMainWindow(): void {
     let mainWindow: BrowserWindow | null = null
     mainWindow = createWindow({ width: 900, height: 670, show: false, autoHideMenuBar: true })
+    windows.clear()
+    windows.set(WindowType.MAIN, mainWindow)
 
     ipcMain.on('minimize-main-window', () => {
         mainWindow!.minimize()
@@ -75,7 +100,7 @@ function createMainWindow(): void {
 function createCameraWindow(): void {
     let cameraWindow: BrowserWindow | null = null
 
-    ipcMain.on('create-camera-window', (_, { url }) => {
+    ipcMain.on('create-camera-window', (_, { url, isDelay }) => {
         if (cameraWindow) {
             return
         }
@@ -88,15 +113,57 @@ function createCameraWindow(): void {
             width: 200,
             height: 200,
             frame: false,
+            show: !isDelay,
             transparent: true,
             resizable: false,
             url: winURL + url
         })
+
+        windows.set(WindowType.CAMERA, cameraWindow)
     })
 
     ipcMain.on('close-camera-window', () => {
+        windows.delete(WindowType.CAMERA)
         cameraWindow?.close()
         cameraWindow = null
+    })
+}
+
+function createRecordingWindow(): void {
+    let recordingWindow: BrowserWindow | null = null
+
+    ipcMain.on('create-recording-window', (_, { url }) => {
+        if (recordingWindow) {
+            return
+        }
+
+        // @TODO: those width and height shoud be auto
+        const primaryDisplay = screen.getPrimaryDisplay()
+        const { height } = primaryDisplay.workAreaSize
+        recordingWindow = createWindow({
+            x: 0,
+            y: height / 2 - 130,
+            width: 60,
+            height: 250,
+            show: false,
+            frame: false,
+            alwaysOnTop: true,
+            transparent: true,
+            resizable: false,
+            url: winURL + url
+        })
+
+        windows.set(WindowType.RECORDING, recordingWindow)
+    })
+
+    ipcMain.on('recording-window-resize', (_, { width, height }) => {
+        recordingWindow?.setSize(width, height)
+    })
+
+    ipcMain.on('close-recording-window', () => {
+        recordingWindow?.close()
+        recordingWindow = null
+        windows.delete(WindowType.RECORDING)
     })
 }
 
@@ -119,96 +186,21 @@ function createCounterWindow(): void {
             transparent: true,
             url: winURL + url
         })
+
+        windows.set(WindowType.COUNTER, counterWindow)
     })
 
     ipcMain.on('close-counter-window', () => {
+        windows.delete(WindowType.COUNTER)
         counterWindow?.close()
         counterWindow = null
-    })
-}
 
-function createRecordingWindow(): void {
-    let recordingWindow: BrowserWindow | null = null
-
-    ipcMain.on('create-recording-window', (_, { url }) => {
-        if (recordingWindow) {
-            return
+        if (windows.has(WindowType.CAMERA)) {
+            windows.get(WindowType.CAMERA)?.show()
         }
 
-        // @TODO: those width and height shoud be auto
-        const primaryDisplay = screen.getPrimaryDisplay()
-        const { height } = primaryDisplay.workAreaSize
-        recordingWindow = createWindow({
-            x: 0,
-            y: height / 2 - 130,
-            width: 60,
-            height: 250,
-            frame: false,
-            alwaysOnTop: true,
-            transparent: true,
-            resizable: false,
-            url: winURL + url
-        })
-    })
-
-    ipcMain.on('recording-window-resize', (_, { width, height }) => {
-        recordingWindow?.setSize(width, height)
-    })
-
-    ipcMain.on('close-recording-window', () => {
-        recordingWindow?.close()
-        recordingWindow = null
-    })
-}
-
-app.whenReady().then(() => {
-    electronApp.setAppUserModelId('com.electron')
-
-    app.on('browser-window-created', (_, window) => {
-        optimizer.watchWindowShortcuts(window)
-    })
-
-    createMainWindow()
-    createCameraWindow()
-    createCounterWindow()
-    createRecordingWindow()
-
-    app.on('activate', function () {
-        if (BrowserWindow.getAllWindows().length === 0) createMainWindow()
-    })
-})
-
-app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit()
-    }
-})
-
-const createWindow = ({ width, height, x, y, url, ...restProps }: IWindow): BrowserWindow => {
-    const options = { width, height } as IWindow
-
-    typeof x === 'number' && (options.x = x)
-    typeof y === 'number' && (options.y = y)
-    url && (options.url = url)
-
-    const window = new BrowserWindow({
-        ...options,
-        ...restProps,
-        webPreferences: {
-            nodeIntegration: true,
-            preload: join(__dirname, '../preload/index.js'),
-            sandbox: false
+        if (windows.has(WindowType.RECORDING)) {
+            windows.get(WindowType.RECORDING)?.show()
         }
     })
-
-    // if there is url, we will use page component of renderer app to show child window
-    if (url) {
-        window.loadURL(url)
-    }
-
-    return window
-}
-
-interface IWindow extends Electron.BrowserWindowConstructorOptions {
-    url?: string
 }
