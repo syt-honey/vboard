@@ -11,10 +11,10 @@ export interface IWindow extends Electron.BrowserWindowConstructorOptions {
 }
 
 export enum WindowType {
-    MAIN,
-    CAMERA,
-    COUNTER,
-    RECORDING
+    MAIN = 'MAIN',
+    CAMERA = 'CAMERA',
+    COUNTER = 'COUNTER',
+    RECORDING = 'RECORDING'
 }
 
 export const createWindow = ({

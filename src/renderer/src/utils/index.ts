@@ -1,4 +1,5 @@
 export * from './ipc'
+export * from './analyser'
 
 export const getUserCameraStream = async (): Promise<MediaStream> => {
     const constraints: MediaStreamConstraints = {

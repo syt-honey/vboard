@@ -1,5 +1,5 @@
 import { makeAutoObservable, runInAction } from 'mobx'
-import { getUserAudioStream, getUserScreenStream, ipcSyncByApp } from '../utils'
+import { getUserAudioStream, getUserScreenStream, ipcSyncByApp, AudioAnalyser } from '../utils'
 import '../../../../lib/fix-webm-duration'
 
 export class Recorder {
@@ -14,6 +14,9 @@ export class Recorder {
     // indicate recorder status
     private _status: RecorderStatus = RecorderStatus.Idle
 
+    private _analyser: AudioAnalyser | null = null
+
+    public volume: number = 0
     public startTime: number = 0
 
     constructor() {
@@ -34,9 +37,7 @@ export class Recorder {
 
     // @TODO: we should clear all status before starting recording
     public async start(): Promise<void> {
-        runInAction(() => {
-            this._status = RecorderStatus.Starting
-        })
+        this._status = RecorderStatus.Starting
         this._recorder = await this._createRecorder()
         runInAction(() => {
             this._status = this._recorder ? RecorderStatus.Recording : RecorderStatus.Idle
@@ -46,35 +47,43 @@ export class Recorder {
     public pause(): void {
         if (this._recorder) {
             this._recorder.pause()
-            runInAction(() => {
-                this._status = RecorderStatus.Paused
-            })
+            this._status = RecorderStatus.Paused
         }
     }
 
     public resume(): void {
         if (this._recorder) {
             this._recorder.resume()
-            runInAction(() => {
-                this._status = RecorderStatus.Recording
-            })
+            this._status = RecorderStatus.Recording
         }
     }
 
+    // cancel recording
     public cancel(): void {
         if (this._recorder) {
             this._recorder.stream.getAudioTracks().forEach((t) => t.stop())
             this._recorder.stream.getVideoTracks().forEach((t) => t.stop())
         }
-        runInAction(() => {
-            this._status = RecorderStatus.Idle
-        })
+        this._status = RecorderStatus.Idle
     }
 
-    public async stop(): Promise<void> {
+    public finish(): void {
         if (this._recorder) {
+            this._status = RecorderStatus.Saving
             this._recorder.stream.getAudioTracks().forEach((t) => t.stop())
             this._recorder.stream.getVideoTracks().forEach((t) => t.stop())
+        }
+    }
+
+    public muteAudio(): void {
+        if (this._recorder) {
+            this._recorder.stream.getAudioTracks().forEach((t) => (t.enabled = false))
+        }
+    }
+
+    public unmuteAudio(): void {
+        if (this._recorder) {
+            this._recorder.stream.getAudioTracks().forEach((t) => (t.enabled = true))
         }
     }
 
@@ -93,8 +102,13 @@ export class Recorder {
                             mimeType: this.miniType
                         }
                     )
-                    this.startTime = Date.now()
-                    _recorder.start(5000)
+                    runInAction(() => {
+                        this.startTime = Date.now()
+                    })
+                    _recorder.onstart = (): void => {
+                        this._analyser = new AudioAnalyser(_recorder.stream)
+                    }
+                    _recorder.start(1000)
                     _recorder.onerror = reject
                     _recorder.ondataavailable = this._dataAvailable.bind(this)
                     _recorder.onstop = this._stop.bind(this)
@@ -108,21 +122,28 @@ export class Recorder {
         })
     }
 
-    private _dataAvailable(e): void {
-        if (e.data.size > 0) {
-            console.log(`[vboard]: start to save chunck every 5s...., size: ${e.data.size}`)
-            this._chunks.push(e.data)
+    private _dataAvailable(event): void {
+        if (event.data.size > 0) {
+            const reader = new FileReader()
+            reader.onload = (): void => {
+                runInAction(() => {
+                    this.volume = this._analyser!.getVolume()
+                })
+            }
+            reader.readAsArrayBuffer(event.data)
+
+            console.log(`[vboard]: start to save chuncks every 5s...., size: ${event.data.size}`)
+            this._chunks.push(event.data)
         }
     }
 
     private async _stop(): Promise<void> {
-        runInAction(() => {
-            this._status = RecorderStatus.Saving
-        })
-        await this._saveMedia(new Blob([...this._chunks], { type: this.miniType }))
-        runInAction(() => {
-            this._status = RecorderStatus.Idle
-        })
+        if (this._status === RecorderStatus.Saving) {
+            await this._saveMedia(new Blob([...this._chunks], { type: this.miniType }))
+            runInAction(() => {
+                this._status = RecorderStatus.Idle
+            })
+        }
     }
 
     private _saveMedia(blob: Blob): Promise<boolean> {

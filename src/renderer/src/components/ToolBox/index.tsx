@@ -8,7 +8,12 @@ import { useTranslation } from 'react-i18next'
 import { RecorderContext } from '../StoreProvider'
 import { SVGResume, SVGPause, SVGCancel, SVGCamera, SVGMic } from '../global'
 import { formatSeconds } from '../../utils'
-import { ipcCloseCameraWindow, ipcCreateCameraWindow } from '../../utils/ipc'
+import {
+    ipcCloseCameraWindow,
+    ipcCreateCameraWindow,
+    ipcCloseRecordingWindow
+    // ipcCreateModalWindow
+} from '../../utils/ipc'
 
 export const ToolBox = observer(() => {
     const { t } = useTranslation()
@@ -20,29 +25,30 @@ export const ToolBox = observer(() => {
     const text = useMemo(() => (isRecording ? timer : t('paused')), [isRecording, timer])
 
     const [cameraMuted, setCameraMuted] = useState(false)
+    const [audioMuted, setAudioMuted] = useState(false)
 
     useEffect(() => {
-        // @FIXME: timer should be paused
         const timer = setTimeout(() => {
-            setDuration(duration + 1)
+            if (isRecording) setDuration(duration + 1)
         }, 1000)
 
         return (): void => clearTimeout(timer)
-    }, [duration])
+    }, [duration, isRecording])
 
-    const stop = useCallback(async () => {
-        await recorderStore.stop()
-        // ipcCloseRecordingWindow()
+    const finish = useCallback(async () => {
+        await recorderStore.finish()
+        ipcCloseRecordingWindow()
     }, [recorderStore])
 
     const cancel = useCallback(() => {
+        // ipcCreateModalWindow({ url: '/cancel-modal' })
         recorderStore.cancel()
-        // ipcCloseCameraWindow()
-        // ipcCloseRecordingWindow()
     }, [recorderStore])
 
-    // @TODO: switch microphone
-    const switchMic = (): void => {}
+    const switchMic = (): void => {
+        audioMuted ? recorderStore.unmuteAudio() : recorderStore.muteAudio()
+        setAudioMuted(!audioMuted)
+    }
 
     const switchCamera = useCallback(() => {
         cameraMuted ? ipcCreateCameraWindow({ url: '/camera' }) : ipcCloseCameraWindow()
@@ -56,7 +62,7 @@ export const ToolBox = observer(() => {
             <Button
                 type="link"
                 className={`stop-btn ${isRecording ? 'stop-btn-recording' : 'stop-btn-pausing'}`}
-                onClick={stop}
+                onClick={finish}
             />
             <Button
                 className="pause-btn"
@@ -69,7 +75,11 @@ export const ToolBox = observer(() => {
                 }
             />
             <Button type="link" icon={<SVGCancel />} onClick={cancel} />
-            <Button type="link" icon={<SVGMic />} onClick={switchMic} />
+            <Button
+                type="link"
+                icon={<SVGMic volume={recorderStore.volume} isMuted={audioMuted} />}
+                onClick={switchMic}
+            />
             <Button type="link" icon={<SVGCamera isMuted={cameraMuted} />} onClick={switchCamera} />
         </div>
     )

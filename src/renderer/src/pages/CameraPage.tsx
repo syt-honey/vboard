@@ -9,8 +9,7 @@ export const CameraPage = observer<React.FC>(() => {
 
     useEffect(() => {
         ;(async function (): Promise<void> {
-            const stream = await getUserCameraStream()
-            setCameraStream(stream)
+            setCameraStream(await getUserCameraStream())
         })()
     }, [])
 
