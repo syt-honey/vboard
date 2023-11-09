@@ -15,6 +15,10 @@ body {
     overflow: hidden;
 }
 
+::-webkit-scrollbar {
+    display: none;
+}
+
 #root {
     height: 100%;
 }
@@ -58,6 +62,7 @@ ul {
     height: 100%;
     background-color: rgba(0, 0, 0, .2);
     border: 3px solid #00ff00;
+    border-radius: 8px;
     box-sizing: border-box;
 }
 

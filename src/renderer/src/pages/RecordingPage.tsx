@@ -30,7 +30,7 @@ export const RecordingPage = observer<React.FC>(() => {
 
     return (
         <div className="recording-page">
-            <ToolBox />
+            <ToolBox recorderStore={recorderStore} />
         </div>
     )
 })

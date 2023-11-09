@@ -1,3 +1,3 @@
 interface Window {
-    ysFixWebmDuration: (blob: Blob, duration: number, cb: (fixedBlob: Blob) => void) => void
+    ysFixWebmDuration: (blob: Blob, duration: number) => Promise<Blob>
 }

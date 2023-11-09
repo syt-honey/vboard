@@ -1,54 +1,65 @@
 import './index.css'
 
 import { Button } from 'antd'
-import { useMemo, useContext, useCallback, useState, useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
+import { useMemo, useCallback, useState, useEffect } from 'react'
 
-import { RecorderContext } from '../StoreProvider'
 import { SVGResume, SVGPause, SVGCancel, SVGCamera, SVGMic } from '../global'
+import { Recorder } from '../../store/recorder'
 import { formatSeconds } from '../../utils'
 import {
     ipcCloseCameraWindow,
     ipcCreateCameraWindow,
+    ipcSyncByApp,
     ipcCloseRecordingWindow
-    // ipcCreateModalWindow
 } from '../../utils/ipc'
 
-export const ToolBox = observer(() => {
+export interface ToolBoxProps {
+    recorderStore: Recorder
+}
+
+export const ToolBox = observer(({ recorderStore }: ToolBoxProps) => {
     const { t } = useTranslation()
 
-    const recorderStore = useContext(RecorderContext)
     const isRecording = useMemo(() => recorderStore.isRecording, [recorderStore.isRecording])
-    const [duration, setDuration] = useState(0)
-    const timer = useMemo(() => formatSeconds(duration), [duration])
+    const [timer, setTimer] = useState('')
     const text = useMemo(() => (isRecording ? timer : t('paused')), [isRecording, timer])
 
     const [cameraMuted, setCameraMuted] = useState(false)
     const [audioMuted, setAudioMuted] = useState(false)
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            if (isRecording) setDuration(duration + 1)
-        }, 1000)
-
-        return (): void => clearTimeout(timer)
-    }, [duration, isRecording])
+        setTimer(formatSeconds(recorderStore.duration))
+    }, [recorderStore.duration])
 
     const finish = useCallback(async () => {
-        await recorderStore.finish()
-        ipcCloseRecordingWindow()
+        if (await recorderStore.finish()) {
+            recorderStore.destroyed()
+
+            ipcCloseRecordingWindow()
+            ipcCloseCameraWindow()
+        } else {
+            // paused
+        }
     }, [recorderStore])
 
-    const cancel = useCallback(() => {
-        // ipcCreateModalWindow({ url: '/cancel-modal' })
-        recorderStore.cancel()
+    const cancel = useCallback(async () => {
+        if (
+            await ipcSyncByApp('confirm-dialog', {
+                title: t('cancelRecordering.title'),
+                message: t('cancelRecordering.message'),
+                buttons: [t('cancelRecordering.confirmBtn'), t('cancelRecordering.cancelBtn')]
+            })
+        ) {
+            recorderStore.cancel()
+        }
     }, [recorderStore])
 
-    const switchMic = (): void => {
+    const switchMic = useCallback(() => {
         audioMuted ? recorderStore.unmuteAudio() : recorderStore.muteAudio()
         setAudioMuted(!audioMuted)
-    }
+    }, [recorderStore, setAudioMuted, audioMuted])
 
     const switchCamera = useCallback(() => {
         cameraMuted ? ipcCreateCameraWindow({ url: '/camera' }) : ipcCloseCameraWindow()

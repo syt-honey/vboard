@@ -53,16 +53,28 @@ function createMainWindow(): void {
     })
 
     // @TODO: there is a max size 2GB limit of blob.
-    ipcMain.handle('save-file', async (_, { arrayBuffer, name }) => {
+    ipcMain.handle('save-file', async (_, { arrayBuffer, name }): Promise<boolean> => {
         const stream = Buffer.from(arrayBuffer)
-        const { filePath } = await dialog.showSaveDialog({ defaultPath: name, title: name })
+        const { canceled, filePath } = await dialog.showSaveDialog({
+            defaultPath: name,
+            title: name
+        })
+
+        if (canceled) return false
+
+        let result = true
+
         if (filePath) {
             fs.writeFile(filePath, stream, (err) => {
+                result = false
+
                 if (err) {
                     console.error(err)
                 }
             })
         }
+
+        return result
     })
 
     mainWindow.on('ready-to-show', () => {
@@ -119,6 +131,7 @@ function createCameraWindow(): void {
             url: winURL + url
         })
 
+        cameraWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
         windows.set(WindowType.CAMERA, cameraWindow)
     })
 
@@ -153,6 +166,7 @@ function createRecordingWindow(): void {
             url: winURL + url
         })
 
+        recordingWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
         windows.set(WindowType.RECORDING, recordingWindow)
     })
 
@@ -165,6 +179,19 @@ function createRecordingWindow(): void {
         recordingWindow = null
         windows.delete(WindowType.RECORDING)
     })
+
+    ipcMain.handle('confirm-dialog', async (_, options: Partial<Electron.MessageBoxOptions>) => {
+        const { response } = await dialog.showMessageBox({
+            type: 'question',
+            defaultId: 0,
+            noLink: true,
+            title: '确认操作',
+            buttons: ['确认', '取消'],
+            message: '你确定要执行该操作吗？',
+            ...options
+        })
+        return response === 0
+    })
 }
 
 function createCounterWindow(): void {
@@ -176,16 +203,28 @@ function createCounterWindow(): void {
         }
 
         const primaryDisplay = screen.getPrimaryDisplay()
-        const { width, height } = primaryDisplay.workAreaSize
+
+        const { width, height } = primaryDisplay.size
+        const { y } = primaryDisplay.workArea
         counterWindow = createWindow({
             x: 0,
             y: 0,
             width,
-            height,
+            height: height - y,
+            minHeight: height - y,
             frame: false,
             transparent: true,
             url: winURL + url
         })
+
+        // always on top, above the Dock(macOS) and the taskbar(Windows)
+        counterWindow.setAlwaysOnTop(true, 'pop-up-menu')
+
+        // always show on all workspaces
+        counterWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
+
+        // set the window size to the full screen size
+        counterWindow.setSize(width, height - y)
 
         windows.set(WindowType.COUNTER, counterWindow)
     })

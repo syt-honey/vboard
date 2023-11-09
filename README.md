@@ -2,6 +2,13 @@
 
 A simple, easy-to-use recorder and whiteboard which totally netless and saved locally.
 
+## TODO
+
+1. Select the area to record
+2. test Devices
+3. Select Devices
+4. Add whiteboard
+
 ## Project Setup
 
 ### Install
