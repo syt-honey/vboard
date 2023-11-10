@@ -8,6 +8,7 @@ A simple, easy-to-use recorder and whiteboard which totally netless and saved lo
 2. test Devices
 3. Select Devices
 4. Add whiteboard
+5. Custom homepage header
 
 ## Project Setup
 

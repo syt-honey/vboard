@@ -1,3 +1,15 @@
+:root {
+    /* base 16px */
+    --font-s-large: 1.25rem;
+    --font-s-medium: 1.125rem;
+
+    --font-c-main: #585656;
+
+    --color-primary: #ee6b4b;
+    --color-white: #fff;
+    --color-grey: #eee;
+}
+
 body {
     font-family:
         Roboto,
@@ -10,7 +22,7 @@ body {
         'Cantarell',
         'Open Sans',
         sans-serif;
-    color: #86a5b1;
+    color: var(--font-c-main);
     height: 100vh;
     overflow: hidden;
 }
@@ -26,50 +38,4 @@ body {
 * {
     padding: 0;
     margin: 0;
-}
-
-ul {
-    list-style: none;
-}
-
-.main-page {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-}
-
-.main-page .ant-btn {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    font-size: 20px;
-}
-
-.recording-page {
-    height: 100%;
-    box-sizing: border-box;
-    cursor: pointer;
-    -webkit-user-select: none;
-    -webkit-app-region: drag;
-}
-
-.counter-page {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    background-color: rgba(0, 0, 0, .2);
-    border: 3px solid #00ff00;
-    border-radius: 8px;
-    box-sizing: border-box;
-}
-
-.camera-page {
-    height: 100%;
-    box-sizing: border-box;
-    cursor: pointer;
-    -webkit-user-select: none;
-    -webkit-app-region: drag;
 }

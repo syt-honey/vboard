@@ -33,7 +33,7 @@ app.on('window-all-closed', () => {
 
 function createMainWindow(): void {
     let mainWindow: BrowserWindow | null = null
-    mainWindow = createWindow({ width: 900, height: 670, show: false, autoHideMenuBar: true })
+    mainWindow = createWindow({ width: 350, height: 500, show: false, autoHideMenuBar: true })
     windows.clear()
     windows.set(WindowType.MAIN, mainWindow)
 

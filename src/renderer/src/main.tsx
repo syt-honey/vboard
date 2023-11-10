@@ -2,6 +2,8 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { StoreProvider } from './components/StoreProvider'
 import './assets/index.css'
+import './assets/pages.css'
+import './assets/reset.css'
 import './i18n'
 import App from './App'
 

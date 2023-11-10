@@ -1,6 +1,10 @@
 export * from './ipc'
 export * from './analyser'
 
+export const getSystemDevices = async (): Promise<MediaDeviceInfo[]> => {
+    return await navigator.mediaDevices.enumerateDevices()
+}
+
 export const getUserCameraStream = async (): Promise<MediaStream> => {
     const constraints: MediaStreamConstraints = {
         audio: false,

@@ -7,5 +7,11 @@ export const en = {
         title: 'Cancel recording',
         message: 'Are you sure to cancel recording?'
     },
-    finishText: 'Finish to record'
+    finishText: 'Finish to record',
+
+    devices: {
+        audioinput: 'Microphone',
+        audiooutput: 'Speakers',
+        videoinput: 'Camera'
+    }
 }
