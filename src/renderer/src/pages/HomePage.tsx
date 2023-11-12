@@ -5,6 +5,7 @@ import React, { useCallback, useContext, useEffect } from 'react'
 
 import { DevicesTypeKey } from '../store/devices'
 import { DevicesContext } from '../components/StoreProvider'
+import { HomePageSkeletons } from '../components/Skeleton/Homepage'
 import { ipcCreateCounterWindow, ipcHideMainWindow } from '../utils'
 
 export const HomePage = observer<React.FC>(() => {
@@ -12,10 +13,10 @@ export const HomePage = observer<React.FC>(() => {
     const devicesStore = useContext(DevicesContext)
 
     useEffect(() => {
-        if (!devicesStore.checkDevices()) {
+        if (!devicesStore.checkDevices) {
             devicesStore.initDevices()
         }
-    }, [devicesStore.devices])
+    }, [devicesStore])
 
     const handleChange = useCallback(
         (value, type) => {
@@ -31,26 +32,32 @@ export const HomePage = observer<React.FC>(() => {
 
     return (
         <div className="main-page">
-            <div className="devices">
-                {Object.keys(devicesStore.devices).map((key) => {
-                    return (
-                        <div key={key}>
-                            <div className="devices-title">{t(`devices.${key}`)}</div>
+            {!devicesStore.checkDevices ? (
+                <HomePageSkeletons />
+            ) : (
+                <>
+                    <div className="devices">
+                        {Object.keys(devicesStore.devices).map((key) => {
+                            return (
+                                <div key={key}>
+                                    <div className="devices-title">{t(`devices.${key}`)}</div>
 
-                            {devicesStore.devices[key].length > 0 &&
-                                renderSelect({
-                                    type: key as DevicesTypeKey,
-                                    devices: devicesStore.devices[key],
-                                    defaultId: devicesStore.devices[key][0].deviceId,
-                                    handleChange
-                                })}
-                        </div>
-                    )
-                })}
-            </div>
-            <Button className="start-btn" type="primary" onClick={callRecording}>
-                {t('start')}
-            </Button>
+                                    {devicesStore.devices[key].length > 0 &&
+                                        renderSelect({
+                                            type: key as DevicesTypeKey,
+                                            devices: devicesStore.devices[key],
+                                            defaultId: devicesStore.devices[key][0].deviceId,
+                                            handleChange
+                                        })}
+                                </div>
+                            )
+                        })}
+                    </div>
+                    <Button className="start-btn" type="primary" onClick={callRecording}>
+                        {t('start')}
+                    </Button>
+                </>
+            )}
         </div>
     )
 })

@@ -2,6 +2,7 @@ import { getSystemDevices } from '../utils'
 import { makeAutoObservable, runInAction } from 'mobx'
 
 export class Devices {
+    public isInit: boolean = false
     public devices: DevicesList = {
         audioinput: [],
         audiooutput: [],
@@ -14,10 +15,9 @@ export class Devices {
 
     constructor() {
         makeAutoObservable(this)
-        this.initDevices()
     }
 
-    public checkDevices(): boolean {
+    public get checkDevices(): boolean {
         return Object.values(this.devices).some((i) => i.length > 0)
     }
 
@@ -35,9 +35,13 @@ export class Devices {
         }
     }
 
-    public initDevices(): void {
-        runInAction(async () => {
-            this.devices = (await getSystemDevices()).reduce((acc, cur) => {
+    public async initDevices(): Promise<void> {
+        if (this.isInit) return
+
+        this.isInit = true
+        const devices = await getSystemDevices()
+        runInAction(() => {
+            this.devices = devices.reduce((acc, cur) => {
                 if (!acc[cur.kind]?.find((i) => i.groupId === cur.groupId)) {
                     if (!acc[cur.kind]) {
                         acc[cur.kind] = []
@@ -47,6 +51,8 @@ export class Devices {
 
                 return acc
             }, this.devices)
+
+            this.isInit = false
         })
     }
 }
