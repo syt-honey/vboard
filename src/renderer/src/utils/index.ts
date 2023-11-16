@@ -5,18 +5,18 @@ export const getSystemDevices = async (): Promise<MediaDeviceInfo[]> => {
     return await navigator.mediaDevices.enumerateDevices()
 }
 
-export const getUserCameraStream = async (): Promise<MediaStream> => {
+export const getUserCameraStream = async (id: string | null): Promise<MediaStream> => {
     const constraints: MediaStreamConstraints = {
         audio: false,
-        video: true
+        video: id ? { deviceId: id } : true
     }
 
     return navigator.mediaDevices.getUserMedia(constraints)
 }
 
-export const getUserAudioStream = async (): Promise<MediaStream> => {
+export const getUserAudioStream = async (id: string | null): Promise<MediaStream> => {
     const constraints: MediaStreamConstraints = {
-        audio: true,
+        audio: id ? { deviceId: id } : true,
         video: false
     }
 

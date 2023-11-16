@@ -1,8 +1,13 @@
+import { runInAction, autorun } from 'mobx'
+
 import { getSystemDevices } from '../utils'
-import { makeAutoObservable, runInAction } from 'mobx'
+import { autoPersistStore } from '../utils/auto-persist-store'
+
+const LS_VERSION = 1
+
+let isInit = false
 
 export class Devices {
-    public isInit: boolean = false
     public devices: DevicesList = {
         audioinput: [],
         audiooutput: [],
@@ -13,32 +18,80 @@ export class Devices {
     public selectedAudioOutput: string | null = null
     public selectedVideoInput: string | null = null
 
+    public audioOutOn: boolean = true
+
+    public audioOn: boolean = false
+    public videoOn: boolean = false
+
     constructor() {
-        makeAutoObservable(this)
+        autoPersistStore({ storeLSName: 'DevicesStore', store: this, version: LS_VERSION })
+        autorun(() => {
+            // to do something if indeed changed
+        })
+    }
+
+    public updateAudioOn = (value: boolean): void => {
+        this.audioOn = value
+
+        if (value) {
+            // we should check `devices` exits
+        }
+    }
+
+    public updateVideoOn = (value: boolean): void => {
+        this.videoOn = value
+
+        if (value) {
+            // we should check `devices` exits
+        }
     }
 
     public get checkDevices(): boolean {
         return Object.values(this.devices).some((i) => i.length > 0)
     }
 
-    public setSelectedDevices(value: string, type: DevicesTypeKey): void {
+    public setSelectedDevices(type: DevicesTypeKey, value?: string | null): void {
         if (type === DevicesTypeValue.AUDIO_INPUT) {
-            this.selectedAudioInput = value
+            this.setAudioDevices(value)
         }
 
         if (type === DevicesTypeValue.AUDIO_OUTPUT) {
-            this.selectedAudioOutput = value
+            // todo
         }
 
         if (type === DevicesTypeValue.VIDEO_INPUT) {
+            this.setVideoDevices(value)
+        }
+    }
+
+    public setAudioDevices(value?: string | null): void {
+        if (typeof value === 'string' || value === null) {
+            // update or clear
+            this.selectedAudioInput = value
+        } else {
+            // default
+            if (this.checkDevices) {
+                this.selectedAudioInput = this.devices.audioinput[0].deviceId
+            }
+        }
+    }
+
+    public setVideoDevices(value?: string | null): void {
+        if (typeof value === 'string' || value === null) {
+            // update or clear
             this.selectedVideoInput = value
+        } else {
+            // default
+            if (this.checkDevices) {
+                this.selectedVideoInput = this.devices.videoinput[0].deviceId
+            }
         }
     }
 
     public async initDevices(): Promise<void> {
-        if (this.isInit) return
+        if (isInit) return
 
-        this.isInit = true
+        isInit = true
         const devices = await getSystemDevices()
         runInAction(() => {
             this.devices = devices.reduce((acc, cur) => {
@@ -52,7 +105,7 @@ export class Devices {
                 return acc
             }, this.devices)
 
-            this.isInit = false
+            isInit = false
         })
     }
 }
@@ -74,3 +127,7 @@ export type DevicesList = {
 }
 
 export const devicesStore = new Devices()
+
+if (process.env.NODE_ENV !== 'production') {
+    window.devicesStore = devicesStore
+}

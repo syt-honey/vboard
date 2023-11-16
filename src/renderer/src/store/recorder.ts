@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx'
 import { getUserAudioStream, getUserScreenStream, ipcSyncByApp, AudioAnalyser } from '../utils'
 import '../../../../lib/fix-webm-duration'
+import { devicesStore } from './devices'
 
 export class Recorder {
     private readonly miniType: string = 'video/webm'
@@ -108,9 +109,17 @@ export class Recorder {
 
     private async createRecorder(): Promise<MediaRecorder | null> {
         try {
+            const audioTracks: MediaStreamTrack[] = []
+            // @TODO: need to record speaker audio
+            if (devicesStore.audioOn) {
+                audioTracks.push(
+                    ...(await getUserAudioStream(devicesStore.selectedAudioInput)).getAudioTracks()
+                )
+            }
+
             const recorder = new MediaRecorder(
                 new MediaStream([
-                    ...(await getUserAudioStream()).getAudioTracks(),
+                    ...audioTracks,
                     ...(await getUserScreenStream(this.id)).getVideoTracks()
                 ]),
                 {
@@ -133,7 +142,9 @@ export class Recorder {
             }, 1000)
 
             recorder.onstart = (): void => {
-                this.analyser = new AudioAnalyser(recorder.stream)
+                if (recorder.stream.getAudioTracks().length > 0) {
+                    this.analyser = new AudioAnalyser(recorder.stream)
+                }
             }
 
             recorder.start(1000)
@@ -157,7 +168,9 @@ export class Recorder {
             const reader = new FileReader()
             reader.onload = (): void => {
                 runInAction(() => {
-                    this.volume = this.analyser!.getVolume()
+                    if (this.analyser) {
+                        this.volume = this.analyser.getVolume()
+                    }
                 })
             }
             reader.readAsArrayBuffer(event.data)

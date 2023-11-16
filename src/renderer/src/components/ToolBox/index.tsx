@@ -3,9 +3,10 @@ import './index.css'
 import { Button } from 'antd'
 import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
-import { useMemo, useCallback, useState, useEffect } from 'react'
+import { useMemo, useCallback, useState, useEffect, useContext } from 'react'
 
 import { SVGResume, SVGPause, SVGCancel, SVGCamera, SVGMic } from '../global'
+import { DevicesContext } from '../StoreProvider'
 import { Recorder } from '../../store/recorder'
 import { formatSeconds } from '../../utils'
 import {
@@ -21,13 +22,11 @@ export interface ToolBoxProps {
 
 export const ToolBox = observer(({ recorderStore }: ToolBoxProps) => {
     const { t } = useTranslation()
+    const devicesStore = useContext(DevicesContext)
 
-    const isRecording = useMemo(() => recorderStore.isRecording, [recorderStore.isRecording])
     const [timer, setTimer] = useState('')
+    const isRecording = useMemo(() => recorderStore.isRecording, [recorderStore.isRecording])
     const text = useMemo(() => (isRecording ? timer : t('paused')), [isRecording, timer])
-
-    const [cameraMuted, setCameraMuted] = useState(false)
-    const [audioMuted, setAudioMuted] = useState(false)
 
     useEffect(() => {
         setTimer(formatSeconds(recorderStore.duration))
@@ -57,14 +56,22 @@ export const ToolBox = observer(({ recorderStore }: ToolBoxProps) => {
     }, [recorderStore])
 
     const switchMic = useCallback(() => {
-        audioMuted ? recorderStore.unmuteAudio() : recorderStore.muteAudio()
-        setAudioMuted(!audioMuted)
-    }, [recorderStore, setAudioMuted, audioMuted])
+        if (devicesStore.audioOn) {
+            recorderStore.unmuteAudio()
+        } else {
+            recorderStore.muteAudio()
+        }
+        devicesStore.updateAudioOn(!devicesStore.audioOn)
+    }, [recorderStore, devicesStore])
 
     const switchCamera = useCallback(() => {
-        cameraMuted ? ipcCreateCameraWindow({ url: '/camera' }) : ipcCloseCameraWindow()
-        setCameraMuted(!cameraMuted)
-    }, [setCameraMuted, cameraMuted])
+        if (devicesStore.videoOn) {
+            ipcCreateCameraWindow({ url: '/camera' })
+        } else {
+            ipcCloseCameraWindow()
+        }
+        devicesStore.updateVideoOn(!devicesStore.videoOn)
+    }, [devicesStore])
 
     return (
         <div className="tool-box">
@@ -85,13 +92,23 @@ export const ToolBox = observer(({ recorderStore }: ToolBoxProps) => {
                         : (): void => recorderStore.resume()
                 }
             />
-            <Button type="link" icon={<SVGCancel />} onClick={cancel} />
+            <Button type="link" icon={<SVGCancel style={{ fill: '#E8E9EA' }} />} onClick={cancel} />
             <Button
                 type="link"
-                icon={<SVGMic volume={recorderStore.volume} isMuted={audioMuted} />}
+                icon={
+                    <SVGMic
+                        volume={recorderStore.volume}
+                        style={{ fill: '#E8E9EA' }}
+                        isMuted={!devicesStore.audioOn}
+                    />
+                }
                 onClick={switchMic}
             />
-            <Button type="link" icon={<SVGCamera isMuted={cameraMuted} />} onClick={switchCamera} />
+            <Button
+                type="link"
+                icon={<SVGCamera isMuted={!devicesStore.videoOn} style={{ fill: '#E8E9EA' }} />}
+                onClick={switchCamera}
+            />
         </div>
     )
 })

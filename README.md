@@ -4,11 +4,13 @@ A simple, easy-to-use recorder and whiteboard which totally netless and saved lo
 
 ## TODO
 
-1. Select the area to record
-2. test Devices
-3. Select Devices
-4. Add whiteboard
-5. Custom homepage header
+* Test Devices(authorization)
+* ～～Select Devices～～
+* Select the area to record
+* Switch devices in recording
+* Add whiteboard
+* Mirror
+* Custom homepage header
 
 ## Project Setup
 

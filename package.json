@@ -27,6 +27,7 @@
     "antd": "^5.9.0",
     "electron-updater": "^6.1.1",
     "i18next": "^23.5.1",
+    "less": "^4.2.0",
     "mobx": "^6.10.2",
     "mobx-react-lite": "^4.0.4",
     "react-i18next": "^13.2.2",

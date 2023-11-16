@@ -1,29 +1,74 @@
 import { Button, Select } from 'antd'
 import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
-import React, { useCallback, useContext, useEffect } from 'react'
+import React, { useContext, useMemo } from 'react'
 
 import { DevicesTypeKey } from '../store/devices'
+import { SVGCamera, SVGMic } from '../components/global'
 import { DevicesContext } from '../components/StoreProvider'
-import { HomePageSkeletons } from '../components/Skeleton/Homepage'
-import { ipcCreateCounterWindow, ipcHideMainWindow } from '../utils'
+import { useDeviceSelect, useDeviceOn } from '../hooks/device'
+import {
+    ipcCreateCounterWindow,
+    ipcHideMainWindow,
+    ipcCreateCameraWindow,
+    ipcCloseCameraWindow
+} from '../utils'
 
 export const HomePage = observer<React.FC>(() => {
     const { t } = useTranslation()
     const devicesStore = useContext(DevicesContext)
 
-    useEffect(() => {
-        if (!devicesStore.checkDevices) {
-            devicesStore.initDevices()
-        }
-    }, [devicesStore])
+    const { handleChange } = useDeviceSelect({ devicesStore, callCamera })
+    const { handleOn: handleOnAudio } = useDeviceOn({
+        devicesStore,
+        handleChange,
+        callCamera,
+        closeCamera
+    })
+    const { handleOn: handleOnVideo } = useDeviceOn({
+        devicesStore,
+        handleChange,
+        closeCamera,
+        callCamera
+    })
 
-    const handleChange = useCallback(
-        (value, type) => {
-            devicesStore.setSelectedDevices(value, type)
-        },
-        [devicesStore]
-    )
+    const deviceSelects = useMemo(() => {
+        return {
+            audioinput: {
+                isOn: devicesStore.audioOn,
+                text: t('devices.audioinputNoText'),
+                icon: devicesStore.audioOn ? <SVGMic isMuted={false} /> : <SVGMic isMuted />,
+                devices: devicesStore.devices.audioinput,
+                defaultId: devicesStore.selectedAudioInput,
+                handleChange,
+                switchOn: {
+                    text: devicesStore.audioOn ? t('devices.isOn') : t('devices.isOff'),
+                    handleOn: handleOnAudio
+                }
+            },
+            videoinput: {
+                isOn: devicesStore.videoOn,
+                text: t('devices.videoinputNoText'),
+                icon: devicesStore.videoOn ? <SVGCamera isMuted={false} /> : <SVGCamera isMuted />,
+                devices: devicesStore.devices.videoinput,
+                defaultId: devicesStore.selectedVideoInput,
+                handleChange,
+                switchOn: {
+                    text: devicesStore.videoOn ? t('devices.isOn') : t('devices.isOff'),
+                    handleOn: handleOnVideo
+                }
+            }
+        }
+    }, [devicesStore.audioOn, devicesStore.videoOn, devicesStore.devices])
+
+    function callCamera(): void {
+        closeCamera()
+        ipcCreateCameraWindow({ url: '/camera' })
+    }
+
+    function closeCamera(): void {
+        ipcCloseCameraWindow()
+    }
 
     const callRecording = (): void => {
         ipcHideMainWindow()
@@ -32,59 +77,103 @@ export const HomePage = observer<React.FC>(() => {
 
     return (
         <div className="main-page">
-            {!devicesStore.checkDevices ? (
-                <HomePageSkeletons />
-            ) : (
-                <>
-                    <div className="devices">
-                        {Object.keys(devicesStore.devices).map((key) => {
-                            return (
-                                <div key={key}>
-                                    <div className="devices-title">{t(`devices.${key}`)}</div>
+            <div className="devices">
+                {Object.keys(deviceSelects).map((key) => (
+                    <div key={key}>
+                        <div className="devices-title">{t(`devices.${key}`)}</div>
 
-                                    {devicesStore.devices[key].length > 0 &&
-                                        renderSelect({
-                                            type: key as DevicesTypeKey,
-                                            devices: devicesStore.devices[key],
-                                            defaultId: devicesStore.devices[key][0].deviceId,
-                                            handleChange
-                                        })}
-                                </div>
-                            )
+                        {renderSelect({
+                            ...deviceSelects[key],
+                            type: key as DevicesTypeKey
                         })}
                     </div>
-                    <Button className="start-btn" type="primary" onClick={callRecording}>
-                        {t('start')}
-                    </Button>
-                </>
-            )}
+                ))}
+            </div>
+
+            <Button className="start-btn" type="primary" onClick={callRecording}>
+                {t('start')}
+            </Button>
         </div>
     )
 })
 
-export interface SelectProps {
-    devices: MediaDeviceInfo[]
-    defaultId: string
+export interface HandleProps {
+    isOn: boolean
+    text: string
     type: DevicesTypeKey
-    handleChange: (value, type) => void
+    handleOn: (value, type) => void
+}
+
+export const renderHandleOn = ({ isOn, text, type, handleOn }: HandleProps): React.ReactNode => {
+    return (
+        <Button
+            className={`devices-operator${isOn ? '' : ' devices-operator-off'}`}
+            shape="round"
+            onClick={(): void => handleOn(!isOn, type)}
+        >
+            {text}
+        </Button>
+    )
+}
+
+export interface SelectProps {
+    icon: React.ReactNode
+    isOn: boolean
+    text: string
+
+    switchOn: Partial<HandleProps>
+    devices: MediaDeviceInfo[]
+    type: DevicesTypeKey
+    defaultId: string
+    handleChange: (type, value) => void
 }
 
 export const renderSelect = ({
+    isOn,
+    icon,
+    text,
+
     type,
     devices,
     defaultId,
+    switchOn,
     handleChange
 }: SelectProps): React.ReactNode => {
-    return (
-        <Select defaultValue={defaultId} onChange={(value): void => handleChange(value, type)}>
-            {devices.map(({ label, deviceId }) => {
-                return (
-                    <Select.Option key={deviceId} value={deviceId}>
-                        {label}
-                    </Select.Option>
-                )
-            })}
-        </Select>
+    return isOn ? (
+        <div className="devices-select-group">
+            <Select
+                className="devices-select"
+                placeholder={text}
+                defaultValue={defaultId}
+                suffixIcon=""
+                onChange={(value): void => handleChange(type, value)}
+                loading={!devices.length}
+            >
+                {devices.map(({ label, deviceId }) => {
+                    return (
+                        <Select.Option key={deviceId} value={deviceId}>
+                            {label}
+                        </Select.Option>
+                    )
+                })}
+            </Select>
+            {renderHandleOn({
+                ...switchOn,
+                isOn,
+                type
+            } as HandleProps)}
+        </div>
+    ) : (
+        <div className="devices-select-btn-group">
+            <Button className="devices-select-btn" shape="round" icon={icon}>
+                {text}
+            </Button>
+            {renderHandleOn({
+                ...switchOn,
+                isOn,
+                type
+            } as HandleProps)}
+        </div>
     )
 }
 
