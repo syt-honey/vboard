@@ -4,24 +4,16 @@ import { DevicesTypeValue, devicesStore } from '../store/devices'
 
 interface IDeviceSelect {
     devicesStore: typeof devicesStore
-    callCamera: () => void
 }
 
 interface IDeviceSelectReturn {
     handleChange: (type: DevicesTypeValue, value?: string | null) => void
 }
 
-export const useDeviceSelect = ({
-    devicesStore,
-    callCamera
-}: IDeviceSelect): IDeviceSelectReturn => {
+export const useDeviceSelect = ({ devicesStore }: IDeviceSelect): IDeviceSelectReturn => {
     const handleChange = useCallback(
         (type, value) => {
             devicesStore.setSelectedDevices(type, value)
-
-            if (value && type === DevicesTypeValue.VIDEO_INPUT) {
-                void callCamera()
-            }
         },
         [devicesStore]
     )
@@ -32,20 +24,13 @@ export const useDeviceSelect = ({
 interface IDeviceOn {
     devicesStore: typeof devicesStore
     handleChange: (type: DevicesTypeValue, value?: string | null) => void
-    closeCamera: () => void
-    callCamera: () => void
 }
 
 interface IDeviceReturn {
     handleOn: (isOn: boolean, type: DevicesTypeValue) => void
 }
 
-export const useDeviceOn = ({
-    devicesStore,
-    closeCamera,
-    handleChange,
-    callCamera
-}: IDeviceOn): IDeviceReturn => {
+export const useDeviceOn = ({ devicesStore, handleChange }: IDeviceOn): IDeviceReturn => {
     const handleOn = useCallback(
         async (isOn, type) => {
             if (isOn) {
@@ -53,17 +38,9 @@ export const useDeviceOn = ({
 
                 // set default devices
                 handleChange(type)
-
-                if (type === DevicesTypeValue.VIDEO_INPUT) {
-                    void callCamera()
-                }
             } else {
                 // clear default devices
                 handleChange(type, null)
-
-                if (type === DevicesTypeValue.VIDEO_INPUT) {
-                    closeCamera()
-                }
             }
 
             updateDeviceStatus(isOn, type)

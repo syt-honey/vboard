@@ -1,12 +1,12 @@
 import { Button, Select } from 'antd'
 import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
-import React, { useContext, useMemo } from 'react'
+import React, { useContext, useEffect, useMemo } from 'react'
 
 import { DevicesTypeKey } from '../store/devices'
 import { SVGCamera, SVGMic } from '../components/global'
 import { DevicesContext } from '../components/StoreProvider'
-import { useDeviceSelect, useDeviceOn } from '../hooks/device'
+import { useDeviceSelect, useDeviceOn, useAudioAnalyser } from '../hooks'
 import {
     ipcCreateCounterWindow,
     ipcHideMainWindow,
@@ -18,18 +18,26 @@ export const HomePage = observer<React.FC>(() => {
     const { t } = useTranslation()
     const devicesStore = useContext(DevicesContext)
 
-    const { handleChange } = useDeviceSelect({ devicesStore, callCamera })
+    const { analyserInit, volume } = useAudioAnalyser()
+
+    // TODO: use volume to get wave animation
+    console.log(analyserInit, volume)
+
+    // useEffect(() => {
+    //     if (devicesStore.selectedAudioInput) {
+    //         analyserInit(devicesStore.selectedAudioInput)
+    //         console.log(volume)
+    //     }
+    // }, [devicesStore.selectedAudioInput, volume])
+
+    const { handleChange } = useDeviceSelect({ devicesStore })
     const { handleOn: handleOnAudio } = useDeviceOn({
         devicesStore,
-        handleChange,
-        callCamera,
-        closeCamera
+        handleChange
     })
     const { handleOn: handleOnVideo } = useDeviceOn({
         devicesStore,
-        handleChange,
-        closeCamera,
-        callCamera
+        handleChange
     })
 
     const deviceSelects = useMemo(() => {
@@ -60,6 +68,16 @@ export const HomePage = observer<React.FC>(() => {
             }
         }
     }, [devicesStore.audioOn, devicesStore.videoOn, devicesStore.devices])
+
+    useEffect(() => {
+        if (devicesStore.selectedVideoInput) {
+            callCamera()
+        } else {
+            closeCamera()
+        }
+
+        return (): void => closeCamera()
+    }, [devicesStore.selectedVideoInput])
 
     function callCamera(): void {
         closeCamera()

@@ -2,7 +2,7 @@ import { useRef, useEffect } from 'react'
 
 type Callback = () => void
 
-const useInterval = (callback: Callback): void => {
+export const useInterval = (callback: Callback, timer?: number): void => {
     const savedCallback = useRef<Callback | null>(null)
 
     useEffect(() => {
@@ -16,7 +16,7 @@ const useInterval = (callback: Callback): void => {
             }
         }
 
-        const id = setInterval(tick, 1000)
+        const id = setInterval(tick, timer || 1000)
         return () => clearInterval(id)
     }, [])
 }
