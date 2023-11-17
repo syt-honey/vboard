@@ -3,7 +3,7 @@ import { ipcSyncByApp } from '../utils/ipc'
 
 export class Media {
     private mediaList: Electron.DesktopCapturerSource[] = []
-    private readonly sourceName: string = 'Entire Screen'
+    private readonly sourceName: string = 'Entire screen'
 
     constructor() {
         makeAutoObservable(this)

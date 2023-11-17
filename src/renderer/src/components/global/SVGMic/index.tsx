@@ -71,7 +71,7 @@ export const SVGMic = /* @__PURE__ */ React.memo<SVGMicProps>(function SVGMic({
                     fill="#44AD00"
                     height={vHeight * 2}
                     style={{
-                        transform: `translateY(${(1 - volume!) * vHeight}px)`,
+                        transform: `translateY(${Math.abs(1 - volume!) * vHeight}px)`,
                         transition: 'transform .1s'
                     }}
                     width={vWidth}

@@ -43,3 +43,7 @@ export const ipcCloseCameraWindow = (): void => {
 export const ipcHideMainWindow = (): void => {
     return window.electron.ipcRenderer.send('minimize-main-window')
 }
+
+export const ipcShowMainWindow = (): void => {
+    return window.electron.ipcRenderer.send('show-main-window')
+}

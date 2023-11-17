@@ -3,10 +3,10 @@ import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
 import React, { useContext, useEffect, useMemo } from 'react'
 
+// import { useAudioAnalyser } from '../hooks'
 import { DevicesTypeKey } from '../store/devices'
 import { SVGCamera, SVGMic } from '../components/global'
 import { DevicesContext } from '../components/StoreProvider'
-import { useDeviceSelect, useDeviceOn, useAudioAnalyser } from '../hooks'
 import {
     ipcCreateCounterWindow,
     ipcHideMainWindow,
@@ -18,66 +18,65 @@ export const HomePage = observer<React.FC>(() => {
     const { t } = useTranslation()
     const devicesStore = useContext(DevicesContext)
 
-    const { analyserInit, volume } = useAudioAnalyser()
+    // const { analyserInit, volume } = useAudioAnalyser()
+    const {
+        audioOn,
+        videoOn,
+        devices,
+        selectedAudioInput,
+        selectedVideoInput,
+        handleDevicesSelect,
+        handleDevicesOn
+    } = devicesStore
 
     // TODO: use volume to get wave animation
-    console.log(analyserInit, volume)
+    // console.log(analyserInit, volume)
 
     // useEffect(() => {
-    //     if (devicesStore.selectedAudioInput) {
-    //         analyserInit(devicesStore.selectedAudioInput)
+    //     if (selectedAudioInput) {
+    //         analyserInit(selectedAudioInput)
     //         console.log(volume)
     //     }
-    // }, [devicesStore.selectedAudioInput, volume])
+    // }, [selectedAudioInput, volume])
 
-    const { handleChange } = useDeviceSelect({ devicesStore })
-    const { handleOn: handleOnAudio } = useDeviceOn({
-        devicesStore,
-        handleChange
-    })
-    const { handleOn: handleOnVideo } = useDeviceOn({
-        devicesStore,
-        handleChange
-    })
-
-    const deviceSelects = useMemo(() => {
+    const deviceConfig = useMemo(() => {
         return {
             audioinput: {
-                isOn: devicesStore.audioOn,
+                isOn: audioOn,
                 text: t('devices.audioinputNoText'),
-                icon: devicesStore.audioOn ? <SVGMic isMuted={false} /> : <SVGMic isMuted />,
-                devices: devicesStore.devices.audioinput,
-                defaultId: devicesStore.selectedAudioInput,
-                handleChange,
+                icon: audioOn ? <SVGMic isMuted={false} /> : <SVGMic isMuted />,
+                devices: devices.audioinput,
+                defaultId: selectedAudioInput,
+                handleChange: handleDevicesSelect,
                 switchOn: {
-                    text: devicesStore.audioOn ? t('devices.isOn') : t('devices.isOff'),
-                    handleOn: handleOnAudio
+                    handleOn: handleDevicesOn,
+                    text: audioOn ? t('devices.isOn') : t('devices.isOff')
                 }
             },
             videoinput: {
-                isOn: devicesStore.videoOn,
+                isOn: videoOn,
                 text: t('devices.videoinputNoText'),
-                icon: devicesStore.videoOn ? <SVGCamera isMuted={false} /> : <SVGCamera isMuted />,
-                devices: devicesStore.devices.videoinput,
-                defaultId: devicesStore.selectedVideoInput,
-                handleChange,
+                icon: videoOn ? <SVGCamera isMuted={false} /> : <SVGCamera isMuted />,
+                devices: devices.videoinput,
+                defaultId: selectedVideoInput,
+                handleChange: handleDevicesSelect,
                 switchOn: {
-                    text: devicesStore.videoOn ? t('devices.isOn') : t('devices.isOff'),
-                    handleOn: handleOnVideo
+                    handleOn: handleDevicesOn,
+                    text: videoOn ? t('devices.isOn') : t('devices.isOff')
                 }
             }
         }
-    }, [devicesStore.audioOn, devicesStore.videoOn, devicesStore.devices])
+    }, [audioOn, videoOn, devices])
 
     useEffect(() => {
-        if (devicesStore.selectedVideoInput) {
+        if (selectedVideoInput) {
             callCamera()
         } else {
             closeCamera()
         }
 
         return (): void => closeCamera()
-    }, [devicesStore.selectedVideoInput])
+    }, [selectedVideoInput])
 
     function callCamera(): void {
         closeCamera()
@@ -96,12 +95,12 @@ export const HomePage = observer<React.FC>(() => {
     return (
         <div className="main-page">
             <div className="devices">
-                {Object.keys(deviceSelects).map((key) => (
+                {Object.keys(deviceConfig).map((key) => (
                     <div key={key}>
                         <div className="devices-title">{t(`devices.${key}`)}</div>
 
                         {renderSelect({
-                            ...deviceSelects[key],
+                            ...deviceConfig[key],
                             type: key as DevicesTypeKey
                         })}
                     </div>

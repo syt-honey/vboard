@@ -1,24 +1,28 @@
 import { makeAutoObservable, runInAction } from 'mobx'
-import { getUserAudioStream, getUserScreenStream, ipcSyncByApp, AudioAnalyser } from '../utils'
+
+import { getUserAudioStream, getUserScreenStream, ipcSyncByApp } from '../utils'
 import '../../../../lib/fix-webm-duration'
 import { devicesStore } from './devices'
 
 export class Recorder {
     private readonly miniType: string = 'video/webm'
+    private readonly audioBitsPerSecond: number = 128000
+    private readonly videoBitsPerSecond: number = 2500000
 
     public timerId: NodeJS.Timeout | null = null
 
+    // screen id
     private id: string = ''
     private recorder: MediaRecorder | null = null
+    private mediaStreamAudioDestinationNode: MediaStreamAudioDestinationNode | null = null
+    private audioContext: AudioContext | null = null
+    private audioSourceConnected = false
 
     // save audio/video & screen stream
     private chunks: Blob[] = []
 
     // indicate recorder status
     private status: RecorderStatus = RecorderStatus.Idle
-
-    private analyser: AudioAnalyser | null = null
-    public volume: number = 0
 
     public startTime: number = 0
     public endTime: number = 0
@@ -73,7 +77,6 @@ export class Recorder {
         }
     }
 
-    // cancel recording
     public cancel(): void {
         if (this.recorder) {
             this.recorder.stream.getAudioTracks().forEach((t) => t.stop())
@@ -87,10 +90,17 @@ export class Recorder {
     public async finish(): Promise<boolean> {
         if (this.recorder) {
             this.status = RecorderStatus.Saving
-            this.recorder.stream.getAudioTracks().forEach((t) => t.stop())
-            this.recorder.stream.getVideoTracks().forEach((t) => t.stop())
 
-            return await this.saveMedia(new Blob([...this.chunks], { type: this.miniType }))
+            if (await this.saveMedia(new Blob([...this.chunks], { type: this.miniType }))) {
+                this.recorder.stream.getAudioTracks().forEach((t) => t.stop())
+                this.recorder.stream.getVideoTracks().forEach((t) => t.stop())
+
+                return true
+            } else {
+                runInAction(() => {
+                    this.status = RecorderStatus.Recording
+                })
+            }
         }
         return false
     }
@@ -101,33 +111,42 @@ export class Recorder {
         }
     }
 
-    public unmuteAudio(): void {
+    public async unmuteAudio(): Promise<void> {
         if (this.recorder) {
-            this.recorder.stream.getAudioTracks().forEach((t) => (t.enabled = true))
+            // if there is no connection for audio track, we should connect it to `mediaStreamAudioDestinationNode`
+            if (devicesStore.selectedAudioInput) {
+                this.connectAudioSource()
+            }
+
+            if (this.recorder.stream.getAudioTracks().length > 0) {
+                this.recorder.stream.getAudioTracks().forEach((t) => (t.enabled = true))
+            }
         }
     }
 
     private async createRecorder(): Promise<MediaRecorder | null> {
         try {
-            const audioTracks: MediaStreamTrack[] = []
             // @TODO: need to record speaker audio
-            if (devicesStore.audioOn) {
-                audioTracks.push(
-                    ...(await getUserAudioStream(devicesStore.selectedAudioInput)).getAudioTracks()
-                )
-            }
+            this.audioContext = new AudioContext()
+            this.mediaStreamAudioDestinationNode = new MediaStreamAudioDestinationNode(
+                this.audioContext
+            )
 
             const recorder = new MediaRecorder(
                 new MediaStream([
-                    ...audioTracks,
+                    ...this.mediaStreamAudioDestinationNode.stream.getAudioTracks(),
                     ...(await getUserScreenStream(this.id)).getVideoTracks()
                 ]),
                 {
-                    audioBitsPerSecond: 128000,
-                    videoBitsPerSecond: 2500000,
+                    audioBitsPerSecond: this.audioBitsPerSecond,
+                    videoBitsPerSecond: this.videoBitsPerSecond,
                     mimeType: this.miniType
                 }
             )
+
+            if (devicesStore.selectedAudioInput) {
+                this.connectAudioSource()
+            }
 
             runInAction(() => {
                 this.startTime = Date.now()
@@ -141,13 +160,7 @@ export class Recorder {
                 })
             }, 1000)
 
-            recorder.onstart = (): void => {
-                if (recorder.stream.getAudioTracks().length > 0) {
-                    this.analyser = new AudioAnalyser(recorder.stream)
-                }
-            }
-
-            recorder.start(1000)
+            recorder.start(5000)
             recorder.ondataavailable = this.dataAvailable.bind(this)
             recorder.onstop = (): void => {
                 runInAction(() => {
@@ -163,18 +176,30 @@ export class Recorder {
         }
     }
 
+    private async connectAudioSource(): Promise<void> {
+        if (
+            !this.audioSourceConnected &&
+            this.mediaStreamAudioDestinationNode &&
+            this.audioContext
+        ) {
+            const mediaStreamAudioSourceNode = new MediaStreamAudioSourceNode(this.audioContext, {
+                mediaStream: await getUserAudioStream(devicesStore.selectedAudioInput)
+            })
+
+            mediaStreamAudioSourceNode.connect(this.mediaStreamAudioDestinationNode)
+            this.audioSourceConnected = true
+        }
+    }
+
+    private disconnectAudioSource(): void {
+        if (this.audioSourceConnected && this.mediaStreamAudioDestinationNode) {
+            this.mediaStreamAudioDestinationNode.disconnect()
+            this.audioSourceConnected = false
+        }
+    }
+
     private dataAvailable(event): void {
         if (event.data.size > 0) {
-            const reader = new FileReader()
-            reader.onload = (): void => {
-                runInAction(() => {
-                    if (this.analyser) {
-                        this.volume = this.analyser.getVolume()
-                    }
-                })
-            }
-            reader.readAsArrayBuffer(event.data)
-
             console.log(`[vboard]: start to save chuncks every 5s...., size: ${event.data.size}`)
             this.chunks.push(event.data)
         }
@@ -208,6 +233,8 @@ export class Recorder {
             this.recorder.stream.getAudioTracks().forEach((t) => t.stop())
             this.recorder.stream.getVideoTracks().forEach((t) => t.stop())
         }
+
+        this.disconnectAudioSource()
     }
 }
 

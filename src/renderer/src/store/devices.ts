@@ -26,8 +26,50 @@ export class Devices {
     constructor() {
         autoPersistStore({ storeLSName: 'DevicesStore', store: this, version: LS_VERSION })
         autorun(() => {
-            // to do something if indeed changed
+            // do something if indeed
         })
+    }
+
+    public get checkDevices(): boolean {
+        return Object.values(this.devices).some((i) => i.length > 0)
+    }
+
+    public handleDevicesCheck = async (): Promise<void> => {
+        if (!this.checkDevices) {
+            await this.initDevices()
+        }
+    }
+
+    public handleDevicesOn = async (isOn: boolean, type: DevicesTypeKey): Promise<void> => {
+        if (isOn) {
+            await this.handleDevicesCheck()
+
+            // set default devices
+            this.handleDevicesSelect(type)
+        } else {
+            // clear default devices
+            this.handleDevicesSelect(type, null)
+        }
+
+        this.handleDevicesStatusUpdate(isOn, type)
+    }
+
+    public handleDevicesStatusUpdate = (status: boolean, type: DevicesTypeKey): void => {
+        if (type === DevicesTypeValue.AUDIO_INPUT) {
+            this.updateAudioOn(status)
+        } else if (type === DevicesTypeValue.VIDEO_INPUT) {
+            this.updateVideoOn(status)
+        }
+    }
+
+    public handleDevicesSelect = (type: DevicesTypeKey, value?: string | null): void => {
+        if (type === DevicesTypeValue.AUDIO_INPUT) {
+            this.setAudioDevices(value)
+        } else if (type === DevicesTypeValue.AUDIO_OUTPUT) {
+            // todo
+        } else if (type === DevicesTypeValue.VIDEO_INPUT) {
+            this.setVideoDevices(value)
+        }
     }
 
     public updateAudioOn = (value: boolean): void => {
@@ -46,25 +88,7 @@ export class Devices {
         }
     }
 
-    public get checkDevices(): boolean {
-        return Object.values(this.devices).some((i) => i.length > 0)
-    }
-
-    public setSelectedDevices(type: DevicesTypeKey, value?: string | null): void {
-        if (type === DevicesTypeValue.AUDIO_INPUT) {
-            this.setAudioDevices(value)
-        }
-
-        if (type === DevicesTypeValue.AUDIO_OUTPUT) {
-            // todo
-        }
-
-        if (type === DevicesTypeValue.VIDEO_INPUT) {
-            this.setVideoDevices(value)
-        }
-    }
-
-    public setAudioDevices(value?: string | null): void {
+    public setAudioDevices = (value?: string | null): void => {
         if (typeof value === 'string' || value === null) {
             // update or clear
             this.selectedAudioInput = value
@@ -76,7 +100,7 @@ export class Devices {
         }
     }
 
-    public setVideoDevices(value?: string | null): void {
+    public setVideoDevices = (value?: string | null): void => {
         if (typeof value === 'string' || value === null) {
             // update or clear
             this.selectedVideoInput = value
@@ -88,7 +112,7 @@ export class Devices {
         }
     }
 
-    public async initDevices(): Promise<void> {
+    public initDevices = async (): Promise<void> => {
         if (isInit) return
 
         isInit = true
