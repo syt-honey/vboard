@@ -1,5 +1,5 @@
 appId: com.electron.app
-productName: react-ts
+productName: vboard
 directories:
   buildResources: build
 files:
@@ -12,12 +12,14 @@ files:
 asarUnpack:
   - resources/**
 win:
-  executableName: react-ts
+  executableName: ${productName}
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
+  installerIcon: resources/icon.ico
+  installerHeaderIcon: resources/icon.ico
 mac:
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:

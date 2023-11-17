@@ -12,14 +12,7 @@ export const en = {
     devices: {
         isOn: 'On',
         isOff: 'Off',
-        audioinput: 'Microphone',
         audioinputNoText: 'No Mircophone',
-        audioinputText: 'Mircophone',
-        videoinputNoText: 'No Camera',
-        videoinputText: 'Camera',
-        audiooutputText: 'Speakers',
-        audiooutputNoText: 'No Speakers',
-        audiooutput: 'Speakers',
-        videoinput: 'Camera'
+        videoinputNoText: 'No Camera'
     }
 }

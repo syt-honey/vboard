@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from 'react'
 
 import { AudioAnalyser, getUserAudioStream } from '../utils'
 import { useInterval } from '../hooks/interval'
+import { devicesStore } from '../store'
 
 export interface IAudioAnalyser {
     volume: number
@@ -14,9 +15,15 @@ export const useAudioAnalyser = (): IAudioAnalyser => {
     const analyserInit = useCallback(
         (id: string): void => {
             const check = async (): Promise<void> => {
-                const stream = await getUserAudioStream(id)
-                if (stream.getAudioTracks().length > 0) {
-                    setStream(stream)
+                try {
+                    const stream = await getUserAudioStream(id)
+                    devicesStore.updateAudioPermission(true)
+
+                    if (stream.getAudioTracks().length > 0) {
+                        setStream(stream)
+                    }
+                } catch {
+                    devicesStore.updateAudioPermission(false)
                 }
             }
 

@@ -1,10 +1,10 @@
 {
-  "name": "react-ts",
+  "name": "vboard",
   "version": "1.0.0",
-  "description": "An Electron application with React and TypeScript",
+  "description": "A simple, easy-to-use recorder and whiteboard which totally netless and saved locally.",
   "main": "./out/main/index.js",
-  "author": "example.com",
-  "homepage": "https://www.electronjs.org",
+  "author": "honeysyt@foxmail.com",
+  "homepage": "https://github.com/syt-honey/vboard",
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",

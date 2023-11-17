@@ -8,6 +8,9 @@ const LS_VERSION = 1
 let isInit = false
 
 export class Devices {
+    public audioPermission: boolean = false
+    public videoPermission: boolean = false
+
     public devices: DevicesList = {
         audioinput: [],
         audiooutput: [],
@@ -19,7 +22,6 @@ export class Devices {
     public selectedVideoInput: string | null = null
 
     public audioOutOn: boolean = true
-
     public audioOn: boolean = false
     public videoOn: boolean = false
 
@@ -72,21 +74,10 @@ export class Devices {
         }
     }
 
-    public updateAudioOn = (value: boolean): void => {
-        this.audioOn = value
-
-        if (value) {
-            // we should check `devices` exits
-        }
-    }
-
-    public updateVideoOn = (value: boolean): void => {
-        this.videoOn = value
-
-        if (value) {
-            // we should check `devices` exits
-        }
-    }
+    public updateAudioPermission = (value: boolean): void => void (this.audioPermission = value)
+    public updateVideoPermission = (value: boolean): void => void (this.videoPermission = value)
+    public updateAudioOn = (value: boolean): void => void (this.audioOn = value)
+    public updateVideoOn = (value: boolean): void => void (this.videoOn = value)
 
     public setAudioDevices = (value?: string | null): void => {
         if (typeof value === 'string' || value === null) {
@@ -151,7 +142,3 @@ export type DevicesList = {
 }
 
 export const devicesStore = new Devices()
-
-if (process.env.NODE_ENV !== 'production') {
-    window.devicesStore = devicesStore
-}

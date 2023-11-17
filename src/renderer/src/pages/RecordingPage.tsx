@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { observer } from 'mobx-react-lite'
 
-import { RecorderContext, MediaContext, DevicesContext, ToolBox } from '../components'
+import { RecorderContext, ScreenContext, DevicesContext, ToolBox } from '../components'
 import { DevicesTypeValue } from '../store'
 import { useAudioAnalyser } from '../hooks'
 import {
@@ -15,7 +15,7 @@ import {
 
 export const RecordingPage = observer<React.FC>(() => {
     const recorderStore = useContext(RecorderContext)
-    const mediaStore = useContext(MediaContext)
+    const screenStore = useContext(ScreenContext)
     const devicesStore = useContext(DevicesContext)
 
     const { analyserInit, volume } = useAudioAnalyser()
@@ -24,11 +24,11 @@ export const RecordingPage = observer<React.FC>(() => {
     const { handleDevicesOn } = devicesStore
 
     useEffect(() => {
-        const checkMedia = async (): Promise<void> => {
-            if (!mediaStore.getMedia()) {
-                await mediaStore.initMedia()
-                if (mediaStore.getMedia()) {
-                    recorderStore.setId(mediaStore.getMedia().id)
+        const checkScreen = async (): Promise<void> => {
+            if (!screenStore.getScreen()) {
+                await screenStore.initScreen()
+                if (screenStore.getScreen()) {
+                    recorderStore.setId(screenStore.getScreen().id)
                 }
 
                 const startRecording = async (): Promise<void> => {
@@ -41,7 +41,7 @@ export const RecordingPage = observer<React.FC>(() => {
             }
         }
 
-        checkMedia()
+        checkScreen()
     }, [])
 
     useEffect(() => {

@@ -97,8 +97,6 @@ export const HomePage = observer<React.FC>(() => {
             <div className="devices">
                 {Object.keys(deviceConfig).map((key) => (
                     <div key={key}>
-                        <div className="devices-title">{t(`devices.${key}`)}</div>
-
                         {renderSelect({
                             ...deviceConfig[key],
                             type: key as DevicesTypeKey

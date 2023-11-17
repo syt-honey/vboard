@@ -3,6 +3,7 @@ import { makeAutoObservable, runInAction } from 'mobx'
 import { getUserAudioStream, getUserScreenStream, ipcSyncByApp } from '../utils'
 import '../../../../lib/fix-webm-duration'
 import { devicesStore } from './devices'
+import { screenStore } from './screen'
 
 export class Recorder {
     private readonly miniType: string = 'video/webm'
@@ -91,7 +92,7 @@ export class Recorder {
         if (this.recorder) {
             this.status = RecorderStatus.Saving
 
-            if (await this.saveMedia(new Blob([...this.chunks], { type: this.miniType }))) {
+            if (await this.saveScreen(new Blob([...this.chunks], { type: this.miniType }))) {
                 this.recorder.stream.getAudioTracks().forEach((t) => t.stop())
                 this.recorder.stream.getVideoTracks().forEach((t) => t.stop())
 
@@ -126,6 +127,15 @@ export class Recorder {
 
     private async createRecorder(): Promise<MediaRecorder | null> {
         try {
+            const screenTracks: MediaStreamTrack[] = []
+            try {
+                screenTracks.push(...(await getUserScreenStream(this.id)).getVideoTracks())
+                screenStore.updateScreenPermission(true)
+            } catch {
+                screenStore.updateScreenPermission(false)
+                return null
+            }
+
             // @TODO: need to record speaker audio
             this.audioContext = new AudioContext()
             this.mediaStreamAudioDestinationNode = new MediaStreamAudioDestinationNode(
@@ -135,7 +145,7 @@ export class Recorder {
             const recorder = new MediaRecorder(
                 new MediaStream([
                     ...this.mediaStreamAudioDestinationNode.stream.getAudioTracks(),
-                    ...(await getUserScreenStream(this.id)).getVideoTracks()
+                    ...screenTracks
                 ]),
                 {
                     audioBitsPerSecond: this.audioBitsPerSecond,
@@ -182,12 +192,27 @@ export class Recorder {
             this.mediaStreamAudioDestinationNode &&
             this.audioContext
         ) {
-            const mediaStreamAudioSourceNode = new MediaStreamAudioSourceNode(this.audioContext, {
-                mediaStream: await getUserAudioStream(devicesStore.selectedAudioInput)
-            })
+            let audioMediaStream: MediaStream | null = null
 
-            mediaStreamAudioSourceNode.connect(this.mediaStreamAudioDestinationNode)
-            this.audioSourceConnected = true
+            try {
+                audioMediaStream = await getUserAudioStream(devicesStore.selectedAudioInput)
+                devicesStore.updateAudioPermission(true)
+            } catch {
+                devicesStore.updateAudioPermission(false)
+                return
+            }
+
+            if (audioMediaStream) {
+                const mediaStreamAudioSourceNode = new MediaStreamAudioSourceNode(
+                    this.audioContext,
+                    {
+                        mediaStream: audioMediaStream
+                    }
+                )
+
+                mediaStreamAudioSourceNode.connect(this.mediaStreamAudioDestinationNode)
+                this.audioSourceConnected = true
+            }
         }
     }
 
@@ -205,7 +230,7 @@ export class Recorder {
         }
     }
 
-    private async saveMedia(blob: Blob): Promise<boolean> {
+    private async saveScreen(blob: Blob): Promise<boolean> {
         try {
             const fixedBlob = await window.ysFixWebmDuration?.(blob, this._duration)
 

@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useContext } from 'react'
 import { observer } from 'mobx-react-lite'
+import React, { useEffect, useState, useContext } from 'react'
 
 import { Camera } from '../components'
 import { getUserCameraStream } from '../utils'
@@ -10,9 +10,17 @@ export const CameraPage = observer<React.FC>(() => {
     const [cameraStream, setCameraStream] = useState<MediaStream | null>(null)
 
     useEffect(() => {
-        ;(async function (): Promise<void> {
-            setCameraStream(await getUserCameraStream(devicesStore.selectedVideoInput))
-        })()
+        if (devicesStore.selectedVideoInput) {
+            try {
+                ;(async function (): Promise<void> {
+                    setCameraStream(await getUserCameraStream(devicesStore.selectedVideoInput))
+                })()
+                devicesStore.updateVideoPermission(true)
+            } catch (err) {
+                // permission denied
+                devicesStore.updateVideoPermission(false)
+            }
+        }
     }, [devicesStore.selectedVideoInput])
 
     return (

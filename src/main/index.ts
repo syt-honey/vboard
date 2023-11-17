@@ -52,7 +52,7 @@ function createMainWindow(): void {
         mainWindow!.minimize()
     })
 
-    ipcMain.handle('get-media', async () => {
+    ipcMain.handle('get-screen', async () => {
         return desktopCapturer.getSources({
             types: ['window', 'screen'],
             thumbnailSize: {

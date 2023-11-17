@@ -1,8 +1,8 @@
 import React, { createContext, FC } from 'react'
-import { mediaStore, recorderStore, devicesStore } from '../store'
+import { screenStore, recorderStore, devicesStore } from '../store'
 
 export const RecorderContext = createContext(recorderStore)
-export const MediaContext = createContext(mediaStore)
+export const ScreenContext = createContext(screenStore)
 export const DevicesContext = createContext(devicesStore)
 
 interface StoreProviderProps {
@@ -12,9 +12,9 @@ interface StoreProviderProps {
 export const StoreProvider: FC<StoreProviderProps> = ({ children }) => {
     return (
         <RecorderContext.Provider value={recorderStore}>
-            <MediaContext.Provider value={mediaStore}>
+            <ScreenContext.Provider value={screenStore}>
                 <DevicesContext.Provider value={devicesStore}>{children}</DevicesContext.Provider>
-            </MediaContext.Provider>
+            </ScreenContext.Provider>
         </RecorderContext.Provider>
     )
 }
