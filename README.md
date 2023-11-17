@@ -5,7 +5,7 @@ A simple, easy-to-use recorder and whiteboard which totally netless and saved lo
 ## TODO
 
 * Test Devices(authorization)
-* ～～Select Devices～～
+* ~~Select Devices~~
 * Select the area to record
 * Switch devices in recording
 * Add whiteboard
