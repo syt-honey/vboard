@@ -1,9 +1,19 @@
-import { app, shell, BrowserWindow, desktopCapturer, ipcMain, dialog, screen } from 'electron'
+import {
+    app,
+    shell,
+    BrowserWindow,
+    desktopCapturer,
+    ipcMain,
+    dialog,
+    screen,
+    systemPreferences
+} from 'electron'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { join } from 'path'
 import fs from 'fs'
 
-import { createWindow, WindowType, winURL } from './utils'
+import runtime from '../script/runtime'
+import { createWindow, WindowType } from './utils'
 
 // manage all windows
 const windows = new Map<WindowType, BrowserWindow>()
@@ -14,6 +24,8 @@ app.whenReady().then(() => {
     app.on('browser-window-created', (_, window) => {
         optimizer.watchWindowShortcuts(window)
     })
+
+    app.setName('vboard')
 
     createMainWindow()
     createCameraWindow()
@@ -26,16 +38,14 @@ app.whenReady().then(() => {
 })
 
 app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit()
-    }
+    app.quit()
 })
 
 function createMainWindow(): void {
     let mainWindow: BrowserWindow | null = null
     mainWindow = createWindow({
-        width: 300,
-        height: 370,
+        width: 380,
+        height: 470,
         show: false
         // transparent: true,
         // frame: false,
@@ -86,6 +96,21 @@ function createMainWindow(): void {
         }
 
         return result
+    })
+
+    // get the audio/video/screen permissions
+    ipcMain.handle('get-devices-permission', async (_, { mediaType }): Promise<boolean> => {
+        return systemPreferences.getMediaAccessStatus(mediaType) === 'granted'
+    })
+
+    // access to the audio&video permissions(only for macOS)
+    ipcMain.handle('request-devices-permission', async (_, { mediaType }): Promise<boolean> => {
+        try {
+            return await systemPreferences.askForMediaAccess(mediaType)
+        } catch {
+            // not support
+            return false
+        }
     })
 
     mainWindow.on('ready-to-show', () => {
@@ -139,7 +164,7 @@ function createCameraWindow(): void {
             show: !isDelay,
             transparent: true,
             resizable: false,
-            url: winURL + url
+            url: runtime.baseUrl + url
         })
 
         cameraWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
@@ -174,7 +199,7 @@ function createRecordingWindow(): void {
             alwaysOnTop: true,
             transparent: true,
             resizable: false,
-            url: winURL + url
+            url: runtime.baseUrl + url
         })
 
         recordingWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
@@ -225,7 +250,7 @@ function createCounterWindow(): void {
             minHeight: height - y,
             frame: false,
             transparent: true,
-            url: winURL + url
+            url: runtime.baseUrl + url
         })
 
         // always on top, above the Dock(macOS) and the taskbar(Windows)

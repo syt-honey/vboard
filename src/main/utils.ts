@@ -1,10 +1,5 @@
 import { BrowserWindow } from 'electron'
-import { join } from 'path'
-
-export const winURL =
-    process.env.NODE_ENV === 'development'
-        ? 'http://localhost:5173'
-        : `file://${__dirname}/index.html`
+import runtime from '../script/runtime'
 
 export interface IWindow extends Electron.BrowserWindowConstructorOptions {
     url?: string
@@ -36,7 +31,7 @@ export const createWindow = ({
         ...restProps,
         webPreferences: {
             nodeIntegration: true,
-            preload: join(__dirname, '../preload/index.js'),
+            preload: runtime.preloadUrl,
             sandbox: false
         }
     })

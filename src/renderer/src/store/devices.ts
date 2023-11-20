@@ -8,9 +8,6 @@ const LS_VERSION = 1
 let isInit = false
 
 export class Devices {
-    public audioPermission: boolean = false
-    public videoPermission: boolean = false
-
     public devices: DevicesList = {
         audioinput: [],
         audiooutput: [],
@@ -74,8 +71,6 @@ export class Devices {
         }
     }
 
-    public updateAudioPermission = (value: boolean): void => void (this.audioPermission = value)
-    public updateVideoPermission = (value: boolean): void => void (this.videoPermission = value)
     public updateAudioOn = (value: boolean): void => void (this.audioOn = value)
     public updateVideoOn = (value: boolean): void => void (this.videoOn = value)
 

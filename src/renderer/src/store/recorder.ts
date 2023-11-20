@@ -3,7 +3,7 @@ import { makeAutoObservable, runInAction } from 'mobx'
 import { getUserAudioStream, getUserScreenStream, ipcSyncByApp } from '../utils'
 import '../../../../lib/fix-webm-duration'
 import { devicesStore } from './devices'
-import { screenStore } from './screen'
+import { permissionStore } from './permission'
 
 export class Recorder {
     private readonly miniType: string = 'video/webm'
@@ -130,9 +130,9 @@ export class Recorder {
             const screenTracks: MediaStreamTrack[] = []
             try {
                 screenTracks.push(...(await getUserScreenStream(this.id)).getVideoTracks())
-                screenStore.updateScreenPermission(true)
+                permissionStore.updateScreenPermission(true)
             } catch {
-                screenStore.updateScreenPermission(false)
+                permissionStore.updateScreenPermission(false)
                 return null
             }
 
@@ -196,9 +196,9 @@ export class Recorder {
 
             try {
                 audioMediaStream = await getUserAudioStream(devicesStore.selectedAudioInput)
-                devicesStore.updateAudioPermission(true)
+                permissionStore.updateAudioPermission(true)
             } catch {
-                devicesStore.updateAudioPermission(false)
+                permissionStore.updateAudioPermission(false)
                 return
             }
 

@@ -1,12 +1,13 @@
 import { Button, Select } from 'antd'
 import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import React, { useContext, useEffect, useMemo } from 'react'
 
 // import { useAudioAnalyser } from '../hooks'
 import { DevicesTypeKey } from '../store/devices'
 import { SVGCamera, SVGMic } from '../components/global'
-import { DevicesContext } from '../components/StoreProvider'
+import { DevicesContext, PermissionContext } from '../components/StoreProvider'
 import {
     ipcCreateCounterWindow,
     ipcHideMainWindow,
@@ -16,7 +17,10 @@ import {
 
 export const HomePage = observer<React.FC>(() => {
     const { t } = useTranslation()
+    const navigate = useNavigate()
+
     const devicesStore = useContext(DevicesContext)
+    const permissionStore = useContext(PermissionContext)
 
     // const { analyserInit, volume } = useAudioAnalyser()
     const {
@@ -28,6 +32,19 @@ export const HomePage = observer<React.FC>(() => {
         handleDevicesSelect,
         handleDevicesOn
     } = devicesStore
+
+    const { checkDevicesPermission } = permissionStore
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (!checkDevicesPermission) {
+                // to permission page
+                navigate('/permission')
+            }
+        }, 500)
+
+        return (): void => clearTimeout(timer)
+    }, [checkDevicesPermission])
 
     // TODO: use volume to get wave animation
     // console.log(analyserInit, volume)

@@ -3,10 +3,11 @@ import React, { useEffect, useState, useContext } from 'react'
 
 import { Camera } from '../components'
 import { getUserCameraStream } from '../utils'
-import { DevicesContext } from '../components/StoreProvider'
+import { PermissionContext, DevicesContext } from '../components/StoreProvider'
 
 export const CameraPage = observer<React.FC>(() => {
     const devicesStore = useContext(DevicesContext)
+    const permissionStore = useContext(PermissionContext)
     const [cameraStream, setCameraStream] = useState<MediaStream | null>(null)
 
     useEffect(() => {
@@ -15,13 +16,13 @@ export const CameraPage = observer<React.FC>(() => {
                 ;(async function (): Promise<void> {
                     setCameraStream(await getUserCameraStream(devicesStore.selectedVideoInput))
                 })()
-                devicesStore.updateVideoPermission(true)
+                permissionStore.updateVideoPermission(true)
             } catch (err) {
                 // permission denied
-                devicesStore.updateVideoPermission(false)
+                permissionStore.updateVideoPermission(false)
             }
         }
-    }, [devicesStore.selectedVideoInput])
+    }, [devicesStore.selectedVideoInput, permissionStore.videoPermission])
 
     return (
         <div className="camera-page">

@@ -51,34 +51,45 @@ export const SVGMic = /* @__PURE__ */ React.memo<SVGMicProps>(function SVGMic({
             <path d="M32.384 44.096C26.5333 44.096 21.6907 39.4107 21.6907 33.7494V16.1734C21.6907 14.5147 23.0027 13.248 24.7173 13.248C26.432 13.248 27.744 14.5147 27.744 16.176V33.7467C27.744 36.1867 29.8613 38.2374 32.384 38.2374C34.904 38.2374 37.024 36.1867 37.024 33.7467V16.1734C37.024 14.5147 38.336 13.248 40.0507 13.248C41.7653 13.248 43.0747 14.5147 43.0747 16.176V33.7467C43.0747 39.408 38.2347 44.0934 32.3813 44.0934L32.384 44.096Z" />
             <path d="M40.0507 33.8453C38.336 33.8453 37.024 32.576 37.024 30.9173V13.3467C37.024 10.9067 34.904 8.856 32.384 8.856C29.8614 8.856 27.744 10.9093 27.744 13.3467V30.92C27.744 32.576 26.432 33.8453 24.7174 33.8453C23.0027 33.8453 21.6934 32.576 21.6934 30.92V13.3467C21.6934 7.68533 26.432 3 32.3867 3C38.3387 3 43.08 7.68533 43.08 13.3467V30.92C43.08 32.576 41.6667 33.8453 40.0534 33.8453H40.0507Z" />
 
-            <defs>
-                <clipPath id="icon-mic-v-clip">
-                    <rect height={vHeight} rx={vWidth / 2} width={vWidth} x={vBaseX} y={vBaseY} />
-                </clipPath>
-            </defs>
+            {typeof volume === 'number' ? (
+                <>
+                    <defs>
+                        <clipPath id="icon-mic-v-clip">
+                            <rect
+                                height={vHeight}
+                                rx={vWidth / 2}
+                                width={vWidth}
+                                x={vBaseX}
+                                y={vBaseY}
+                            />
+                        </clipPath>
+                    </defs>
 
-            <rect
-                clipPath="url(#icon-mic-v-clip)"
-                fill="#D8D8D8"
-                height={vHeight}
-                width={vWidth}
-                x={vBaseX}
-                y={vBaseY}
-            />
-
-            <g clipPath="url(#icon-mic-v-clip)">
-                <rect
-                    fill="#44AD00"
-                    height={vHeight * 2}
-                    style={{
-                        transform: `translateY(${Math.abs(1 - volume!) * vHeight}px)`,
-                        transition: 'transform .1s'
-                    }}
-                    width={vWidth}
-                    x={vBaseX}
-                    y={vBaseY}
-                />
-            </g>
+                    <rect
+                        clipPath="url(#icon-mic-v-clip)"
+                        fill="#D8D8D8"
+                        height={vHeight}
+                        width={vWidth}
+                        x={vBaseX}
+                        y={vBaseY}
+                    />
+                    <g clipPath="url(#icon-mic-v-clip)">
+                        <rect
+                            fill="#44AD00"
+                            height={vHeight * 2}
+                            style={{
+                                transform: `translateY(${Math.abs(1 - volume!) * vHeight}px)`,
+                                transition: 'transform .1s'
+                            }}
+                            width={vWidth}
+                            x={vBaseX}
+                            y={vBaseY}
+                        />
+                    </g>
+                </>
+            ) : (
+                ''
+            )}
         </svg>
     )
 })

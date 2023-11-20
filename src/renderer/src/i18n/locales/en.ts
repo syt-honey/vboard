@@ -9,6 +9,19 @@ export const en = {
     },
     finishText: 'Finish to record',
 
+    welcome: 'Welcome to vboard',
+    welcomeSub: 'Enable permissions to use vboard',
+    continue: 'Continue',
+    enable: 'Enable',
+    done: 'Done',
+    cameraInfo: 'So viewer can see you',
+    micInfo: 'So viewer can hear you',
+    recordInfo: 'To share your screen',
+
+    mic: 'Mircophone',
+    camera: 'Camera',
+    screen: 'Screen Recording',
+
     devices: {
         isOn: 'On',
         isOff: 'Off',
