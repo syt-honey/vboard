@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx'
 
 import { ipcSyncByApp } from '../utils'
+import { DeviceType } from '../types/device'
 
 export class Permission {
     public audioPermission: boolean = false
@@ -36,19 +37,22 @@ export class Permission {
         })
 
     public checkAudioPermission = async (): Promise<boolean> =>
-        await ipcSyncByApp('get-devices-permission', { mediaType: 'microphone' })
+        await ipcSyncByApp('get-devices-permission', { mediaType: DeviceType.Microphone })
 
     public checkVideoPermission = async (): Promise<boolean> =>
-        await ipcSyncByApp('get-devices-permission', { mediaType: 'camera' })
+        await ipcSyncByApp('get-devices-permission', { mediaType: DeviceType.Camera })
 
     public checkScreenPermission = async (): Promise<boolean> =>
-        await ipcSyncByApp('get-devices-permission', { mediaType: 'screen' })
+        await ipcSyncByApp('get-devices-permission', { mediaType: DeviceType.Screen })
 
     public requestAudioPermission = async (): Promise<boolean> =>
-        await ipcSyncByApp('request-devices-permission', { mediaType: 'microphone' })
+        await ipcSyncByApp('request-devices-permission', { mediaType: DeviceType.Microphone })
 
     public requestVideoPermission = async (): Promise<boolean> =>
-        await ipcSyncByApp('request-devices-permission', { mediaType: 'camera' })
+        await ipcSyncByApp('request-devices-permission', { mediaType: DeviceType.Camera })
+
+    public requestScreenPermission = async (): Promise<boolean> =>
+        await ipcSyncByApp('request-devices-permission', { mediaType: DeviceType.Screen })
 }
 
 export const permissionStore = new Permission()

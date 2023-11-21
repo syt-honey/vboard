@@ -9,11 +9,12 @@ import {
     systemPreferences
 } from 'electron'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import { join } from 'path'
+import path from 'path'
 import fs from 'fs'
 
-import runtime from '../script/runtime'
+import runtime from './script/runtime'
 import { createWindow, WindowType } from './utils'
+import { systemPreferencesShell } from './script/system'
 
 // manage all windows
 const windows = new Map<WindowType, BrowserWindow>()
@@ -37,7 +38,18 @@ app.whenReady().then(() => {
     })
 })
 
+app.on('will-quit', () => {
+    if (windows.size) {
+        windows.forEach((w) => {
+            w.close()
+        })
+        windows.clear()
+    }
+})
+
 app.on('window-all-closed', () => {
+    if (runtime.isMac) return
+
     app.quit()
 })
 
@@ -53,6 +65,18 @@ function createMainWindow(): void {
     })
     windows.clear()
     windows.set(WindowType.MAIN, mainWindow)
+
+    mainWindow.on('close', () => {
+        if (windows.size) {
+            // close all related windows
+            windows.forEach((w, k) => {
+                if (k !== WindowType.MAIN) {
+                    w.close()
+                }
+            })
+            windows.clear()
+        }
+    })
 
     ipcMain.on('show-main-window', () => {
         mainWindow!.show()
@@ -103,10 +127,36 @@ function createMainWindow(): void {
         return systemPreferences.getMediaAccessStatus(mediaType) === 'granted'
     })
 
-    // access to the audio&video permissions(only for macOS)
+    // access to the audio&video permissions (only needed in macOS)
     ipcMain.handle('request-devices-permission', async (_, { mediaType }): Promise<boolean> => {
         try {
-            return await systemPreferences.askForMediaAccess(mediaType)
+            if (mediaType === 'screen') {
+                // there is no system API access for screen recording
+                // so we open the system preferences instead.
+                // see: https://www.electronjs.org/docs/latest/api/system-preferences#systempreferencesaskformediaaccessmediatype-macos
+                shell.openExternal(systemPreferencesShell(mediaType))
+                return false
+            }
+
+            // NOTE: I do not know the `restricted` status means what, so we ignore it first.
+            // TODO: we should check the `restricted` status
+            if (
+                ['not-determined', 'unknown'].indexOf(
+                    systemPreferences.getMediaAccessStatus(mediaType)
+                ) > -1
+            ) {
+                // the first time to request the permissions
+                return await systemPreferences.askForMediaAccess(mediaType)
+            } else {
+                // the second time
+                const result = await systemPreferences.askForMediaAccess(mediaType)
+                if (result === false) {
+                    // user denied before, so we should open the system preferences
+                    shell.openExternal(systemPreferencesShell(mediaType))
+                    return false
+                }
+                return false
+            }
         } catch {
             // not support
             return false
@@ -141,7 +191,7 @@ function createMainWindow(): void {
     if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
         mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
     } else {
-        mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+        mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'))
     }
 }
 

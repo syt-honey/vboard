@@ -5,9 +5,8 @@ import { useNavigate } from 'react-router-dom'
 import React, { useCallback, useContext, useMemo, useEffect } from 'react'
 
 import appIcon from '../assets/icon/app.svg'
-import { SVGCamera, SVGMic, SVGDesktop } from '../components/global'
 import { PermissionContext } from '../components/StoreProvider'
-import { getUserScreenStream } from '../utils'
+import { SVGCamera, SVGMic, SVGDesktop } from '../components/global'
 
 export const PermissionPage = observer<React.FC>(() => {
     const { t } = useTranslation()
@@ -28,6 +27,8 @@ export const PermissionPage = observer<React.FC>(() => {
                 title: t('camera'),
                 info: t('cameraInfo'),
                 handleChange: async (): Promise<void> => {
+                    if (permissionStore.videoPermission) return
+
                     permissionStore.updateVideoPermission(
                         await permissionStore.requestVideoPermission()
                     )
@@ -39,6 +40,8 @@ export const PermissionPage = observer<React.FC>(() => {
                 title: t('mic'),
                 info: t('micInfo'),
                 handleChange: async (): Promise<void> => {
+                    if (permissionStore.audioPermission) return
+
                     permissionStore.updateAudioPermission(
                         await permissionStore.requestAudioPermission()
                     )
@@ -50,13 +53,11 @@ export const PermissionPage = observer<React.FC>(() => {
                 title: t('screen'),
                 info: t('recordInfo'),
                 handleChange: async (): Promise<void> => {
-                    try {
-                        await getUserScreenStream('')
-                        permissionStore.updateScreenPermission(true)
-                    } catch {
-                        // permission denied
-                        permissionStore.updateScreenPermission(false)
-                    }
+                    if (permissionStore.screenPermission) return
+
+                    permissionStore.updateScreenPermission(
+                        await permissionStore.requestScreenPermission()
+                    )
                 }
             }
         ]

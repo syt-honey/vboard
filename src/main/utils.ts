@@ -1,5 +1,5 @@
 import { BrowserWindow } from 'electron'
-import runtime from '../script/runtime'
+import runtime from './script/runtime'
 
 export interface IWindow extends Electron.BrowserWindowConstructorOptions {
     url?: string

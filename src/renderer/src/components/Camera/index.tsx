@@ -44,6 +44,13 @@ export const Camera = observer(
                 camera.current.srcObject = stream
                 camera.current.play()
             }
+
+            return (): void => {
+                if (camera.current) {
+                    camera.current.pause()
+                    camera.current.srcObject = null
+                }
+            }
         }, [camera.current, stream, setLoading])
 
         useEffect(() => {

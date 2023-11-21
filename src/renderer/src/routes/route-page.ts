@@ -47,5 +47,5 @@ export const routePages: RouterPages = {
         title: 'Permission',
         component: PermissionPage,
         path: '/permission'
-    },
+    }
 }
