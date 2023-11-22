@@ -4,7 +4,7 @@ import { routePages } from './route-page'
 
 export const AppRouter: React.FC = () => {
     return (
-        <HashRouter>
+        <HashRouter basename="/">
             <Routes>
                 {Object.keys(routePages).map((name) => {
                     const { component, path } = routePages[name]

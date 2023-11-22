@@ -35,7 +35,7 @@ export class Devices {
 
     public handleDevicesCheck = async (): Promise<void> => {
         if (!this.checkDevices) {
-            await this.initDevices()
+            return await this.initDevices()
         }
     }
 

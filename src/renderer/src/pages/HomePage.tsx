@@ -83,7 +83,7 @@ export const HomePage = observer<React.FC>(() => {
                 }
             }
         }
-    }, [audioOn, videoOn, devices])
+    }, [audioOn, videoOn, devices, selectedAudioInput, selectedVideoInput])
 
     useEffect(() => {
         if (selectedVideoInput) {

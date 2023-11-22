@@ -44,14 +44,7 @@ export const Camera = observer(
                 camera.current.srcObject = stream
                 camera.current.play()
             }
-
-            return (): void => {
-                if (camera.current) {
-                    camera.current.pause()
-                    camera.current.srcObject = null
-                }
-            }
-        }, [camera.current, stream, setLoading])
+        }, [stream, loading])
 
         useEffect(() => {
             if (shape === 'circle') {
@@ -75,7 +68,7 @@ export const Camera = observer(
                 {loading ? (
                     <LoadingOutlined />
                 ) : (
-                    <video ref={camera} style={{ ...videoStyle }} id="preview" autoPlay></video>
+                    <video ref={camera} style={{ ...videoStyle }} autoPlay></video>
                 )}
             </div>
         )
