@@ -8,14 +8,14 @@ import {
     screen,
     systemPreferences
 } from 'electron'
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import path from 'path'
+import { electronApp, optimizer } from '@electron-toolkit/utils'
 import fs from 'fs'
 
 import runtime from './script/runtime'
-import { createWindow, WindowType } from './utils'
+import { WindowType, createWindow } from './utils'
 import { systemPreferencesShell } from './script/system'
 
+// TODO: replace with BrowserWindow.getAllWindows()
 // manage all windows
 const windows = new Map<WindowType, BrowserWindow>()
 
@@ -28,63 +28,16 @@ app.whenReady().then(() => {
 
     app.setName('vboard')
 
-    createMainWindow()
-    createCameraWindow()
-    createCounterWindow()
-    createRecordingWindow()
-
     app.on('activate', function () {
         if (BrowserWindow.getAllWindows().length === 0) createMainWindow()
     })
 })
 
-app.on('will-quit', () => {
-    if (windows.size) {
-        windows.forEach((w) => {
-            w.close()
-        })
-        windows.clear()
-    }
-})
-
-app.on('window-all-closed', () => {
-    if (runtime.isMac) return
-
-    app.quit()
-})
-
-function createMainWindow(): void {
-    let mainWindow: BrowserWindow | null = null
-    mainWindow = createWindow({
-        width: 380,
-        height: 470,
-        show: false
-        // transparent: true,
-        // frame: false,
-        // resizable: false
-    })
-    windows.clear()
-    windows.set(WindowType.MAIN, mainWindow)
-
-    mainWindow.on('close', () => {
-        if (windows.size) {
-            // close all related windows
-            windows.forEach((w, k) => {
-                if (k !== WindowType.MAIN) {
-                    w.close()
-                }
-            })
-            windows.clear()
-        }
-    })
-
-    ipcMain.on('show-main-window', () => {
-        mainWindow!.show()
-    })
-
-    ipcMain.on('minimize-main-window', () => {
-        mainWindow!.minimize()
-    })
+app.once('ready', () => {
+    createMainWindow()
+    createCameraWindow()
+    createCounterWindow()
+    createRecordingWindow()
 
     ipcMain.handle('get-screen', async () => {
         return desktopCapturer.getSources({
@@ -162,25 +115,42 @@ function createMainWindow(): void {
             return false
         }
     })
+})
+
+app.on('window-all-closed', () => {
+    if (runtime.isMac) return
+
+    app.quit()
+})
+
+function createMainWindow(): void {
+    let mainWindow: BrowserWindow | null = null
+    mainWindow = createWindow({
+        width: 380,
+        height: 470
+        // transparent: true,
+        // frame: false,
+        // resizable: false
+    })
+    windows.clear()
+    windows.set(WindowType.MAIN, mainWindow)
+
+    mainWindow.setFullScreenable(false)
+
+    mainWindow.on('close', () => {
+        BrowserWindow.getAllWindows().forEach((window) => window.destroy())
+    })
+
+    ipcMain.on('show-main-window', () => {
+        mainWindow!.show()
+    })
+
+    ipcMain.on('minimize-main-window', () => {
+        mainWindow!.minimize()
+    })
 
     mainWindow.on('ready-to-show', () => {
         mainWindow!.show()
-
-        // @TODO: we should check the audio&video permissions before using them
-        // try {
-        //     // prompt for permissions on macOS
-        //     const types = ["camera", "microphone", "screen"]
-        //     let accessPerms = {}
-
-        //     for (const type of types) {
-        //         const status = systemPreferences.getMediaAccessStatus(type as "camera" | "microphone" | "screen")
-        //         accessPerms[type] = status
-        //     }
-
-        //     console.log(accessPerms)
-        //     } catch (e) {
-        //     console.error(e)
-        // }
     })
 
     mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -188,11 +158,7 @@ function createMainWindow(): void {
         return { action: 'deny' }
     })
 
-    if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-        mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
-    } else {
-        mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'))
-    }
+    mainWindow.loadURL(runtime.baseUrl())
 }
 
 function createCameraWindow(): void {
@@ -214,7 +180,8 @@ function createCameraWindow(): void {
             show: !isDelay,
             transparent: true,
             resizable: false,
-            url: runtime.baseUrl + url
+            title: WindowType.CAMERA,
+            url: runtime.baseUrl() + url
         })
 
         cameraWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
@@ -249,7 +216,8 @@ function createRecordingWindow(): void {
             alwaysOnTop: true,
             transparent: true,
             resizable: false,
-            url: runtime.baseUrl + url
+            title: WindowType.RECORDING,
+            url: runtime.baseUrl() + url
         })
 
         recordingWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
@@ -300,7 +268,8 @@ function createCounterWindow(): void {
             minHeight: height - y,
             frame: false,
             transparent: true,
-            url: runtime.baseUrl + url
+            title: WindowType.COUNTER,
+            url: runtime.baseUrl() + url
         })
 
         // always on top, above the Dock(macOS) and the taskbar(Windows)
