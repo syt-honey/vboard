@@ -21,7 +21,7 @@ export const RecordingPage = observer<React.FC>(() => {
     const { analyserInit, volume } = useAudioAnalyser()
 
     const { t } = useTranslation()
-    const { handleDevicesOn } = devicesStore
+    const { handleDevicesStatusUpdate } = devicesStore
 
     useEffect(() => {
         const checkScreen = async (): Promise<void> => {
@@ -89,7 +89,7 @@ export const RecordingPage = observer<React.FC>(() => {
     }, [recorderStore])
 
     const handleMicSwitch = useCallback(async () => {
-        await handleDevicesOn(!devicesStore.audioOn, DevicesTypeValue.AUDIO_INPUT)
+        await handleDevicesStatusUpdate(!devicesStore.audioOn, DevicesTypeValue.AUDIO_INPUT)
 
         if (devicesStore.audioOn) {
             recorderStore.unmuteAudio()
@@ -99,7 +99,7 @@ export const RecordingPage = observer<React.FC>(() => {
     }, [devicesStore.audioOn])
 
     const handleCameraSwitch = useCallback(async () => {
-        await handleDevicesOn(!devicesStore.videoOn, DevicesTypeValue.VIDEO_INPUT)
+        await handleDevicesStatusUpdate(!devicesStore.videoOn, DevicesTypeValue.VIDEO_INPUT)
 
         if (devicesStore.videoOn) {
             ipcCreateCameraWindow({ url: '/camera' })
