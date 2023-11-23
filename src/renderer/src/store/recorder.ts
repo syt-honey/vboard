@@ -137,22 +137,21 @@ export class Recorder {
             }
 
             // @TODO: need to record speaker audio
+            const audioTracks: MediaStreamTrack[] = []
             this.audioContext = new AudioContext()
             this.mediaStreamAudioDestinationNode = new MediaStreamAudioDestinationNode(
                 this.audioContext
             )
 
-            const recorder = new MediaRecorder(
-                new MediaStream([
-                    ...this.mediaStreamAudioDestinationNode.stream.getAudioTracks(),
-                    ...screenTracks
-                ]),
-                {
-                    audioBitsPerSecond: this.audioBitsPerSecond,
-                    videoBitsPerSecond: this.videoBitsPerSecond,
-                    mimeType: this.miniType
-                }
-            )
+            if (devicesStore.selectedAudioInput) {
+                audioTracks.push(...this.mediaStreamAudioDestinationNode.stream.getAudioTracks())
+            }
+
+            const recorder = new MediaRecorder(new MediaStream([...audioTracks, ...screenTracks]), {
+                audioBitsPerSecond: this.audioBitsPerSecond,
+                videoBitsPerSecond: this.videoBitsPerSecond,
+                mimeType: this.miniType
+            })
 
             if (devicesStore.selectedAudioInput) {
                 this.connectAudioSource()
