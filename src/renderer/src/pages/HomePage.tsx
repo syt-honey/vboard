@@ -179,7 +179,6 @@ export const renderSelect = ({
                 defaultValue={defaultId}
                 suffixIcon=""
                 onChange={(value): void => handleChange(type, value)}
-                loading={!devices.length}
             >
                 {devices.map(({ label, deviceId }) => {
                     return (

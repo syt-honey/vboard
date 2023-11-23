@@ -27,6 +27,9 @@ export class Devices {
         autorun(() => {
             // do something if indeed
         })
+
+        // need time to get the devices
+        this.handleDevicesCheck()
     }
 
     public get checkDevices(): boolean {
@@ -41,8 +44,6 @@ export class Devices {
 
     public handleDevicesOn = async (isOn: boolean, type: DevicesTypeKey): Promise<void> => {
         if (isOn) {
-            await this.handleDevicesCheck()
-
             // set default devices
             this.handleDevicesSelect(type)
         } else {
