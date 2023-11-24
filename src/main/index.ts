@@ -118,8 +118,6 @@ app.once('ready', () => {
 })
 
 app.on('window-all-closed', () => {
-    if (runtime.isMac) return
-
     app.quit()
 })
 
@@ -128,9 +126,6 @@ function createMainWindow(): void {
     mainWindow = createWindow({
         width: 380,
         height: 470
-        // transparent: true,
-        // frame: false,
-        // resizable: false
     })
     windows.clear()
     windows.set(WindowType.MAIN, mainWindow)
@@ -164,7 +159,7 @@ function createMainWindow(): void {
 function createCameraWindow(): void {
     let cameraWindow: BrowserWindow | null = null
 
-    ipcMain.on('create-camera-window', (_, { url, isDelay }) => {
+    ipcMain.on('create-camera-window', (_, { url }) => {
         if (cameraWindow) {
             return
         }
@@ -177,14 +172,17 @@ function createCameraWindow(): void {
             width: 200,
             height: 200,
             frame: false,
-            show: !isDelay,
+            alwaysOnTop: true,
             transparent: true,
             resizable: false,
             title: WindowType.CAMERA,
             url: runtime.baseUrl() + url
         })
 
-        cameraWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
+        // set `{ visibleOnFullScreen: true }` will hide dock icon
+        // see: https://github.com/electron/electron/issues/26350、https://github.com/electron/electron/pull/25126
+        // https://www.electronjs.org/docs/latest/api/browser-window#winsetvisibleonallworkspacesvisible-options-macos-linux
+        cameraWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: false })
         windows.set(WindowType.CAMERA, cameraWindow)
     })
 
@@ -220,7 +218,7 @@ function createRecordingWindow(): void {
             url: runtime.baseUrl() + url
         })
 
-        recordingWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
+        recordingWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: false })
         windows.set(WindowType.RECORDING, recordingWindow)
     })
 
@@ -276,7 +274,7 @@ function createCounterWindow(): void {
         counterWindow.setAlwaysOnTop(true, 'pop-up-menu')
 
         // always show on all workspaces
-        counterWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
+        counterWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: false })
 
         // set the window size to the full screen size
         counterWindow.setSize(width, height - y)
