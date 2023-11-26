@@ -17,7 +17,9 @@ export class Recorder {
     private recorder: MediaRecorder | null = null
     private mediaStreamAudioDestinationNode: MediaStreamAudioDestinationNode | null = null
     private audioContext: AudioContext | null = null
+    private gainNode: GainNode | null = null
     private audioSourceConnected = false
+    private originalAudioVolume = false
 
     // save audio/video & screen stream
     private chunks: Blob[] = []
@@ -114,9 +116,8 @@ export class Recorder {
 
     public async unmuteAudio(): Promise<void> {
         if (this.recorder) {
-            // if there is no connection for audio track, we should connect it to `mediaStreamAudioDestinationNode`
-            if (devicesStore.selectedAudioInput) {
-                this.connectAudioSource()
+            if (this.originalAudioVolume) {
+                this.setAudioVolume(this.originalAudioVolume)
             }
 
             if (this.recorder.stream.getAudioTracks().length > 0) {
@@ -139,6 +140,7 @@ export class Recorder {
             // @TODO: need to record speaker audio
             const audioTracks: MediaStreamTrack[] = []
             this.audioContext = new AudioContext()
+            this.gainNode = this.audioContext.createGain()
             this.mediaStreamAudioDestinationNode = new MediaStreamAudioDestinationNode(
                 this.audioContext
             )
@@ -154,7 +156,13 @@ export class Recorder {
             })
 
             if (devicesStore.selectedAudioInput) {
-                this.connectAudioSource()
+                await this.connectAudioSource()
+            } else {
+                //  if there is no selected audio input, we should get it first. Default is the first one
+                devicesStore.setAudioDevices()
+
+                await this.connectAudioSource()
+                this.setAudioVolume(false)
             }
 
             runInAction(() => {
@@ -185,12 +193,32 @@ export class Recorder {
         }
     }
 
+    private setAudioVolume(volumeOff: boolean): void {
+        if (this.audioContext && this.gainNode) {
+            // save the original volume
+            this.originalAudioVolume = !volumeOff
+            this.gainNode.gain.setValueAtTime(Number(volumeOff), this.audioContext.currentTime)
+            console.log(this.gainNode.gain.value, Number(volumeOff))
+            console.log(
+                `[vboard]: set audio volume to ${Number(volumeOff)} ${
+                    this.audioContext.currentTime
+                }`
+            )
+        }
+    }
+
+    /**
+     * connect audio source to the audio destination node *no matter what the `audioOn` status is*
+     * 1. if the `audioOn` is true, we connect the audio source *with volume*
+     * 2. if the `audioOn` is false, we connect the audio source *without volume*
+     *
+     * Note: The `devicesStore.selectedAudioInput` is required,
+     * so that we can get the audio source and control the volume and connect it to the audio destination node.
+     */
     private async connectAudioSource(): Promise<void> {
-        if (
-            !this.audioSourceConnected &&
-            this.mediaStreamAudioDestinationNode &&
-            this.audioContext
-        ) {
+        if (this.mediaStreamAudioDestinationNode && this.audioContext && this.gainNode) {
+            if (!devicesStore.selectedAudioInput) return
+
             let audioMediaStream: MediaStream | null = null
 
             try {
@@ -209,15 +237,22 @@ export class Recorder {
                     }
                 )
 
-                mediaStreamAudioSourceNode.connect(this.mediaStreamAudioDestinationNode)
+                mediaStreamAudioSourceNode.connect(this.gainNode)
+                this.gainNode.connect(this.mediaStreamAudioDestinationNode)
+
+                console.log(this.gainNode.gain.value)
                 this.audioSourceConnected = true
             }
         }
     }
 
     private disconnectAudioSource(): void {
-        if (this.audioSourceConnected && this.mediaStreamAudioDestinationNode) {
+        if (this.audioSourceConnected && this.mediaStreamAudioDestinationNode && this.gainNode) {
             this.mediaStreamAudioDestinationNode.disconnect()
+            this.gainNode.disconnect()
+            this.audioContext = null
+            this.gainNode = null
+            this.mediaStreamAudioDestinationNode = null
             this.audioSourceConnected = false
         }
     }
@@ -252,6 +287,10 @@ export class Recorder {
 
     public destroyed(): void {
         this.timerId && clearTimeout(this.timerId)
+
+        if (!devicesStore.audioOn) {
+            devicesStore.setAudioDevices(null)
+        }
 
         if (this.recorder) {
             this.recorder.stream.getAudioTracks().forEach((t) => t.stop())
