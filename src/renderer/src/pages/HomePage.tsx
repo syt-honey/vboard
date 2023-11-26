@@ -30,7 +30,8 @@ export const HomePage = observer<React.FC>(() => {
         selectedAudioInput,
         selectedVideoInput,
         handleDevicesSelect,
-        handleDevicesOn
+        handleDevicesOn,
+        setAudioDevices
     } = devicesStore
 
     const { checkDevicesPermission } = permissionStore
@@ -84,6 +85,12 @@ export const HomePage = observer<React.FC>(() => {
             }
         }
     }, [audioOn, videoOn, devices, selectedAudioInput, selectedVideoInput])
+
+    useEffect(() => {
+        if (!audioOn && selectedAudioInput !== null) {
+            setAudioDevices(null)
+        }
+    }, [audioOn])
 
     useEffect(() => {
         if (selectedVideoInput) {

@@ -15,9 +15,6 @@ export class Recorder {
     // screen id
     private id: string = ''
     private recorder: MediaRecorder | null = null
-    private mediaStreamAudioDestinationNode: MediaStreamAudioDestinationNode | null = null
-    private audioContext: AudioContext | null = null
-    private audioSourceConnected = false
 
     // save audio/video & screen stream
     private chunks: Blob[] = []
@@ -107,21 +104,14 @@ export class Recorder {
     }
 
     public muteAudio(): void {
-        if (this.recorder) {
+        if (this.recorder && this.recorder.stream.getAudioTracks().length > 0) {
             this.recorder.stream.getAudioTracks().forEach((t) => (t.enabled = false))
         }
     }
 
     public async unmuteAudio(): Promise<void> {
-        if (this.recorder) {
-            // if there is no connection for audio track, we should connect it to `mediaStreamAudioDestinationNode`
-            if (devicesStore.selectedAudioInput) {
-                this.connectAudioSource()
-            }
-
-            if (this.recorder.stream.getAudioTracks().length > 0) {
-                this.recorder.stream.getAudioTracks().forEach((t) => (t.enabled = true))
-            }
+        if (this.recorder && this.recorder.stream.getAudioTracks().length > 0) {
+            this.recorder.stream.getAudioTracks().forEach((t) => (t.enabled = true))
         }
     }
 
@@ -136,26 +126,33 @@ export class Recorder {
                 return null
             }
 
-            // @TODO: need to record speaker audio
             const audioTracks: MediaStreamTrack[] = []
-            this.audioContext = new AudioContext()
-            this.mediaStreamAudioDestinationNode = new MediaStreamAudioDestinationNode(
-                this.audioContext
-            )
+            try {
+                if (!devicesStore.selectedAudioInput) {
+                    //  if there is no selected audio input, we should get it first. Default is the first one
+                    devicesStore.setAudioDevices()
+                }
 
-            if (devicesStore.selectedAudioInput) {
-                audioTracks.push(...this.mediaStreamAudioDestinationNode.stream.getAudioTracks())
+                audioTracks.push(
+                    ...(await getUserAudioStream(devicesStore.selectedAudioInput)).getAudioTracks()
+                )
+                permissionStore.updateAudioPermission(true)
+            } catch {
+                permissionStore.updateAudioPermission(false)
+                return null
             }
+
+            if (audioTracks.length > 0 && !devicesStore.audioOn) {
+                audioTracks.forEach((t) => (t.enabled = false))
+            }
+
+            // @TODO: need to record speaker audio
 
             const recorder = new MediaRecorder(new MediaStream([...audioTracks, ...screenTracks]), {
                 audioBitsPerSecond: this.audioBitsPerSecond,
                 videoBitsPerSecond: this.videoBitsPerSecond,
                 mimeType: this.miniType
             })
-
-            if (devicesStore.selectedAudioInput) {
-                this.connectAudioSource()
-            }
 
             runInAction(() => {
                 this.startTime = Date.now()
@@ -182,43 +179,6 @@ export class Recorder {
             // not support
             console.error(e)
             return null
-        }
-    }
-
-    private async connectAudioSource(): Promise<void> {
-        if (
-            !this.audioSourceConnected &&
-            this.mediaStreamAudioDestinationNode &&
-            this.audioContext
-        ) {
-            let audioMediaStream: MediaStream | null = null
-
-            try {
-                audioMediaStream = await getUserAudioStream(devicesStore.selectedAudioInput)
-                permissionStore.updateAudioPermission(true)
-            } catch {
-                permissionStore.updateAudioPermission(false)
-                return
-            }
-
-            if (audioMediaStream) {
-                const mediaStreamAudioSourceNode = new MediaStreamAudioSourceNode(
-                    this.audioContext,
-                    {
-                        mediaStream: audioMediaStream
-                    }
-                )
-
-                mediaStreamAudioSourceNode.connect(this.mediaStreamAudioDestinationNode)
-                this.audioSourceConnected = true
-            }
-        }
-    }
-
-    private disconnectAudioSource(): void {
-        if (this.audioSourceConnected && this.mediaStreamAudioDestinationNode) {
-            this.mediaStreamAudioDestinationNode.disconnect()
-            this.audioSourceConnected = false
         }
     }
 
@@ -253,12 +213,14 @@ export class Recorder {
     public destroyed(): void {
         this.timerId && clearTimeout(this.timerId)
 
+        if (!devicesStore.audioOn) {
+            devicesStore.setAudioDevices(null)
+        }
+
         if (this.recorder) {
             this.recorder.stream.getAudioTracks().forEach((t) => t.stop())
             this.recorder.stream.getVideoTracks().forEach((t) => t.stop())
         }
-
-        this.disconnectAudioSource()
     }
 }
 
