@@ -287,10 +287,6 @@ function createCounterWindow(): void {
         counterWindow?.close()
         counterWindow = null
 
-        if (windows.has(WindowType.CAMERA)) {
-            windows.get(WindowType.CAMERA)?.show()
-        }
-
         if (windows.has(WindowType.RECORDING)) {
             windows.get(WindowType.RECORDING)?.show()
         }

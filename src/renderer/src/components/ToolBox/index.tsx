@@ -65,19 +65,17 @@ export const ToolBox = observer(
                     icon={<SVGCancel style={{ fill: '#E8E9EA' }} />}
                     onClick={handleCancel}
                 />
-                {devicesStore.selectedAudioInput && (
-                    <Button
-                        type="link"
-                        icon={
-                            <SVGMic
-                                volume={volume}
-                                style={{ fill: '#E8E9EA' }}
-                                isMuted={!devicesStore.audioOn}
-                            />
-                        }
-                        onClick={handleMicSwitch}
-                    />
-                )}
+                <Button
+                    type="link"
+                    icon={
+                        <SVGMic
+                            volume={volume}
+                            style={{ fill: '#E8E9EA' }}
+                            isMuted={!devicesStore.audioOn}
+                        />
+                    }
+                    onClick={handleMicSwitch}
+                />
                 <Button
                     type="link"
                     icon={<SVGCamera isMuted={!devicesStore.videoOn} style={{ fill: '#E8E9EA' }} />}
