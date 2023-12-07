@@ -207,7 +207,7 @@ function createRecordingWindow(): void {
         recordingWindow = createWindow({
             x: 0,
             y: height / 2 - 130,
-            width: 60,
+            width: 68,
             height: 250,
             show: false,
             frame: false,
