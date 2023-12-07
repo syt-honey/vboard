@@ -55,9 +55,11 @@ export const PermissionPage = observer<React.FC>(() => {
                 handleChange: async (): Promise<void> => {
                     if (permissionStore.screenPermission) return
 
-                    permissionStore.updateScreenPermission(
-                        await permissionStore.requestScreenPermission()
-                    )
+                    if (!permissionStore.requestScreenPermissionByApi()) {
+                        permissionStore.updateScreenPermission(
+                            await permissionStore.requestScreenPermission()
+                        )
+                    }
                 }
             }
         ]
