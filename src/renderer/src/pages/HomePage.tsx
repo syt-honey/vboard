@@ -93,14 +93,14 @@ export const HomePage = observer<React.FC>(() => {
     }, [audioOn])
 
     useEffect(() => {
-        if (selectedVideoInput) {
+        if (videoOn && selectedVideoInput) {
             callCamera()
         } else {
             closeCamera()
         }
 
         return (): void => closeCamera()
-    }, [selectedVideoInput])
+    }, [videoOn, selectedVideoInput])
 
     function callCamera(): void {
         closeCamera()

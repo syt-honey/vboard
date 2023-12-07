@@ -1,7 +1,10 @@
-appId: com.electron.app
+appId: com.vboard.app
 productName: vboard
+artifactName: vboard-${arch}-${version}.${ext}
+
 directories:
   buildResources: build
+
 files:
   - '!**/.vscode/*'
   - '!src/*'
@@ -9,17 +12,30 @@ files:
   - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+
 asarUnpack:
   - resources/**
+
 win:
-  executableName: ${productName}
+  target:
+    - target: zip
+      arch:
+        - x64
+    - target: nsis
+      arch:
+        - x64
+
 nsis:
-  artifactName: ${name}-${version}-setup.${ext}
+  oneClick: false
+  perMachine: true
+  createStartMenuShortcut: true
+  allowToChangeInstallationDirectory: true
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
   installerIcon: resources/icon.ico
   installerHeaderIcon: resources/icon.ico
+
 mac:
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
@@ -29,18 +45,26 @@ mac:
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
   notarize: false
   hardenedRuntime: true
-dmg:
-  artifactName: ${name}-${version}.${ext}
-linux:
   target:
-    - AppImage
-    - snap
-    - deb
-  maintainer: electronjs.org
-  category: Utility
+    - target: zip
+      arch:
+        - x64
+        - arm64
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+
+dmg:
+  contents:
+    - { x: 130, y: 220 }
+    - { x: 410, y: 220, type: link, path: /Applications }
+
 appImage:
   artifactName: ${name}-${version}.${ext}
+
 npmRebuild: false
+
 publish:
   provider: generic
   url: https://example.com/auto-updates

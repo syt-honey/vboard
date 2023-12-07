@@ -133,6 +133,10 @@ export class Recorder {
                     devicesStore.setAudioDevices()
                 }
 
+                if (!devicesStore.selectedVideoInput) {
+                    devicesStore.setVideoDevices()
+                }
+
                 audioTracks.push(
                     ...(await getUserAudioStream(devicesStore.selectedAudioInput)).getAudioTracks()
                 )

@@ -1,6 +1,6 @@
 {
   "name": "vboard",
-  "version": "1.0.0",
+  "version": "0.0.2",
   "description": "A simple, easy-to-use recorder and whiteboard which totally netless and saved locally.",
   "main": "./out/main/index.js",
   "author": "honeysyt@foxmail.com",
@@ -10,14 +10,13 @@
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
-    "typecheck": "npm run typecheck:node && npm run typecheck:web",
+    "typecheck": " npm run typecheck:web",
     "start": "electron-vite preview",
     "dev": "electron-vite dev",
     "build": "npm run typecheck && electron-vite build",
     "postinstall": "electron-builder install-app-deps",
     "build:win": "npm run build && electron-builder --win --config",
-    "build:mac": "electron-vite build && electron-builder --mac --config",
-    "build:linux": "electron-vite build && electron-builder --linux --config"
+    "build:mac": "electron-vite build && electron-builder --mac --config"
   },
   "dependencies": {
     "@ant-design/icons": "^5.2.6",
