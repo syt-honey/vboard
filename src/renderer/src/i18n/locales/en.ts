@@ -1,5 +1,9 @@
 export const en = {
     paused: 'Paused',
+    finish: 'Finish',
+    pause: 'Pause',
+    resume: 'Resume',
+    cancel: 'Cancel',
     start: 'Start recording',
     cancelRecordering: {
         confirmBtn: 'Confirm',

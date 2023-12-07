@@ -1,6 +1,6 @@
 {
   "name": "vboard",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A simple, easy-to-use recorder and whiteboard which totally netless and saved locally.",
   "main": "./out/main/index.js",
   "author": "honeysyt@foxmail.com",

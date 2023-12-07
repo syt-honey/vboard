@@ -1,6 +1,6 @@
 import { makeAutoObservable, runInAction } from 'mobx'
 
-import { ipcSyncByApp } from '../utils'
+import { ipcSyncByApp, getUserScreenStream } from '../utils'
 import { DeviceType } from '../types/device'
 
 export class Permission {
@@ -53,6 +53,15 @@ export class Permission {
 
     public requestScreenPermission = async (): Promise<boolean> =>
         await ipcSyncByApp('request-devices-permission', { mediaType: DeviceType.Screen })
+
+    public requestScreenPermissionByApi = async (): Promise<boolean> => {
+        try {
+            await getUserScreenStream('')
+            return true
+        } catch {
+            return false
+        }
+    }
 }
 
 export const permissionStore = new Permission()

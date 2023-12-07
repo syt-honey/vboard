@@ -87,7 +87,7 @@ app.once('ready', () => {
                 // there is no system API access for screen recording
                 // so we open the system preferences instead.
                 // see: https://www.electronjs.org/docs/latest/api/system-preferences#systempreferencesaskformediaaccessmediatype-macos
-                shell.openExternal(systemPreferencesShell(mediaType))
+                await shell.openExternal(systemPreferencesShell(mediaType))
                 return false
             }
 
@@ -105,7 +105,7 @@ app.once('ready', () => {
                 const result = await systemPreferences.askForMediaAccess(mediaType)
                 if (result === false) {
                     // user denied before, so we should open the system preferences
-                    shell.openExternal(systemPreferencesShell(mediaType))
+                    await shell.openExternal(systemPreferencesShell(mediaType))
                     return false
                 }
                 return false
@@ -207,7 +207,7 @@ function createRecordingWindow(): void {
         recordingWindow = createWindow({
             x: 0,
             y: height / 2 - 130,
-            width: 60,
+            width: 68,
             height: 250,
             show: false,
             frame: false,
