@@ -8,12 +8,8 @@ import React, { useContext, useEffect, useMemo } from 'react'
 import { DevicesTypeKey } from '../store/devices'
 import { SVGCamera, SVGMic } from '../components/global'
 import { DevicesContext, PermissionContext } from '../components/StoreProvider'
-import {
-    ipcCreateCounterWindow,
-    ipcHideMainWindow,
-    ipcCreateCameraWindow,
-    ipcCloseCameraWindow
-} from '../utils'
+import { ipcCreateCounterWindow, ipcHideMainWindow } from '../utils'
+import { CameraPage } from './CameraPage'
 
 export const HomePage = observer<React.FC>(() => {
     const { t } = useTranslation()
@@ -35,6 +31,7 @@ export const HomePage = observer<React.FC>(() => {
     } = devicesStore
 
     const { checkDevicesPermission } = permissionStore
+    const showTestPage = useMemo(() => videoOn && selectedVideoInput, [videoOn, selectedVideoInput])
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -92,25 +89,6 @@ export const HomePage = observer<React.FC>(() => {
         }
     }, [audioOn])
 
-    useEffect(() => {
-        if (videoOn && selectedVideoInput) {
-            callCamera()
-        } else {
-            closeCamera()
-        }
-
-        return (): void => closeCamera()
-    }, [videoOn, selectedVideoInput])
-
-    function callCamera(): void {
-        closeCamera()
-        ipcCreateCameraWindow({ url: '/camera' })
-    }
-
-    function closeCamera(): void {
-        ipcCloseCameraWindow()
-    }
-
     const callRecording = (): void => {
         ipcHideMainWindow()
         ipcCreateCounterWindow({ url: '/counter' })
@@ -118,6 +96,13 @@ export const HomePage = observer<React.FC>(() => {
 
     return (
         <div className="main-page">
+            {showTestPage && (
+                <CameraPage
+                    selectedVideoInput={devicesStore.selectedVideoInput!}
+                    updateVideoPermission={permissionStore.updateVideoPermission}
+                ></CameraPage>
+            )}
+
             <div className="devices">
                 {Object.keys(deviceConfig).map((key) => (
                     <div key={key}>
@@ -128,7 +113,6 @@ export const HomePage = observer<React.FC>(() => {
                     </div>
                 ))}
             </div>
-
             <Button className="start-btn" type="primary" onClick={callRecording}>
                 {t('start')}
             </Button>

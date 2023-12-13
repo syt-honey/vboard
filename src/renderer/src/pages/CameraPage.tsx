@@ -1,34 +1,66 @@
 import { observer } from 'mobx-react-lite'
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 
-import { Camera } from '../components'
 import { getUserCameraStream } from '../utils'
-import { PermissionContext, DevicesContext } from '../components/StoreProvider'
+import { WindowType } from '@renderer/types/window'
+import { ChildWindow } from '../components/ChildWindow'
+import { Camera as CameraContent } from '../components/Camera'
 
-export const CameraPage = observer<React.FC>(() => {
-    const devicesStore = useContext(DevicesContext)
-    const permissionStore = useContext(PermissionContext)
-    const [cameraStream, setCameraStream] = useState<MediaStream | null>(null)
+export interface CameraPageProps {
+    selectedVideoInput: string
+    updateVideoPermission: (status: boolean) => void
+}
 
-    useEffect(() => {
-        if (devicesStore.selectedVideoInput) {
+export const CAMERA_WINDOW_ID = 'camera'
+
+export const CameraPage = observer(
+    ({ selectedVideoInput, updateVideoPermission }: CameraPageProps): React.ReactElement => {
+        const [cameraStream, setCameraStream] = useState<MediaStream | null>(null)
+
+        useEffect(() => {
+            return () => {
+                if (cameraStream) {
+                    cameraStream.getTracks().forEach((t) => {
+                        t.stop()
+                    })
+                }
+            }
+        }, [cameraStream])
+
+        const onClosed = (): void => {
+            // to close page
+        }
+
+        const onFinished = useCallback(async (): Promise<void> => {
             try {
-                ;(async function (): Promise<void> {
-                    setCameraStream(await getUserCameraStream(devicesStore.selectedVideoInput))
-                })()
-                permissionStore.updateVideoPermission(true)
+                // call camera permission when child window has been created
+                setCameraStream(await getUserCameraStream(selectedVideoInput))
+                updateVideoPermission(true)
             } catch (err) {
                 // permission denied
-                permissionStore.updateVideoPermission(false)
+                updateVideoPermission(false)
             }
-        }
-    }, [devicesStore.selectedVideoInput, permissionStore.videoPermission])
+        }, [selectedVideoInput])
 
-    return (
-        <div className="camera-page">
-            <Camera stream={cameraStream} shape={'rect'} />
-        </div>
-    )
-})
+        return (
+            <ChildWindow
+                type={WindowType.CAMERA}
+                x={0}
+                y={200}
+                height={200}
+                width={200}
+                frame={false}
+                alwaysOnTop
+                transparent
+                resizable={false}
+                title={CAMERA_WINDOW_ID}
+                onClosed={onClosed}
+                onFinished={onFinished}
+            >
+                <CameraContent stream={cameraStream} shape={'rect'} />
+            </ChildWindow>
+        )
+    }
+)
 
 export default CameraPage

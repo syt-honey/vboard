@@ -12,7 +12,7 @@ import { electronApp, optimizer } from '@electron-toolkit/utils'
 import fs from 'fs'
 
 import runtime from './script/runtime'
-import { WindowType, createWindow } from './utils'
+import { WindowType, createWindow, isWindowType, windowExists, parseWindowFeatures } from './utils'
 import { systemPreferencesShell } from './script/system'
 
 // TODO: replace with BrowserWindow.getAllWindows()
@@ -148,8 +148,31 @@ function createMainWindow(): void {
         mainWindow!.show()
     })
 
-    mainWindow.webContents.setWindowOpenHandler((details) => {
-        shell.openExternal(details.url)
+    // Create child window
+    mainWindow.webContents.setWindowOpenHandler(({ features }) => {
+        const { electronWindowOptions, windowType } = parseWindowFeatures(features)
+
+        // Only the specified type is allowed to create a window
+        if (isWindowType(windowType)) {
+
+            // If the given title has existed, we return `action: deny`
+            // It means we can not create two same title windows
+            if (electronWindowOptions.title && windowExists(electronWindowOptions.title)) {
+                return { action: 'deny' }
+            }
+
+            return {
+                action: 'allow',
+                overrideBrowserWindowOptions: {
+                    ...electronWindowOptions,
+                    webPreferences: {
+                        nodeIntegration: true,
+                        sandbox: false
+                    }
+                }
+            }
+        }
+
         return { action: 'deny' }
     })
 

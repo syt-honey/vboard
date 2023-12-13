@@ -12,6 +12,21 @@ export enum WindowType {
     RECORDING = 'RECORDING'
 }
 
+export const isWindowType = (type: string): boolean =>
+    Object.values(WindowType).includes(type as WindowType)
+
+export const windowExists = (windowTitle: string): boolean =>
+    BrowserWindow.getAllWindows()?.some((win) => win.getTitle() === windowTitle)
+
+export function parseWindowFeatures(features: string): {
+    electronWindowOptions: Electron.BrowserWindowConstructorOptions
+    windowType: string
+} {
+    const { windowType, options } = JSON.parse(new URLSearchParams(features).get('config') || '{}')
+
+    return { electronWindowOptions: options, windowType }
+}
+
 export const createWindow = ({
     width,
     height,
@@ -26,7 +41,7 @@ export const createWindow = ({
     typeof y === 'number' && (options.y = y)
     url && (options.url = url)
 
-    const window = new BrowserWindow({
+    const win = new BrowserWindow({
         ...options,
         ...restProps,
         webPreferences: {
@@ -38,8 +53,8 @@ export const createWindow = ({
 
     // if there is url, we will use page component of renderer app to show child window
     if (url) {
-        window.loadURL(url)
+        win.loadURL(url)
     }
 
-    return window
+    return win
 }
