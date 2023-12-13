@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite'
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 
 import { getUserCameraStream } from '../utils'
 import { WindowType } from '@renderer/types/window'
@@ -7,6 +7,7 @@ import { ChildWindow } from '../components/ChildWindow'
 import { Camera as CameraContent } from '../components/Camera'
 
 export interface CameraPageProps {
+    position?: { x?: number; y?: number }
     selectedVideoInput: string
     updateVideoPermission: (status: boolean) => void
 }
@@ -14,8 +15,14 @@ export interface CameraPageProps {
 export const CAMERA_WINDOW_ID = 'camera'
 
 export const CameraPage = observer(
-    ({ selectedVideoInput, updateVideoPermission }: CameraPageProps): React.ReactElement => {
+    ({
+        position,
+        selectedVideoInput,
+        updateVideoPermission
+    }: CameraPageProps): React.ReactElement => {
         const [cameraStream, setCameraStream] = useState<MediaStream | null>(null)
+        const x = useMemo(() => position?.x || 0, [position?.x])
+        const y = useMemo(() => position?.y || 0, [position?.y])
 
         useEffect(() => {
             return () => {
@@ -45,8 +52,8 @@ export const CameraPage = observer(
         return (
             <ChildWindow
                 type={WindowType.CAMERA}
-                x={0}
-                y={200}
+                x={x}
+                y={y}
                 height={200}
                 width={200}
                 frame={false}

@@ -18,6 +18,9 @@ export const isWindowType = (type: string): boolean =>
 export const windowExists = (windowTitle: string): boolean =>
     BrowserWindow.getAllWindows()?.some((win) => win.getTitle() === windowTitle)
 
+export const getWindow = (windowTitle: string): BrowserWindow | undefined =>
+    BrowserWindow.getAllWindows()?.find((win) => win.getTitle() === windowTitle)
+
 export function parseWindowFeatures(features: string): {
     electronWindowOptions: Electron.BrowserWindowConstructorOptions
     windowType: string

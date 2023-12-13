@@ -47,3 +47,7 @@ export const ipcHideMainWindow = (): void => {
 export const ipcShowMainWindow = (): void => {
     return window.electron.ipcRenderer.send('show-main-window')
 }
+
+export const ipcWindowOptionsChanges = (title, newOptions): void => {
+    return window.electron.ipcRenderer.send('window-options-changes', { title, newOptions })
+}

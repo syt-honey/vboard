@@ -12,7 +12,14 @@ import { electronApp, optimizer } from '@electron-toolkit/utils'
 import fs from 'fs'
 
 import runtime from './script/runtime'
-import { WindowType, createWindow, isWindowType, windowExists, parseWindowFeatures } from './utils'
+import {
+    WindowType,
+    createWindow,
+    isWindowType,
+    windowExists,
+    parseWindowFeatures,
+    getWindow
+} from './utils'
 import { systemPreferencesShell } from './script/system'
 
 // TODO: replace with BrowserWindow.getAllWindows()
@@ -39,7 +46,24 @@ app.once('ready', () => {
     createCounterWindow()
     createRecordingWindow()
 
-    ipcMain.handle('get-screen', async () => {
+    ipcMain.handle('get-screen-work-area', () => {
+        const primaryDisplay = screen.getPrimaryDisplay()
+        const { width: workAreaSizeWidth, height: workAreaSizeHeight } = primaryDisplay.workAreaSize
+        const { width: workAreaWidth, height: workAreaHeight } = primaryDisplay.workArea
+
+        return {
+            workAreaSize: {
+                width: workAreaSizeWidth,
+                height: workAreaSizeHeight
+            },
+            workArea: {
+                width: workAreaWidth,
+                height: workAreaHeight
+            }
+        }
+    })
+
+    ipcMain.handle('get-screen', () => {
         return desktopCapturer.getSources({
             types: ['window', 'screen'],
             thumbnailSize: {
@@ -115,6 +139,19 @@ app.once('ready', () => {
             return false
         }
     })
+
+    ipcMain.handle('confirm-dialog', async (_, options: Partial<Electron.MessageBoxOptions>) => {
+        const { response } = await dialog.showMessageBox({
+            type: 'question',
+            defaultId: 0,
+            noLink: true,
+            title: '确认操作',
+            buttons: ['确认', '取消'],
+            message: '你确定要执行该操作吗？',
+            ...options
+        })
+        return response === 0
+    })
 })
 
 app.on('window-all-closed', () => {
@@ -154,12 +191,15 @@ function createMainWindow(): void {
 
         // Only the specified type is allowed to create a window
         if (isWindowType(windowType)) {
-
             // If the given title has existed, we return `action: deny`
             // It means we can not create two same title windows
             if (electronWindowOptions.title && windowExists(electronWindowOptions.title)) {
                 return { action: 'deny' }
             }
+
+            app.once('browser-window-created', () => {
+                initNewChildWindow(electronWindowOptions.title)
+            })
 
             return {
                 action: 'allow',
@@ -179,6 +219,36 @@ function createMainWindow(): void {
     mainWindow.loadURL(runtime.baseUrl())
 }
 
+export const listenOptionsChanges = (title, callback): void => {
+    ipcMain.on('window-options-changes', (_, { title: id, newOptions }) => {
+        console.log('window-options-changes: ', newOptions.x, newOptions.y, id)
+
+        if (id === title) {
+            callback(newOptions)
+        }
+    })
+}
+
+const initNewChildWindow = (title): void => {
+    listenOptionsChanges(title, (newOptions) => {
+        applyWindowOptions(title, newOptions)
+    })
+}
+
+// Just listen `position` currently
+// If you want to listen other properties you should add them manually.
+const applyWindowOptions = (title, newOptions): void => {
+    const childWindow = getWindow(title)
+
+    if (childWindow) {
+        if (
+            newOptions.x !== childWindow.getPosition()[0] ||
+            newOptions.y !== childWindow.getPosition()[1]
+        ) {
+            childWindow.setPosition(newOptions.x, newOptions.y)
+        }
+    }
+}
 function createCameraWindow(): void {
     let cameraWindow: BrowserWindow | null = null
 
@@ -253,19 +323,6 @@ function createRecordingWindow(): void {
         recordingWindow?.close()
         recordingWindow = null
         windows.delete(WindowType.RECORDING)
-    })
-
-    ipcMain.handle('confirm-dialog', async (_, options: Partial<Electron.MessageBoxOptions>) => {
-        const { response } = await dialog.showMessageBox({
-            type: 'question',
-            defaultId: 0,
-            noLink: true,
-            title: '确认操作',
-            buttons: ['确认', '取消'],
-            message: '你确定要执行该操作吗？',
-            ...options
-        })
-        return response === 0
     })
 }
 

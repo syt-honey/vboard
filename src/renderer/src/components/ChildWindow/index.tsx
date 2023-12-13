@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 
 import { WindowType } from '../../types/window'
 import { useChangesEffect } from '../../hooks/lifecycle'
+import { ipcWindowOptionsChanges } from '../../utils/ipc'
 
 type ChildWindowOptionsProps = Partial<Electron.BrowserWindowConstructorOptions>
 
@@ -45,7 +46,10 @@ export const ChildWindow = function ChildWindow({
 
     useChangesEffect(() => {
         // update window options when options changed
-        // window.electronBridge.updateWindowOptions(id, options)
+        // only support `position` now
+        if (options.title) {
+            ipcWindowOptionsChanges(options.title, options)
+        }
     }, [options])
 
     useEffect(() => {
@@ -53,5 +57,6 @@ export const ChildWindow = function ChildWindow({
         // window.electronBridge.onWindowClosed(id, onClosed)
     }, [onClosed])
 
+    // @TODO: need to make the child style work
     return <>{newWindow && createPortal(<>{children}</>, newWindow.document.body)}</>
 }

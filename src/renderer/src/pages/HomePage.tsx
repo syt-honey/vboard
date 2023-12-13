@@ -5,11 +5,11 @@ import { useNavigate } from 'react-router-dom'
 import React, { useContext, useEffect, useMemo } from 'react'
 
 // import { useAudioAnalyser } from '../hooks'
+import { CameraPage } from './CameraPage'
 import { DevicesTypeKey } from '../store/devices'
 import { SVGCamera, SVGMic } from '../components/global'
-import { DevicesContext, PermissionContext } from '../components/StoreProvider'
 import { ipcCreateCounterWindow, ipcHideMainWindow } from '../utils'
-import { CameraPage } from './CameraPage'
+import { DevicesContext, PermissionContext, ScreenContext } from '../components/StoreProvider'
 
 export const HomePage = observer<React.FC>(() => {
     const { t } = useTranslation()
@@ -17,6 +17,7 @@ export const HomePage = observer<React.FC>(() => {
 
     const devicesStore = useContext(DevicesContext)
     const permissionStore = useContext(PermissionContext)
+    const screenStore = useContext(ScreenContext)
 
     // const { analyserInit, volume } = useAudioAnalyser()
     const {
@@ -29,9 +30,18 @@ export const HomePage = observer<React.FC>(() => {
         handleDevicesOn,
         setAudioDevices
     } = devicesStore
-
     const { checkDevicesPermission } = permissionStore
     const showTestPage = useMemo(() => videoOn && selectedVideoInput, [videoOn, selectedVideoInput])
+    const cameraY = useMemo(() => {
+        const h = screenStore.workArea?.workAreaSize.height || 0
+        return h ? h - 200 : 0
+    }, [screenStore.workArea])
+
+    useEffect(() => {
+        if (!screenStore.workArea) {
+            screenStore.initScreenWorkArea()
+        }
+    })
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -98,6 +108,7 @@ export const HomePage = observer<React.FC>(() => {
         <div className="main-page">
             {showTestPage && (
                 <CameraPage
+                    position={{ y: cameraY }}
                     selectedVideoInput={devicesStore.selectedVideoInput!}
                     updateVideoPermission={permissionStore.updateVideoPermission}
                 ></CameraPage>

@@ -10,8 +10,6 @@ export const useUnmount = (callback): void => {
     }, [callback])
 }
 
-// export const useMount = (call)
-
 export const useChangesEffect = (callback, dependencies): void => {
     const isInitialMount = useRef(true)
 
