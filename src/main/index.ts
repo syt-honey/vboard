@@ -42,7 +42,6 @@ app.whenReady().then(() => {
 
 app.once('ready', () => {
     createMainWindow()
-    createCameraWindow()
     createCounterWindow()
     createRecordingWindow()
 
@@ -187,42 +186,50 @@ function createMainWindow(): void {
 
     // Create child window
     mainWindow.webContents.setWindowOpenHandler(({ features }) => {
-        const { electronWindowOptions, windowType } = parseWindowFeatures(features)
-
-        // Only the specified type is allowed to create a window
-        if (isWindowType(windowType)) {
-            // If the given title has existed, we return `action: deny`
-            // It means we can not create two same title windows
-            if (electronWindowOptions.title && windowExists(electronWindowOptions.title)) {
-                return { action: 'deny' }
-            }
-
-            app.once('browser-window-created', () => {
-                initNewChildWindow(electronWindowOptions.title)
-            })
-
-            return {
-                action: 'allow',
-                overrideBrowserWindowOptions: {
-                    ...electronWindowOptions,
-                    webPreferences: {
-                        nodeIntegration: true,
-                        sandbox: false
-                    }
-                }
-            }
-        }
-
-        return { action: 'deny' }
+        return registerWindowHandler(features)
     })
 
     mainWindow.loadURL(runtime.baseUrl())
 }
 
-export const listenOptionsChanges = (title, callback): void => {
-    ipcMain.on('window-options-changes', (_, { title: id, newOptions }) => {
-        console.log('window-options-changes: ', newOptions.x, newOptions.y, id)
+interface WindowHandlerResponse {
+    action: 'allow' | 'deny'
+    overrideBrowserWindowOptions?: Electron.BrowserWindowConstructorOptions
+    outlivesOpener?: boolean
+}
 
+const registerWindowHandler = (features: string): WindowHandlerResponse => {
+    const { electronWindowOptions, windowType } = parseWindowFeatures(features)
+
+    // Only the specified type is allowed to create a window
+    if (isWindowType(windowType)) {
+        // If the given title has existed, we return `action: deny`
+        // It means we can not create two same title windows
+        if (electronWindowOptions.title && windowExists(electronWindowOptions.title)) {
+            return { action: 'deny' }
+        }
+
+        app.once('browser-window-created', () => {
+            initNewChildWindow(electronWindowOptions.title)
+        })
+
+        return {
+            action: 'allow',
+            overrideBrowserWindowOptions: {
+                ...electronWindowOptions,
+                webPreferences: {
+                    nodeIntegration: true,
+                    sandbox: false
+                }
+            }
+        }
+    }
+
+    return { action: 'deny' }
+}
+
+const listenOptionsChanges = (title, callback): void => {
+    ipcMain.on('window-options-changes', (_, { title: id, newOptions }) => {
         if (id === title) {
             callback(newOptions)
         }
@@ -249,42 +256,8 @@ const applyWindowOptions = (title, newOptions): void => {
         }
     }
 }
-function createCameraWindow(): void {
-    let cameraWindow: BrowserWindow | null = null
 
-    ipcMain.on('create-camera-window', (_, { url }) => {
-        if (cameraWindow) {
-            return
-        }
-
-        const primaryDisplay = screen.getPrimaryDisplay()
-        const { height } = primaryDisplay.workAreaSize
-        cameraWindow = createWindow({
-            x: 0,
-            y: height - 200,
-            width: 200,
-            height: 200,
-            frame: false,
-            alwaysOnTop: true,
-            transparent: true,
-            resizable: false,
-            title: WindowType.CAMERA,
-            url: runtime.baseUrl() + url
-        })
-
-        // set `{ visibleOnFullScreen: true }` will hide dock icon
-        // see: https://github.com/electron/electron/issues/26350、https://github.com/electron/electron/pull/25126
-        // https://www.electronjs.org/docs/latest/api/browser-window#winsetvisibleonallworkspacesvisible-options-macos-linux
-        cameraWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: false })
-        windows.set(WindowType.CAMERA, cameraWindow)
-    })
-
-    ipcMain.on('close-camera-window', () => {
-        windows.delete(WindowType.CAMERA)
-        cameraWindow?.close()
-        cameraWindow = null
-    })
-}
+// TODO: need to set cameraWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: false })
 
 function createRecordingWindow(): void {
     let recordingWindow: BrowserWindow | null = null
@@ -309,6 +282,10 @@ function createRecordingWindow(): void {
             resizable: false,
             title: WindowType.RECORDING,
             url: runtime.baseUrl() + url
+        })
+
+        recordingWindow.webContents.setWindowOpenHandler(({ features }) => {
+            return registerWindowHandler(features)
         })
 
         recordingWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: false })

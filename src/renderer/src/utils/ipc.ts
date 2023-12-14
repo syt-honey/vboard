@@ -26,20 +26,6 @@ export const ipcCloseCounterWindow = (): void => {
     return window.electron.ipcRenderer.send('close-counter-window')
 }
 
-export const ipcCreateCameraWindow = ({
-    url,
-    isDelay
-}: {
-    url: string
-    isDelay?: boolean
-}): void => {
-    return window.electron.ipcRenderer.send('create-camera-window', { url, isDelay })
-}
-
-export const ipcCloseCameraWindow = (): void => {
-    return window.electron.ipcRenderer.send('close-camera-window')
-}
-
 export const ipcHideMainWindow = (): void => {
     return window.electron.ipcRenderer.send('minimize-main-window')
 }

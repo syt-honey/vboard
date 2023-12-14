@@ -2,7 +2,8 @@ import { Button, Select } from 'antd'
 import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import React, { useContext, useEffect, useMemo } from 'react'
+import { LoadingOutlined } from '@ant-design/icons'
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
 // import { useAudioAnalyser } from '../hooks'
 import { CameraPage } from './CameraPage'
@@ -36,12 +37,13 @@ export const HomePage = observer<React.FC>(() => {
         const h = screenStore.workArea?.workAreaSize.height || 0
         return h ? h - 200 : 0
     }, [screenStore.workArea])
+    const [cameraLoading, setCameraLoading] = useState(false)
 
     useEffect(() => {
         if (!screenStore.workArea) {
             screenStore.initScreenWorkArea()
         }
-    })
+    }, [])
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -75,6 +77,7 @@ export const HomePage = observer<React.FC>(() => {
                 handleChange: handleDevicesSelect,
                 switchOn: {
                     handleOn: handleDevicesOn,
+                    loading: false,
                     text: audioOn ? t('devices.isOn') : t('devices.isOff')
                 }
             },
@@ -87,11 +90,12 @@ export const HomePage = observer<React.FC>(() => {
                 handleChange: handleDevicesSelect,
                 switchOn: {
                     handleOn: handleDevicesOn,
+                    loading: cameraLoading,
                     text: videoOn ? t('devices.isOn') : t('devices.isOff')
                 }
             }
         }
-    }, [audioOn, videoOn, devices, selectedAudioInput, selectedVideoInput])
+    }, [audioOn, videoOn, devices, selectedAudioInput, selectedVideoInput, cameraLoading])
 
     useEffect(() => {
         if (!audioOn && selectedAudioInput !== null) {
@@ -99,10 +103,20 @@ export const HomePage = observer<React.FC>(() => {
         }
     }, [audioOn])
 
+    useEffect(() => {
+        if (videoOn && selectedVideoInput) {
+            setCameraLoading(true)
+        }
+    }, [videoOn, selectedVideoInput])
+
     const callRecording = (): void => {
         ipcHideMainWindow()
         ipcCreateCounterWindow({ url: '/counter' })
     }
+
+    const onCameraFinished = useCallback(() => {
+        setCameraLoading(false)
+    }, [videoOn, selectedVideoInput])
 
     return (
         <div className="main-page">
@@ -111,6 +125,7 @@ export const HomePage = observer<React.FC>(() => {
                     position={{ y: cameraY }}
                     selectedVideoInput={devicesStore.selectedVideoInput!}
                     updateVideoPermission={permissionStore.updateVideoPermission}
+                    onCameraFinished={onCameraFinished}
                 ></CameraPage>
             )}
 
@@ -135,17 +150,24 @@ export interface HandleProps {
     isOn: boolean
     text: string
     type: DevicesTypeKey
+    loading: boolean
     handleOn: (value, type) => void
 }
 
-export const renderHandleOn = ({ isOn, text, type, handleOn }: HandleProps): React.ReactNode => {
+export const renderHandleOn = ({
+    isOn,
+    text,
+    type,
+    loading,
+    handleOn
+}: HandleProps): React.ReactNode => {
     return (
         <Button
             className={`devices-operator${isOn ? '' : ' devices-operator-off'}`}
             shape="round"
             onClick={(): void => handleOn(!isOn, type)}
         >
-            {text}
+            {loading ? <LoadingOutlined /> : text}
         </Button>
     )
 }

@@ -1,27 +1,36 @@
-import React, { useContext, useEffect, useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
+import React, { useContext, useEffect, useCallback, useMemo } from 'react'
 
-import { RecorderContext, ScreenContext, DevicesContext, ToolBox } from '../components'
+import { CameraPage } from './CameraPage'
 import { DevicesTypeValue } from '../store'
 import { useAudioAnalyser } from '../hooks'
+import { ipcCloseRecordingWindow, ipcShowMainWindow, ipcSyncByApp } from '../utils'
 import {
-    ipcCloseCameraWindow,
-    ipcCreateCameraWindow,
-    ipcCloseRecordingWindow,
-    ipcShowMainWindow,
-    ipcSyncByApp
-} from '../utils'
+    RecorderContext,
+    ScreenContext,
+    DevicesContext,
+    PermissionContext,
+    ToolBox
+} from '../components'
 
 export const RecordingPage = observer<React.FC>(() => {
     const recorderStore = useContext(RecorderContext)
     const screenStore = useContext(ScreenContext)
     const devicesStore = useContext(DevicesContext)
+    const permissionStore = useContext(PermissionContext)
 
     const { analyserInit, volume } = useAudioAnalyser()
-
     const { t } = useTranslation()
-    const { handleDevicesStatusUpdate } = devicesStore
+
+    const { handleDevicesStatusUpdate, videoOn, selectedVideoInput } = devicesStore
+
+    const showTestPage = useMemo(() => videoOn && selectedVideoInput, [videoOn, selectedVideoInput])
+
+    const cameraY = useMemo(() => {
+        const h = screenStore.workArea?.workAreaSize.height || 0
+        return h ? h - 200 : 0
+    }, [screenStore.workArea])
 
     useEffect(() => {
         const checkScreen = async (): Promise<void> => {
@@ -41,16 +50,12 @@ export const RecordingPage = observer<React.FC>(() => {
             }
         }
 
-        checkScreen()
-    }, [])
-
-    useEffect(() => {
-        if (devicesStore.videoOn) {
-            ipcCreateCameraWindow({ url: '/camera' })
+        if (!screenStore.workArea) {
+            screenStore.initScreenWorkArea()
         }
 
-        return (): void => ipcCloseCameraWindow()
-    }, [devicesStore.videoOn])
+        checkScreen()
+    }, [])
 
     useEffect(() => {
         if (devicesStore.audioOn && devicesStore.selectedAudioInput) {
@@ -63,7 +68,6 @@ export const RecordingPage = observer<React.FC>(() => {
             recorderStore.destroyed()
 
             ipcCloseRecordingWindow()
-            ipcCloseCameraWindow()
             ipcShowMainWindow()
         }
     }, [recorderStore])
@@ -100,12 +104,6 @@ export const RecordingPage = observer<React.FC>(() => {
 
     const handleCameraSwitch = useCallback(() => {
         handleDevicesStatusUpdate(!devicesStore.videoOn, DevicesTypeValue.VIDEO_INPUT)
-
-        if (devicesStore.videoOn) {
-            ipcCreateCameraWindow({ url: '/camera' })
-        } else {
-            ipcCloseCameraWindow()
-        }
     }, [devicesStore.videoOn])
 
     return (
@@ -121,6 +119,14 @@ export const RecordingPage = observer<React.FC>(() => {
                 handleMicSwitch={handleMicSwitch}
                 handleCameraSwitch={handleCameraSwitch}
             />
+
+            {showTestPage && (
+                <CameraPage
+                    position={{ y: cameraY }}
+                    selectedVideoInput={devicesStore.selectedVideoInput!}
+                    updateVideoPermission={permissionStore.updateVideoPermission}
+                ></CameraPage>
+            )}
         </div>
     )
 })

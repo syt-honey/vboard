@@ -10,6 +10,7 @@ export interface CameraPageProps {
     position?: { x?: number; y?: number }
     selectedVideoInput: string
     updateVideoPermission: (status: boolean) => void
+    onCameraFinished?: () => void
 }
 
 export const CAMERA_WINDOW_ID = 'camera'
@@ -18,7 +19,8 @@ export const CameraPage = observer(
     ({
         position,
         selectedVideoInput,
-        updateVideoPermission
+        updateVideoPermission,
+        onCameraFinished
     }: CameraPageProps): React.ReactElement => {
         const [cameraStream, setCameraStream] = useState<MediaStream | null>(null)
         const x = useMemo(() => position?.x || 0, [position?.x])
@@ -64,7 +66,7 @@ export const CameraPage = observer(
                 onClosed={onClosed}
                 onFinished={onFinished}
             >
-                <CameraContent stream={cameraStream} shape={'rect'} />
+                <CameraContent stream={cameraStream} shape={'rect'} onFinished={onCameraFinished} />
             </ChildWindow>
         )
     }

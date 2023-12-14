@@ -1,5 +1,6 @@
 import { createPortal } from 'react-dom'
 import React, { useEffect, useState } from 'react'
+import { StyleSheetManager } from 'styled-components'
 
 import { WindowType } from '../../types/window'
 import { useChangesEffect } from '../../hooks/lifecycle'
@@ -58,5 +59,15 @@ export const ChildWindow = function ChildWindow({
     }, [onClosed])
 
     // @TODO: need to make the child style work
-    return <>{newWindow && createPortal(<>{children}</>, newWindow.document.body)}</>
+    return (
+        <>
+            {newWindow &&
+                createPortal(
+                    <StyleSheetManager target={newWindow.document.body}>
+                        {children}
+                    </StyleSheetManager>,
+                    newWindow.document.body
+                )}
+        </>
+    )
 }

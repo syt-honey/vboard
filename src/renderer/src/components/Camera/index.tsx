@@ -1,8 +1,26 @@
-import './index.css'
-
-import { useEffect, useState, useRef } from 'react'
+import styled from 'styled-components'
 import { observer } from 'mobx-react-lite'
-import { LoadingOutlined } from '@ant-design/icons'
+import { useEffect, useState, useRef } from 'react'
+
+const CameraContainer = styled.div`
+    display: inline-block;
+    height: 200px;
+    width: 200px;
+    line-height: 200px;
+    text-align: center;
+    overflow: hidden;
+    box-sizing: border-box;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -webkit-app-region: drag;
+`
+
+const CameraPreview = styled.video`
+    width: 267px;
+    height: 200px;
+    object-fit: cover;
+`
+
 export interface CameraProps {
     // support px and precent(%)
     width?: string
@@ -11,6 +29,7 @@ export interface CameraProps {
     // then we will set width and height to the minimum value of them
     shape?: 'circle' | 'rect'
     stream: MediaStream | null
+    onFinished?: () => void
 }
 
 // default camera ratio. we should use this ratio to calculate circle width
@@ -22,8 +41,7 @@ export const replaceDigital = (origin: string, v: string): string => {
 }
 
 export const Camera = observer(
-    ({ width = '200px', height = '200px', shape = 'circle', stream }: CameraProps) => {
-        const [loading, setLoading] = useState<boolean>(true)
+    ({ width = '200px', height = '200px', shape = 'circle', stream, onFinished }: CameraProps) => {
         const camera = useRef<HTMLVideoElement>(null)
         // keep default ratio
         const [videoStyle, setVideoStyle] = useState({ width, height })
@@ -37,14 +55,13 @@ export const Camera = observer(
 
         useEffect(() => {
             if (stream) {
-                setLoading(false)
+                onFinished?.()
             }
-
             if (camera.current && stream) {
                 camera.current.srcObject = stream
                 camera.current.play()
             }
-        }, [stream, loading])
+        }, [stream])
 
         useEffect(() => {
             if (shape === 'circle') {
@@ -64,13 +81,9 @@ export const Camera = observer(
         }, [shape, width, height])
 
         return (
-            <div className="camera" style={{ ...containerStyle }}>
-                {loading ? (
-                    <LoadingOutlined />
-                ) : (
-                    <video ref={camera} style={{ ...videoStyle }} autoPlay></video>
-                )}
-            </div>
+            <CameraContainer style={{ ...containerStyle }}>
+                <CameraPreview ref={camera} style={{ ...videoStyle }} autoPlay></CameraPreview>
+            </CameraContainer>
         )
     }
 )
