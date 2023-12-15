@@ -18,14 +18,6 @@ export const ipcCloseRecordingWindow = (): void => {
     return window.electron.ipcRenderer.send('close-recording-window')
 }
 
-export const ipcCreateCounterWindow = ({ url }: { url: string }): void => {
-    return window.electron.ipcRenderer.send('create-counter-window', { url })
-}
-
-export const ipcCloseCounterWindow = (): void => {
-    return window.electron.ipcRenderer.send('close-counter-window')
-}
-
 export const ipcHideMainWindow = (): void => {
     return window.electron.ipcRenderer.send('minimize-main-window')
 }

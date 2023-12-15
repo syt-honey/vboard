@@ -7,10 +7,11 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 
 // import { useAudioAnalyser } from '../hooks'
 import { CameraPage } from './CameraPage'
+import { CounterPage } from './CounterPage'
 import { DevicesTypeKey } from '../store/devices'
 import { SVGCamera, SVGMic } from '../components/global'
-import { ipcCreateCounterWindow, ipcHideMainWindow } from '../utils'
-import { DevicesContext, PermissionContext, ScreenContext } from '../components/StoreProvider'
+import { DevicesContext, PermissionContext } from '../components/StoreProvider'
+import { ipcHideMainWindow, ipcCloseRecordingWindow, ipcCreateRecordingWindow } from '../utils'
 
 export const HomePage = observer<React.FC>(() => {
     const { t } = useTranslation()
@@ -18,7 +19,6 @@ export const HomePage = observer<React.FC>(() => {
 
     const devicesStore = useContext(DevicesContext)
     const permissionStore = useContext(PermissionContext)
-    const screenStore = useContext(ScreenContext)
 
     // const { analyserInit, volume } = useAudioAnalyser()
     const {
@@ -32,18 +32,12 @@ export const HomePage = observer<React.FC>(() => {
         setAudioDevices
     } = devicesStore
     const { checkDevicesPermission } = permissionStore
-    const showTestPage = useMemo(() => videoOn && selectedVideoInput, [videoOn, selectedVideoInput])
-    const cameraY = useMemo(() => {
-        const h = screenStore.workArea?.workAreaSize.height || 0
-        return h ? h - 200 : 0
-    }, [screenStore.workArea])
+    const showCameraPage = useMemo(
+        () => videoOn && selectedVideoInput,
+        [videoOn, selectedVideoInput]
+    )
+    const [showCounterPage, setShowCounterPage] = useState(false)
     const [cameraLoading, setCameraLoading] = useState(false)
-
-    useEffect(() => {
-        if (!screenStore.workArea) {
-            screenStore.initScreenWorkArea()
-        }
-    }, [])
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -111,23 +105,32 @@ export const HomePage = observer<React.FC>(() => {
 
     const callRecording = (): void => {
         ipcHideMainWindow()
-        ipcCreateCounterWindow({ url: '/counter' })
+
+        setShowCounterPage(true)
     }
 
     const onCameraFinished = useCallback(() => {
         setCameraLoading(false)
     }, [videoOn, selectedVideoInput])
 
+    const onCounterFinished = useCallback(() => {
+        setShowCounterPage(false)
+
+        ipcCloseRecordingWindow()
+        ipcCreateRecordingWindow({ url: '/recording' })
+    }, [showCounterPage])
+
     return (
         <div className="main-page">
-            {showTestPage && (
+            {showCameraPage && (
                 <CameraPage
-                    position={{ y: cameraY }}
                     selectedVideoInput={devicesStore.selectedVideoInput!}
                     updateVideoPermission={permissionStore.updateVideoPermission}
                     onCameraFinished={onCameraFinished}
                 ></CameraPage>
             )}
+
+            {showCounterPage && <CounterPage onCounterFinished={onCounterFinished}></CounterPage>}
 
             <div className="devices">
                 {Object.keys(deviceConfig).map((key) => (

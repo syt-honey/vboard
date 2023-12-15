@@ -1,10 +1,11 @@
 import { observer } from 'mobx-react-lite'
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useCallback, useMemo, useContext } from 'react'
 
+import { ScreenContext } from '../components/StoreProvider'
 import { getUserCameraStream } from '../utils'
 import { WindowType } from '@renderer/types/window'
 import { ChildWindow } from '../components/ChildWindow'
-import { Camera as CameraContent } from '../components/Camera'
+import { Camera } from '../components/Camera'
 
 export interface CameraPageProps {
     position?: { x?: number; y?: number }
@@ -22,9 +23,24 @@ export const CameraPage = observer(
         updateVideoPermission,
         onCameraFinished
     }: CameraPageProps): React.ReactElement => {
+        const screenStore = useContext(ScreenContext)
         const [cameraStream, setCameraStream] = useState<MediaStream | null>(null)
+
         const x = useMemo(() => position?.x || 0, [position?.x])
-        const y = useMemo(() => position?.y || 0, [position?.y])
+        const y = useMemo(() => {
+            {
+                if (position?.y) return position.y
+
+                const h = screenStore.primaryDisplay?.workAreaSize.height || 0
+                return h ? h - 200 : 0
+            }
+        }, [screenStore.primaryDisplay, position?.y])
+
+        useEffect(() => {
+            if (!screenStore.primaryDisplay) {
+                screenStore.initScreenPrimaryDisplay()
+            }
+        }, [])
 
         useEffect(() => {
             return () => {
@@ -66,7 +82,7 @@ export const CameraPage = observer(
                 onClosed={onClosed}
                 onFinished={onFinished}
             >
-                <CameraContent stream={cameraStream} shape={'rect'} onFinished={onCameraFinished} />
+                <Camera stream={cameraStream} shape={'rect'} onFinished={onCameraFinished} />
             </ChildWindow>
         )
     }

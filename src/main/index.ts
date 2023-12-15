@@ -45,20 +45,12 @@ app.once('ready', () => {
     createCounterWindow()
     createRecordingWindow()
 
-    ipcMain.handle('get-screen-work-area', () => {
-        const primaryDisplay = screen.getPrimaryDisplay()
-        const { width: workAreaSizeWidth, height: workAreaSizeHeight } = primaryDisplay.workAreaSize
-        const { width: workAreaWidth, height: workAreaHeight } = primaryDisplay.workArea
-
+    ipcMain.handle('get-screen-primary-display', () => {
+        const { size, workArea, workAreaSize } = screen.getPrimaryDisplay()
         return {
-            workAreaSize: {
-                width: workAreaSizeWidth,
-                height: workAreaSizeHeight
-            },
-            workArea: {
-                width: workAreaWidth,
-                height: workAreaHeight
-            }
+            size,
+            workAreaSize,
+            workArea
         }
     })
 
@@ -249,15 +241,29 @@ const applyWindowOptions = (title, newOptions): void => {
 
     if (childWindow) {
         if (
-            newOptions.x !== childWindow.getPosition()[0] ||
-            newOptions.y !== childWindow.getPosition()[1]
+            (newOptions.x && newOptions.x !== childWindow.getPosition()[0]) ||
+            (newOptions.y && newOptions.y !== childWindow.getPosition()[1])
         ) {
             childWindow.setPosition(newOptions.x, newOptions.y)
+        }
+
+        if (
+            (newOptions.width && newOptions.width !== childWindow.getSize()[0]) ||
+            (newOptions.height && newOptions.height !== childWindow.getSize()[1])
+        ) {
+            childWindow.setSize(newOptions.width, newOptions.height)
         }
     }
 }
 
-// TODO: need to set cameraWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: false })
+// TODO:
+// 1. need to set cameraWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: false })
+// always on top, above the Dock(macOS) and the taskbar(Windows)
+// 2. counterWindow.setAlwaysOnTop(true, 'pop-up-menu')
+// always show on all workspaces
+// 3. counterWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: false })
+// set the window size to the full screen size
+// 4. counterWindow.setSize(width, height - y)
 
 function createRecordingWindow(): void {
     let recordingWindow: BrowserWindow | null = null
@@ -275,7 +281,6 @@ function createRecordingWindow(): void {
             y: height / 2 - 130,
             width: 68,
             height: 250,
-            show: false,
             frame: false,
             alwaysOnTop: true,
             transparent: true,
@@ -300,52 +305,5 @@ function createRecordingWindow(): void {
         recordingWindow?.close()
         recordingWindow = null
         windows.delete(WindowType.RECORDING)
-    })
-}
-
-function createCounterWindow(): void {
-    let counterWindow: BrowserWindow | null = null
-
-    ipcMain.on('create-counter-window', (_, { url }) => {
-        if (counterWindow) {
-            return
-        }
-
-        const primaryDisplay = screen.getPrimaryDisplay()
-
-        const { width, height } = primaryDisplay.size
-        const { y } = primaryDisplay.workArea
-        counterWindow = createWindow({
-            x: 0,
-            y: 0,
-            width,
-            height: height - y,
-            minHeight: height - y,
-            frame: false,
-            transparent: true,
-            title: WindowType.COUNTER,
-            url: runtime.baseUrl() + url
-        })
-
-        // always on top, above the Dock(macOS) and the taskbar(Windows)
-        counterWindow.setAlwaysOnTop(true, 'pop-up-menu')
-
-        // always show on all workspaces
-        counterWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: false })
-
-        // set the window size to the full screen size
-        counterWindow.setSize(width, height - y)
-
-        windows.set(WindowType.COUNTER, counterWindow)
-    })
-
-    ipcMain.on('close-counter-window', () => {
-        windows.delete(WindowType.COUNTER)
-        counterWindow?.close()
-        counterWindow = null
-
-        if (windows.has(WindowType.RECORDING)) {
-            windows.get(WindowType.RECORDING)?.show()
-        }
     })
 }

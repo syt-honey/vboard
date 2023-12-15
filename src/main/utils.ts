@@ -23,7 +23,7 @@ export const getWindow = (windowTitle: string): BrowserWindow | undefined =>
 
 export function parseWindowFeatures(features: string): {
     electronWindowOptions: Electron.BrowserWindowConstructorOptions
-    windowType: string
+    windowType: WindowType
 } {
     const { windowType, options } = JSON.parse(new URLSearchParams(features).get('config') || '{}')
 

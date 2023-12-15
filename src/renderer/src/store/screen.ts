@@ -1,6 +1,5 @@
 import { makeAutoObservable, runInAction } from 'mobx'
 import { ipcSyncByApp } from '../utils/ipc'
-import { ScreenWorkAreaType } from '@renderer/types/ipc'
 
 export class Screen {
     private readonly sourceName: string[] = ['Entire screen', '整个屏幕', 'Screen 1']
@@ -8,7 +7,8 @@ export class Screen {
     private readonly regx: RegExp = /:.+/g
 
     private screenList: Electron.DesktopCapturerSource[] = []
-    public workArea: ScreenWorkAreaType | null = null
+    public primaryDisplay: Pick<Electron.Display, 'size' | 'workArea' | 'workAreaSize'> | null =
+        null
 
     constructor() {
         makeAutoObservable(this)
@@ -23,11 +23,11 @@ export class Screen {
         })
     }
 
-    public initScreenWorkArea = async (): Promise<void> => {
-        const workArea = await ipcSyncByApp('get-screen-work-area')
+    public initScreenPrimaryDisplay = async (): Promise<void> => {
+        const primaryDisplay = await ipcSyncByApp('get-screen-primary-display')
 
         runInAction(() => {
-            this.workArea = workArea
+            this.primaryDisplay = primaryDisplay
         })
     }
 

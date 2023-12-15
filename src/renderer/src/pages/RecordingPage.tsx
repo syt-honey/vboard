@@ -25,12 +25,10 @@ export const RecordingPage = observer<React.FC>(() => {
 
     const { handleDevicesStatusUpdate, videoOn, selectedVideoInput } = devicesStore
 
-    const showTestPage = useMemo(() => videoOn && selectedVideoInput, [videoOn, selectedVideoInput])
-
-    const cameraY = useMemo(() => {
-        const h = screenStore.workArea?.workAreaSize.height || 0
-        return h ? h - 200 : 0
-    }, [screenStore.workArea])
+    const showCameraPage = useMemo(
+        () => videoOn && selectedVideoInput,
+        [videoOn, selectedVideoInput]
+    )
 
     useEffect(() => {
         const checkScreen = async (): Promise<void> => {
@@ -50,8 +48,8 @@ export const RecordingPage = observer<React.FC>(() => {
             }
         }
 
-        if (!screenStore.workArea) {
-            screenStore.initScreenWorkArea()
+        if (!screenStore.primaryDisplay) {
+            screenStore.initScreenPrimaryDisplay()
         }
 
         checkScreen()
@@ -120,9 +118,8 @@ export const RecordingPage = observer<React.FC>(() => {
                 handleCameraSwitch={handleCameraSwitch}
             />
 
-            {showTestPage && (
+            {showCameraPage && (
                 <CameraPage
-                    position={{ y: cameraY }}
                     selectedVideoInput={devicesStore.selectedVideoInput!}
                     updateVideoPermission={permissionStore.updateVideoPermission}
                 ></CameraPage>

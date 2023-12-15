@@ -10,8 +10,8 @@ type ChildWindowOptionsProps = Partial<Electron.BrowserWindowConstructorOptions>
 
 export interface ChildWindowProps extends React.PropsWithChildren<ChildWindowOptionsProps> {
     type: WindowType
-    onClosed: () => void
-    onFinished: () => void
+    onClosed?: () => void
+    onFinished?: () => void
 }
 
 export const ChildWindow = function ChildWindow({
@@ -25,7 +25,7 @@ export const ChildWindow = function ChildWindow({
 
     useEffect(() => {
         if (newWindow) {
-            onFinished()
+            onFinished?.()
         } else {
             const w = window.open(
                 'about:blank',
@@ -58,7 +58,6 @@ export const ChildWindow = function ChildWindow({
         // window.electronBridge.onWindowClosed(id, onClosed)
     }, [onClosed])
 
-    // @TODO: need to make the child style work
     return (
         <>
             {newWindow &&
