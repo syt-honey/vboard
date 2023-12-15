@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
-import React, { useContext, useEffect, useCallback, useMemo } from 'react'
+import React, { useContext, useEffect, useCallback, useMemo, useState } from 'react'
 
 import { CameraPage } from './CameraPage'
 import { DevicesTypeValue } from '../store'
@@ -24,6 +24,7 @@ export const RecordingPage = observer<React.FC>(() => {
     const { t } = useTranslation()
 
     const { handleDevicesStatusUpdate, videoOn, selectedVideoInput } = devicesStore
+    const [pageLoading, setPageLoading] = useState(false)
 
     const showCameraPage = useMemo(
         () => videoOn && selectedVideoInput,
@@ -31,6 +32,7 @@ export const RecordingPage = observer<React.FC>(() => {
     )
 
     useEffect(() => {
+        setPageLoading(true)
         const checkScreen = async (): Promise<void> => {
             if (!screenStore.getScreen()) {
                 await screenStore.initScreen()
@@ -46,10 +48,12 @@ export const RecordingPage = observer<React.FC>(() => {
 
                 startRecording()
             }
-        }
 
-        if (!screenStore.primaryDisplay) {
-            screenStore.initScreenPrimaryDisplay()
+            if (!screenStore.primaryDisplay) {
+                screenStore.initScreenPrimaryDisplay()
+            }
+
+            setPageLoading(false)
         }
 
         checkScreen()
@@ -107,6 +111,7 @@ export const RecordingPage = observer<React.FC>(() => {
     return (
         <div className="recording-page">
             <ToolBox
+                loading={pageLoading}
                 volume={volume}
                 devicesStore={devicesStore}
                 recorderStore={recorderStore}

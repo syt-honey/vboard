@@ -8,8 +8,10 @@ import { useMemo, useState, useEffect } from 'react'
 import { SVGResume, SVGPause, SVGCancel, SVGCamera, SVGMic } from '../global'
 import { Devices, Recorder } from '../../store'
 import { formatSeconds } from '../../utils'
+import { LoadingOutlined } from '@ant-design/icons'
 
 export interface ToolBoxProps {
+    loading: boolean
     volume: number
     recorderStore: Recorder
     devicesStore: Devices
@@ -23,6 +25,7 @@ export interface ToolBoxProps {
 
 export const ToolBox = observer(
     ({
+        loading,
         volume,
         recorderStore,
         devicesStore,
@@ -45,61 +48,67 @@ export const ToolBox = observer(
 
         return (
             <div className="tool-box">
-                {<span className="text">{text}</span>}
+                {loading ? (
+                    <LoadingOutlined />
+                ) : (
+                    <>
+                        <span className="text">{text}</span>
 
-                <Tooltip title={t('finish')}>
-                    <Button
-                        type="link"
-                        className={`stop-btn ${
-                            isRecording ? 'stop-btn-recording' : 'stop-btn-pausing'
-                        }`}
-                        onClick={handleFinish}
-                    />
-                </Tooltip>
-
-                <Tooltip title={t(isRecording ? 'pause' : 'resume')}>
-                    <Button
-                        className="pause-btn"
-                        type="link"
-                        icon={isRecording ? <SVGPause /> : <SVGResume />}
-                        onClick={isRecording ? handlePause : handleResume}
-                    />
-                </Tooltip>
-
-                <Tooltip title={t('cancel')}>
-                    <Button
-                        type="link"
-                        icon={<SVGCancel style={{ fill: '#E8E9EA' }} />}
-                        onClick={handleCancel}
-                    />
-                </Tooltip>
-
-                <Tooltip title={t(devicesStore.audioOn ? 'devices.isOff' : 'devices.isOn')}>
-                    <Button
-                        type="link"
-                        icon={
-                            <SVGMic
-                                volume={volume}
-                                style={{ fill: '#E8E9EA' }}
-                                isMuted={!devicesStore.audioOn}
+                        <Tooltip title={t('finish')}>
+                            <Button
+                                type="link"
+                                className={`stop-btn ${
+                                    isRecording ? 'stop-btn-recording' : 'stop-btn-pausing'
+                                }`}
+                                onClick={handleFinish}
                             />
-                        }
-                        onClick={handleMicSwitch}
-                    />
-                </Tooltip>
+                        </Tooltip>
 
-                <Tooltip title={t(devicesStore.videoOn ? 'devices.isOff' : 'devices.isOn')}>
-                    <Button
-                        type="link"
-                        icon={
-                            <SVGCamera
-                                isMuted={!devicesStore.videoOn}
-                                style={{ fill: '#E8E9EA' }}
+                        <Tooltip title={t(isRecording ? 'pause' : 'resume')}>
+                            <Button
+                                className="pause-btn"
+                                type="link"
+                                icon={isRecording ? <SVGPause /> : <SVGResume />}
+                                onClick={isRecording ? handlePause : handleResume}
                             />
-                        }
-                        onClick={handleCameraSwitch}
-                    />
-                </Tooltip>
+                        </Tooltip>
+
+                        <Tooltip title={t('cancel')}>
+                            <Button
+                                type="link"
+                                icon={<SVGCancel style={{ fill: '#E8E9EA' }} />}
+                                onClick={handleCancel}
+                            />
+                        </Tooltip>
+
+                        <Tooltip title={t(devicesStore.audioOn ? 'devices.isOff' : 'devices.isOn')}>
+                            <Button
+                                type="link"
+                                icon={
+                                    <SVGMic
+                                        volume={volume}
+                                        style={{ fill: '#E8E9EA' }}
+                                        isMuted={!devicesStore.audioOn}
+                                    />
+                                }
+                                onClick={handleMicSwitch}
+                            />
+                        </Tooltip>
+
+                        <Tooltip title={t(devicesStore.videoOn ? 'devices.isOff' : 'devices.isOn')}>
+                            <Button
+                                type="link"
+                                icon={
+                                    <SVGCamera
+                                        isMuted={!devicesStore.videoOn}
+                                        style={{ fill: '#E8E9EA' }}
+                                    />
+                                }
+                                onClick={handleCameraSwitch}
+                            />
+                        </Tooltip>
+                    </>
+                )}
             </div>
         )
     }
