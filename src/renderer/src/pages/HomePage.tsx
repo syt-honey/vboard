@@ -187,7 +187,7 @@ export const renderHandleOn = ({
         <Button
             className={`devices-operator${isOn ? '' : ' devices-operator-off'}`}
             shape="round"
-            onClick={(): void => handleOn(!isOn, type)}
+            onClick={(): void => void (!loading && handleOn(!isOn, type))}
         >
             {loading ? <LoadingOutlined /> : text}
         </Button>
