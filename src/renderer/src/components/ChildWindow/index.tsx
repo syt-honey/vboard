@@ -37,6 +37,7 @@ export const ChildWindow = function ChildWindow({
             if (w) {
                 setNewWindow(w)
 
+                // add base css to child window head tag
                 if (baseCssModule) {
                     const style = document.createElement('style')
                     style.textContent = baseCssModule
@@ -49,8 +50,6 @@ export const ChildWindow = function ChildWindow({
             newWindow?.close()
         }
     }, [newWindow])
-
-    // const [windowContext, setWindowContext] = useState<React.Context<Window> | null>(null)
 
     useChangesEffect(() => {
         // update window options when options changed

@@ -38,6 +38,7 @@ export const HomePage = observer<React.FC>(() => {
     )
     const [showCounterPage, setShowCounterPage] = useState(false)
     const [cameraLoading, setCameraLoading] = useState(false)
+    const [startLoading, setStartLoading] = useState(false)
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -103,22 +104,26 @@ export const HomePage = observer<React.FC>(() => {
         }
     }, [videoOn, selectedVideoInput])
 
-    const callRecording = (): void => {
-        ipcHideMainWindow()
-
+    const callRecording = useCallback((): void => {
+        setStartLoading(true)
         setShowCounterPage(true)
-    }
+    }, [startLoading])
 
-    const onCameraFinished = useCallback(() => {
+    const onCameraMounted = useCallback(() => {
         setCameraLoading(false)
     }, [videoOn, selectedVideoInput])
 
-    const onCounterFinished = useCallback(() => {
+    const onCounterDownFinished = useCallback(() => {
         setShowCounterPage(false)
 
         ipcCloseRecordingWindow()
         ipcCreateRecordingWindow({ url: '/recording' })
     }, [showCounterPage])
+
+    const onCounterMounted = useCallback(() => {
+        setStartLoading(false)
+        ipcHideMainWindow()
+    }, [startLoading])
 
     return (
         <div className="main-page">
@@ -126,11 +131,16 @@ export const HomePage = observer<React.FC>(() => {
                 <CameraPage
                     selectedVideoInput={devicesStore.selectedVideoInput!}
                     updateVideoPermission={permissionStore.updateVideoPermission}
-                    onCameraFinished={onCameraFinished}
+                    onCameraMounted={onCameraMounted}
                 ></CameraPage>
             )}
 
-            {showCounterPage && <CounterPage onCounterFinished={onCounterFinished}></CounterPage>}
+            {showCounterPage && (
+                <CounterPage
+                    onCounterMounted={onCounterMounted}
+                    onCounterDownFinished={onCounterDownFinished}
+                ></CounterPage>
+            )}
 
             <div className="devices">
                 {Object.keys(deviceConfig).map((key) => (
@@ -142,7 +152,13 @@ export const HomePage = observer<React.FC>(() => {
                     </div>
                 ))}
             </div>
-            <Button className="start-btn" type="primary" onClick={callRecording}>
+            <Button
+                disabled={startLoading}
+                loading={startLoading}
+                className="start-btn"
+                type="primary"
+                onClick={callRecording}
+            >
                 {t('start')}
             </Button>
         </div>

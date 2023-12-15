@@ -11,21 +11,21 @@ export const ipcSyncByApp = <
 }
 
 export const ipcCreateRecordingWindow = ({ url }: { url: string }): void => {
-    return window.electron.ipcRenderer.send('create-recording-window', { url })
+    return window.electron.ipcRenderer.send('createRecordingWindow', { url })
 }
 
 export const ipcCloseRecordingWindow = (): void => {
-    return window.electron.ipcRenderer.send('close-recording-window')
+    return window.electron.ipcRenderer.send('closeRecordingWindow')
 }
 
 export const ipcHideMainWindow = (): void => {
-    return window.electron.ipcRenderer.send('minimize-main-window')
+    return window.electron.ipcRenderer.send('minimizeMainWindow')
 }
 
 export const ipcShowMainWindow = (): void => {
-    return window.electron.ipcRenderer.send('show-main-window')
+    return window.electron.ipcRenderer.send('showMainWindow')
 }
 
 export const ipcWindowOptionsChanges = (title, newOptions): void => {
-    return window.electron.ipcRenderer.send('window-options-changes', { title, newOptions })
+    return window.electron.ipcRenderer.send('windowOptionsChanges', { title, newOptions })
 }

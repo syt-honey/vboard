@@ -72,7 +72,7 @@ export const RecordingPage = observer<React.FC>(() => {
 
     const handleCancel = useCallback(async () => {
         if (
-            await ipcSyncByApp('confirm-dialog', {
+            await ipcSyncByApp('confirmDialog', {
                 title: t('cancelRecordering.title'),
                 message: t('cancelRecordering.message'),
                 buttons: [t('cancelRecordering.confirmBtn'), t('cancelRecordering.cancelBtn')]

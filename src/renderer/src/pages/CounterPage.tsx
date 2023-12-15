@@ -9,11 +9,12 @@ import { ScreenContext } from '../components/StoreProvider'
 export const COUNTDOWN_WINDOW_ID = 'count'
 
 export interface CounterPageProps {
-    onCounterFinished: () => void
+    onCounterMounted: () => void
+    onCounterDownFinished: () => void
 }
 
 export const CounterPage = observer(
-    ({ onCounterFinished }: CounterPageProps): React.ReactElement => {
+    ({ onCounterDownFinished, onCounterMounted }: CounterPageProps): React.ReactElement => {
         const screenStore = useContext(ScreenContext)
 
         // @TODO: need to cover full screen
@@ -44,8 +45,9 @@ export const CounterPage = observer(
                 alwaysOnTop
                 transparent
                 title={COUNTDOWN_WINDOW_ID}
+                onFinished={onCounterMounted}
             >
-                <CountDown finished={onCounterFinished} />
+                <CountDown finished={onCounterDownFinished} />
             </ChildWindow>
         )
     }

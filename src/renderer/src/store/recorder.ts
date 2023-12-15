@@ -199,7 +199,7 @@ export class Recorder {
 
             if (fixedBlob) {
                 const arrayBuffer = await fixedBlob.arrayBuffer()
-                return await ipcSyncByApp('save-file', {
+                return await ipcSyncByApp('saveFile', {
                     arrayBuffer,
                     name: `vboard-${Date.now()}.webm`
                 })

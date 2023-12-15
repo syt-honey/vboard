@@ -15,7 +15,7 @@ export class Screen {
     }
 
     public async initScreen(): Promise<Electron.DesktopCapturerSource> {
-        return await ipcSyncByApp('get-screen').then((sources) => {
+        return await ipcSyncByApp('getScreen').then((sources) => {
             runInAction(() => {
                 this.screenList = sources
             })
@@ -24,7 +24,7 @@ export class Screen {
     }
 
     public initScreenPrimaryDisplay = async (): Promise<void> => {
-        const primaryDisplay = await ipcSyncByApp('get-screen-primary-display')
+        const primaryDisplay = await ipcSyncByApp('getScreenPrimaryDisplay')
 
         runInAction(() => {
             this.primaryDisplay = primaryDisplay

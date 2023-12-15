@@ -21,15 +21,6 @@ export const windowExists = (windowTitle: string): boolean =>
 export const getWindow = (windowTitle: string): BrowserWindow | undefined =>
     BrowserWindow.getAllWindows()?.find((win) => win.getTitle() === windowTitle)
 
-export function parseWindowFeatures(features: string): {
-    electronWindowOptions: Electron.BrowserWindowConstructorOptions
-    windowType: WindowType
-} {
-    const { windowType, options } = JSON.parse(new URLSearchParams(features).get('config') || '{}')
-
-    return { electronWindowOptions: options, windowType }
-}
-
 export const createWindow = ({
     width,
     height,
