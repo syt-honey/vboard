@@ -42,7 +42,6 @@ app.whenReady().then(() => {
 
 app.once('ready', () => {
     createMainWindow()
-    createCounterWindow()
     createRecordingWindow()
 
     ipcMain.handle('get-screen-primary-display', () => {
@@ -234,8 +233,9 @@ const initNewChildWindow = (title): void => {
     })
 }
 
-// Just listen `position` currently
+// Just listen `position` and `size` currently
 // If you want to listen other properties you should add them manually.
+// Warning: This operation has performance issues, and too many changes can result in too much IPC and rendering overhead
 const applyWindowOptions = (title, newOptions): void => {
     const childWindow = getWindow(title)
 

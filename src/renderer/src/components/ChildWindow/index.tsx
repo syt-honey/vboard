@@ -1,6 +1,7 @@
 import { createPortal } from 'react-dom'
 import React, { useEffect, useState } from 'react'
 import { StyleSheetManager } from 'styled-components'
+import baseCssModule from '../../assets/index.less?inline'
 
 import { WindowType } from '../../types/window'
 import { useChangesEffect } from '../../hooks/lifecycle'
@@ -35,6 +36,12 @@ export const ChildWindow = function ChildWindow({
 
             if (w) {
                 setNewWindow(w)
+
+                if (baseCssModule) {
+                    const style = document.createElement('style')
+                    style.textContent = baseCssModule
+                    w.document.head.appendChild(style)
+                }
             }
         }
 
@@ -47,7 +54,7 @@ export const ChildWindow = function ChildWindow({
 
     useChangesEffect(() => {
         // update window options when options changed
-        // only support `position` now
+        // only support `position` and `size` now
         if (options.title) {
             ipcWindowOptionsChanges(options.title, options)
         }
