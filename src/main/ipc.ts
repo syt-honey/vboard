@@ -37,20 +37,13 @@ export const registerMainWindowMainIPCHandler = (): void => {
     mainWindow.loadURL(runtime.baseUrl())
 
     // register showMainWindow&minimizeMainWindow handler
-    showMainWindow(mainWindow)
-    minimizeMainWindow(mainWindow)
+    ipcMain.on('showMainWindow', () => {
+        mainWindow!.show()
+    })
 
-    function showMainWindow(mainWindow: BrowserWindow): void {
-        ipcMain.on('showMainWindow', () => {
-            mainWindow!.show()
-        })
-    }
-
-    function minimizeMainWindow(mainWindow: BrowserWindow): void {
-        ipcMain.on('minimizeMainWindow', () => {
-            mainWindow!.minimize()
-        })
-    }
+    ipcMain.on('minimizeMainWindow', () => {
+        mainWindow!.minimize()
+    })
 }
 
 export const registerRecordingWindowMainIPCHandler = (): void => {
@@ -62,7 +55,7 @@ export const registerRecordingWindowMainIPCHandler = (): void => {
         const primaryDisplay = screen.getPrimaryDisplay()
         const { height } = primaryDisplay.workAreaSize
         recordingWindow = createWindow({
-            x: 0,
+            x: 10,
             y: height / 2 - 130,
             width: 68,
             height: 250,
@@ -82,13 +75,9 @@ export const registerRecordingWindowMainIPCHandler = (): void => {
     })
 
     // register closeRecordingWindow handler
-    closeRecordingWindowHanlder(recordingWindow)
-
-    function closeRecordingWindowHanlder(recordingWindow: BrowserWindow | null): void {
-        ipcMain.on('closeRecordingWindow', () => {
-            recordingWindow?.close()
-        })
-    }
+    ipcMain.on('closeRecordingWindow', () => {
+        recordingWindow?.close()
+    })
 }
 
 export const registerWindowOptionsChangesMainIPCHandler = (title, callback): void => {

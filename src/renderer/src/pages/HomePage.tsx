@@ -32,13 +32,15 @@ export const HomePage = observer<React.FC>(() => {
         setAudioDevices
     } = devicesStore
     const { checkDevicesPermission } = permissionStore
-    const showCameraPage = useMemo(
-        () => videoOn && selectedVideoInput,
-        [videoOn, selectedVideoInput]
-    )
+
+    const [showCameraPage, setShowCameraPage] = useState(false)
     const [showCounterPage, setShowCounterPage] = useState(false)
     const [cameraLoading, setCameraLoading] = useState(false)
     const [startLoading, setStartLoading] = useState(false)
+
+    useEffect(() => {
+        setShowCameraPage(Boolean(videoOn && selectedVideoInput))
+    }, [videoOn, selectedVideoInput])
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -105,6 +107,7 @@ export const HomePage = observer<React.FC>(() => {
     }, [videoOn, selectedVideoInput])
 
     const callRecording = useCallback((): void => {
+        setShowCameraPage(false)
         setStartLoading(true)
         setShowCounterPage(true)
     }, [startLoading])

@@ -26,7 +26,7 @@ export const CameraPage = observer(
         const screenStore = useContext(ScreenContext)
         const [cameraStream, setCameraStream] = useState<MediaStream | null>(null)
 
-        const x = useMemo(() => position?.x || 0, [position?.x])
+        const x = useMemo(() => position?.x || 10, [position?.x])
         const y = useMemo(() => {
             {
                 if (position?.y) return position.y
