@@ -5,7 +5,13 @@ import React, { useContext, useEffect, useCallback, useMemo, useState } from 're
 import { CameraPage } from './CameraPage'
 import { DevicesTypeValue } from '../store'
 import { useAudioAnalyser } from '../hooks'
-import { ipcCloseRecordingWindow, ipcShowMainWindow, ipcSyncByApp } from '../utils'
+import {
+    ipcCloseRecordingWindow,
+    ipcShowMainWindow,
+    ipcSyncByApp,
+    ipcCreateBoardWindow,
+    ipcCloseBoardWindow
+} from '../utils'
 import {
     RecorderContext,
     ScreenContext,
@@ -25,6 +31,7 @@ export const RecordingPage = observer<React.FC>(() => {
 
     const { handleDevicesStatusUpdate, videoOn, selectedVideoInput } = devicesStore
     const [pageLoading, setPageLoading] = useState(false)
+    const [boardOpened, setBoardOpend] = useState(false)
 
     const showCameraPage = useMemo(
         () => videoOn && selectedVideoInput,
@@ -114,6 +121,16 @@ export const RecordingPage = observer<React.FC>(() => {
         handleDevicesStatusUpdate(!devicesStore.videoOn, DevicesTypeValue.VIDEO_INPUT)
     }, [devicesStore.videoOn])
 
+    const handleBoardSwitch = useCallback((): void => {
+        if (boardOpened) {
+            ipcCloseBoardWindow()
+        } else {
+            ipcCreateBoardWindow({ url: '/board' })
+        }
+
+        setBoardOpend(!boardOpened)
+    }, [boardOpened])
+
     return (
         <div className="recording-page">
             <ToolBox
@@ -121,12 +138,14 @@ export const RecordingPage = observer<React.FC>(() => {
                 volume={volume}
                 devicesStore={devicesStore}
                 recorderStore={recorderStore}
+                boardOpened={boardOpened}
                 handleFinish={handleFinish}
                 handleCancel={handleCancel}
                 handlePause={handlePause}
                 handleResume={handleResume}
                 handleMicSwitch={handleMicSwitch}
                 handleCameraSwitch={handleCameraSwitch}
+                handleBoardSwitch={handleBoardSwitch}
             />
 
             {showCameraPage && (

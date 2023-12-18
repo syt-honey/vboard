@@ -5,7 +5,7 @@ import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
 import { useMemo, useState, useEffect } from 'react'
 
-import { SVGResume, SVGPause, SVGCancel, SVGCamera, SVGMic } from '../global'
+import { SVGResume, SVGPause, SVGCancel, SVGCamera, SVGMic, SVGPencil } from '../global'
 import { Devices, Recorder } from '../../store'
 import { formatSeconds } from '../../utils'
 import { LoadingOutlined } from '@ant-design/icons'
@@ -15,12 +15,14 @@ export interface ToolBoxProps {
     volume: number
     recorderStore: Recorder
     devicesStore: Devices
+    boardOpened: boolean
     handleFinish: () => void
     handlePause: () => void
     handleResume: () => void
     handleCancel: () => void
     handleMicSwitch: () => void
     handleCameraSwitch: () => void
+    handleBoardSwitch: () => void
 }
 
 export const ToolBox = observer(
@@ -29,12 +31,14 @@ export const ToolBox = observer(
         volume,
         recorderStore,
         devicesStore,
+        boardOpened,
         handleFinish,
         handlePause,
         handleResume,
         handleCameraSwitch,
         handleCancel,
-        handleMicSwitch
+        handleMicSwitch,
+        handleBoardSwitch
     }: ToolBoxProps) => {
         const { t } = useTranslation()
 
@@ -107,6 +111,12 @@ export const ToolBox = observer(
                                 onClick={handleCameraSwitch}
                             />
                         </Tooltip>
+
+                        <Button
+                            type="link"
+                            icon={<SVGPencil opened={boardOpened} />}
+                            onClick={handleBoardSwitch}
+                        />
                     </>
                 )}
             </div>

@@ -29,3 +29,11 @@ export const ipcShowMainWindow = (): void => {
 export const ipcWindowOptionsChanges = (title, newOptions): void => {
     return window.electron.ipcRenderer.send('windowOptionsChanges', { title, newOptions })
 }
+
+export const ipcCreateBoardWindow = ({ url }: { url: string }): void => {
+    return window.electron.ipcRenderer.send('createBoardWindow', { url })
+}
+
+export const ipcCloseBoardWindow = (): void => {
+    return window.electron.ipcRenderer.send('closeBoardWindow')
+}

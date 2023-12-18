@@ -13,6 +13,43 @@ import { createWindow, WindowType } from './utils'
 import { systemPreferencesShell, runtime } from './script'
 import { registerWindowHandler } from './registerChildWindow'
 
+export const registerBoardWindowMainIPCHandler = (): void => {
+    let boardWindow: BrowserWindow | null = null
+
+    ipcMain.on('createBoardWindow', (_, { url }) => {
+        if (boardWindow || !url) return
+
+        const { size } = screen.getPrimaryDisplay()
+        boardWindow = createWindow({
+            x: 0,
+            y: 0,
+            width: size.width,
+            // @TODO: why should need to Minus 30
+            height: size.height - 30,
+            frame: false,
+            alwaysOnTop: true,
+            transparent: true,
+            resizable: false,
+            title: WindowType.BOARD,
+            url: runtime.baseUrl() + url
+        })
+
+        boardWindow.webContents.setWindowOpenHandler(({ features }) => {
+            return registerWindowHandler(features)
+        })
+
+        boardWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: false })
+
+        boardWindow.setAlwaysOnTop(true, 'pop-up-menu', 1)
+    })
+
+    // register closeBoard Window handler
+    ipcMain.on('closeBoardWindow', () => {
+        boardWindow?.close()
+        boardWindow = null
+    })
+}
+
 export const registerMainWindowMainIPCHandler = (): void => {
     let mainWindow: BrowserWindow | null = null
     mainWindow = createWindow({
@@ -50,7 +87,7 @@ export const registerRecordingWindowMainIPCHandler = (): void => {
     let recordingWindow: BrowserWindow | null = null
 
     ipcMain.on('createRecordingWindow', (_, { url }) => {
-        if (recordingWindow) return
+        if (recordingWindow || !url) return
 
         const primaryDisplay = screen.getPrimaryDisplay()
         const { height } = primaryDisplay.workAreaSize
@@ -58,7 +95,7 @@ export const registerRecordingWindowMainIPCHandler = (): void => {
             x: 10,
             y: height / 2 - 130,
             width: 68,
-            height: 250,
+            height: 300,
             frame: false,
             alwaysOnTop: true,
             transparent: true,
@@ -72,6 +109,9 @@ export const registerRecordingWindowMainIPCHandler = (): void => {
         })
 
         recordingWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: false })
+
+        // make recording window higher than other window
+        recordingWindow.setAlwaysOnTop(true, 'pop-up-menu', 2)
     })
 
     // register closeRecordingWindow handler

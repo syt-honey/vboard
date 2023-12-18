@@ -11,6 +11,8 @@ const CounterContainer = styled.div`
     border: 3px solid #00ff00;
     border-radius: 8px;
     box-sizing: border-box;
+    user-select: none;
+    pointer-events: none;
 `
 const CounterText = styled.div`
     display: inline-block;

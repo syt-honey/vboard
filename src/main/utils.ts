@@ -9,7 +9,8 @@ export enum WindowType {
     MAIN = 'MAIN',
     CAMERA = 'CAMERA',
     COUNTER = 'COUNTER',
-    RECORDING = 'RECORDING'
+    RECORDING = 'RECORDING',
+    BOARD = 'BOARD'
 }
 
 export const isWindowType = (type: string): boolean =>
