@@ -43,20 +43,22 @@ export const RecordingPage = observer<React.FC>(() => {
                 const startRecording = async (): Promise<void> => {
                     if (recorderStore.isIdle) {
                         await recorderStore.start()
+
+                        if (!screenStore.primaryDisplay) {
+                            screenStore.initScreenPrimaryDisplay()
+                        }
+
+                        setPageLoading(false)
                     }
                 }
 
                 startRecording()
             }
-
-            if (!screenStore.primaryDisplay) {
-                screenStore.initScreenPrimaryDisplay()
-            }
-
-            setPageLoading(false)
         }
 
         checkScreen()
+
+        return (): void => setPageLoading(false)
     }, [])
 
     useEffect(() => {
@@ -83,6 +85,10 @@ export const RecordingPage = observer<React.FC>(() => {
             })
         ) {
             recorderStore.cancel()
+
+            recorderStore.destroyed()
+            ipcCloseRecordingWindow()
+            ipcShowMainWindow()
         }
     }, [recorderStore])
 

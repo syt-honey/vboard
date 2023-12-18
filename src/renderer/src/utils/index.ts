@@ -73,3 +73,26 @@ export const formatSeconds = (secs: number): string => {
 
     return `${h > 0 ? pad(h) + ':' : ''}${pad(m)}:${pad(s)}`
 }
+
+export const generateUniqueFileName = (): string => {
+    // ->2023-03-03vk4zbz
+    return formatTimestamp() + randomString()
+}
+
+export const formatTimestamp = (): string => {
+    const d = new Date()
+
+    return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d
+        .getDate()
+        .toString()
+        .padStart(2, '0')}`
+}
+
+export const randomString = (): string => {
+    // ->vk4zbz
+    return Math.random().toString(36).substring(2, 8)
+}
+
+export const sleep = (ms: number): Promise<NodeJS.Timeout> => {
+    return new Promise((resolve) => setTimeout(resolve, ms))
+}

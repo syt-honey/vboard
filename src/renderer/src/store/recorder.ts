@@ -1,6 +1,12 @@
 import { makeAutoObservable, runInAction } from 'mobx'
 
-import { getUserAudioStream, getUserScreenStream, ipcSyncByApp } from '../utils'
+import {
+    getUserAudioStream,
+    getUserScreenStream,
+    ipcSyncByApp,
+    generateUniqueFileName,
+    sleep
+} from '../utils'
 import '../../../../lib/fix-webm-duration'
 import { devicesStore } from './devices'
 import { permissionStore } from './permission'
@@ -87,12 +93,20 @@ export class Recorder {
 
     public async finish(): Promise<boolean> {
         if (this.recorder) {
-            this.status = RecorderStatus.Saving
+            // The `dataAvailable` event is triggered manually to ensure that all recorded content is put into chunks
+            this.recorder.requestData()
 
+            // wait chunks updated
+            await sleep(100)
+
+            runInAction(() => {
+                this.status = RecorderStatus.Saving
+            })
+
+            // start to save
+            this.recorder.stream.getAudioTracks().forEach((t) => t.stop())
+            this.recorder.stream.getVideoTracks().forEach((t) => t.stop())
             if (await this.saveScreen(new Blob([...this.chunks], { type: this.miniType }))) {
-                this.recorder.stream.getAudioTracks().forEach((t) => t.stop())
-                this.recorder.stream.getVideoTracks().forEach((t) => t.stop())
-
                 return true
             } else {
                 runInAction(() => {
@@ -201,7 +215,7 @@ export class Recorder {
                 const arrayBuffer = await fixedBlob.arrayBuffer()
                 return await ipcSyncByApp('saveFile', {
                     arrayBuffer,
-                    name: `vboard-${Date.now()}.webm`
+                    name: `vboard-${generateUniqueFileName()}.webm`
                 })
             }
 
