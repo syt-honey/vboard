@@ -37,22 +37,22 @@ export class Permission {
         })
 
     public checkAudioPermission = async (): Promise<boolean> =>
-        await ipcSyncByApp('get-devices-permission', { mediaType: DeviceType.Microphone })
+        await ipcSyncByApp('getDevicesPermission', { mediaType: DeviceType.Microphone })
 
     public checkVideoPermission = async (): Promise<boolean> =>
-        await ipcSyncByApp('get-devices-permission', { mediaType: DeviceType.Camera })
+        await ipcSyncByApp('getDevicesPermission', { mediaType: DeviceType.Camera })
 
     public checkScreenPermission = async (): Promise<boolean> =>
-        await ipcSyncByApp('get-devices-permission', { mediaType: DeviceType.Screen })
+        await ipcSyncByApp('getDevicesPermission', { mediaType: DeviceType.Screen })
 
     public requestAudioPermission = async (): Promise<boolean> =>
-        await ipcSyncByApp('request-devices-permission', { mediaType: DeviceType.Microphone })
+        await ipcSyncByApp('requestDevicesPermission', { mediaType: DeviceType.Microphone })
 
     public requestVideoPermission = async (): Promise<boolean> =>
-        await ipcSyncByApp('request-devices-permission', { mediaType: DeviceType.Camera })
+        await ipcSyncByApp('requestDevicesPermission', { mediaType: DeviceType.Camera })
 
     public requestScreenPermission = async (): Promise<boolean> =>
-        await ipcSyncByApp('request-devices-permission', { mediaType: DeviceType.Screen })
+        await ipcSyncByApp('requestDevicesPermission', { mediaType: DeviceType.Screen })
 
     public requestScreenPermissionByApi = async (): Promise<boolean> => {
         try {

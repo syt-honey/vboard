@@ -1,27 +1,56 @@
-import React, { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
+import React, { useContext, useEffect, useMemo } from 'react'
 
-import { ipcCloseCounterWindow, ipcCreateRecordingWindow, ipcCloseRecordingWindow } from '../utils'
 import { CountDown } from '../components'
+import { WindowType } from '../types/window'
+import { ChildWindow } from '../components/ChildWindow'
+import { ScreenContext } from '../components/StoreProvider'
 
-export const CounterPage = observer<React.FC>(() => {
-    useEffect(() => {
-        ipcCreateRecordingWindow({ url: '/recording' })
+export const COUNTDOWN_WINDOW_ID = 'count'
 
-        return (): void => {
-            ipcCloseRecordingWindow()
-        }
-    }, [])
+export interface CounterPageProps {
+    onCounterMounted: () => void
+    onCounterDownFinished: () => void
+}
 
-    const handleFinish = (): void => {
-        ipcCloseCounterWindow()
+export const CounterPage = observer(
+    ({ onCounterDownFinished, onCounterMounted }: CounterPageProps): React.ReactElement => {
+        const screenStore = useContext(ScreenContext)
+
+        // @TODO: need to cover full screen
+        const size = useMemo(
+            () => screenStore.primaryDisplay?.size || { width: 0, height: 0 },
+            [screenStore.primaryDisplay?.size]
+        )
+        const y = useMemo(
+            () => screenStore.primaryDisplay?.workArea.y || 0,
+            [screenStore.primaryDisplay?.workArea.y]
+        )
+
+        useEffect(() => {
+            if (!screenStore.primaryDisplay) {
+                screenStore.initScreenPrimaryDisplay()
+            }
+        }, [])
+
+        return (
+            <ChildWindow
+                type={WindowType.COUNTER}
+                x={0}
+                y={0}
+                width={size?.width}
+                height={size?.height - y}
+                minHeight={size?.height - y}
+                frame={false}
+                alwaysOnTop
+                transparent
+                title={COUNTDOWN_WINDOW_ID}
+                onFinished={onCounterMounted}
+            >
+                <CountDown finished={onCounterDownFinished} />
+            </ChildWindow>
+        )
     }
-
-    return (
-        <div className="counter-page">
-            <CountDown finished={handleFinish} />
-        </div>
-    )
-})
+)
 
 export default CounterPage

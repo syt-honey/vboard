@@ -1,7 +1,28 @@
-import './index.css'
-
+import styled from 'styled-components'
 import React, { useState } from 'react'
 import useInterval from '../../hooks/interval'
+
+const CounterContainer = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 3px solid #00ff00;
+    border-radius: 8px;
+    box-sizing: border-box;
+`
+const CounterText = styled.div`
+    display: inline-block;
+    width: 150px;
+    height: 150px;
+    line-height: 150px;
+    text-align: center;
+    border-radius: 50%;
+    background-color: #121821;
+    color: #fff;
+    font-size: 60px;
+`
 
 const COUNTDOWN = 3
 
@@ -21,7 +42,11 @@ export const CountDown: React.FC<CountDownProps> = ({ finished }: CountDownProps
         setCount(n)
     })
 
-    return <div className="count-down">{count}</div>
+    return (
+        <CounterContainer>
+            <CounterText>{count}</CounterText>
+        </CounterContainer>
+    )
 }
 
 export default CountDown

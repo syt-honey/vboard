@@ -12,6 +12,15 @@ export enum WindowType {
     RECORDING = 'RECORDING'
 }
 
+export const isWindowType = (type: string): boolean =>
+    Object.values(WindowType).includes(type as WindowType)
+
+export const windowExists = (windowTitle: string): boolean =>
+    BrowserWindow.getAllWindows()?.some((win) => win.getTitle() === windowTitle)
+
+export const getWindow = (windowTitle: string): BrowserWindow | undefined =>
+    BrowserWindow.getAllWindows()?.find((win) => win.getTitle() === windowTitle)
+
 export const createWindow = ({
     width,
     height,
@@ -26,7 +35,7 @@ export const createWindow = ({
     typeof y === 'number' && (options.y = y)
     url && (options.url = url)
 
-    const window = new BrowserWindow({
+    const win = new BrowserWindow({
         ...options,
         ...restProps,
         webPreferences: {
@@ -38,8 +47,8 @@ export const createWindow = ({
 
     // if there is url, we will use page component of renderer app to show child window
     if (url) {
-        window.loadURL(url)
+        win.loadURL(url)
     }
 
-    return window
+    return win
 }

@@ -7,17 +7,27 @@ export class Screen {
     private readonly regx: RegExp = /:.+/g
 
     private screenList: Electron.DesktopCapturerSource[] = []
+    public primaryDisplay: Pick<Electron.Display, 'size' | 'workArea' | 'workAreaSize'> | null =
+        null
 
     constructor() {
         makeAutoObservable(this)
     }
 
     public async initScreen(): Promise<Electron.DesktopCapturerSource> {
-        return await ipcSyncByApp('get-screen').then((sources) => {
+        return await ipcSyncByApp('getScreen').then((sources) => {
             runInAction(() => {
                 this.screenList = sources
             })
             return this.getScreen()
+        })
+    }
+
+    public initScreenPrimaryDisplay = async (): Promise<void> => {
+        const primaryDisplay = await ipcSyncByApp('getScreenPrimaryDisplay')
+
+        runInAction(() => {
+            this.primaryDisplay = primaryDisplay
         })
     }
 

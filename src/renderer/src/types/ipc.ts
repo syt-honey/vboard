@@ -1,9 +1,12 @@
 import { MediaType } from './device'
 
 export type AppActionSync = {
-    'get-screen': () => Promise<Electron.DesktopCapturerSource[]>
-    'save-file': (args: { arrayBuffer: ArrayBuffer; name: string }) => Promise<boolean>
-    'confirm-dialog': (options: Partial<Electron.MessageBoxOptions>) => Promise<number>
-    'get-devices-permission': (args: { mediaType: MediaType }) => Promise<boolean>
-    'request-devices-permission': (args: { mediaType: MediaType }) => Promise<boolean>
+    getScreenPrimaryDisplay: () => Promise<
+        Pick<Electron.Display, 'size' | 'workArea' | 'workAreaSize'>
+    >
+    getScreen: () => Promise<Electron.DesktopCapturerSource[]>
+    saveFile: (args: { arrayBuffer: ArrayBuffer; name: string }) => Promise<boolean>
+    confirmDialog: (options: Partial<Electron.MessageBoxOptions>) => Promise<number>
+    getDevicesPermission: (args: { mediaType: MediaType }) => Promise<boolean>
+    requestDevicesPermission: (args: { mediaType: MediaType }) => Promise<boolean>
 }
