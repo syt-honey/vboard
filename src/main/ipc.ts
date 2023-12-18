@@ -77,6 +77,7 @@ export const registerRecordingWindowMainIPCHandler = (): void => {
     // register closeRecordingWindow handler
     ipcMain.on('closeRecordingWindow', () => {
         recordingWindow?.close()
+        recordingWindow = null
     })
 }
 
