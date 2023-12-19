@@ -1,6 +1,5 @@
 interface SVGRectProps
-    extends Pick<React.SVGProps<SVGSVGElement>, 'className' | 'style' | 'width' | 'height'> {
-}
+    extends Pick<React.SVGProps<SVGSVGElement>, 'className' | 'style' | 'width' | 'height'> {}
 
 export const SVGRect = ({ ...restProps }: SVGRectProps): React.ReactElement => {
     return (

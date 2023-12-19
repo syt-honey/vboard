@@ -98,7 +98,7 @@ export const registerRecordingWindowMainIPCHandler = (): void => {
         const primaryDisplay = screen.getPrimaryDisplay()
         const { height } = primaryDisplay.workAreaSize
         recordingWindow = createWindow({
-            x: 10,
+            x: 0,
             y: height / 2 - 130,
             width: 68,
             height: 300,
@@ -108,6 +108,11 @@ export const registerRecordingWindowMainIPCHandler = (): void => {
             resizable: false,
             title: WindowType.RECORDING,
             url: runtime.baseUrl() + url
+        })
+
+        // We need to set the `x` again to fix the bug that window was positioned in the center of Desktop in silicon macOS.
+        recordingWindow.setBounds({
+            x: 10
         })
 
         recordingWindow.webContents.setWindowOpenHandler(({ features }) => {

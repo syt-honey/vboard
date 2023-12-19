@@ -1,6 +1,5 @@
 interface SVGTextProps
-    extends Pick<React.SVGProps<SVGSVGElement>, 'className' | 'style' | 'width' | 'height'> {
-}
+    extends Pick<React.SVGProps<SVGSVGElement>, 'className' | 'style' | 'width' | 'height'> {}
 
 export const SVGText = ({ ...restProps }: SVGTextProps): React.ReactElement => {
     return (

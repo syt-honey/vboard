@@ -1,6 +1,5 @@
 interface SVGCircleProps
-    extends Pick<React.SVGProps<SVGSVGElement>, 'className' | 'style' | 'width' | 'height'> {
-}
+    extends Pick<React.SVGProps<SVGSVGElement>, 'className' | 'style' | 'width' | 'height'> {}
 
 export const SVGCircle = ({ ...restProps }: SVGCircleProps): React.ReactElement => {
     return (
