@@ -35,6 +35,9 @@ dependencies:
   mobx-react-lite:
     specifier: ^4.0.4
     version: registry.npmmirror.com/mobx-react-lite@4.0.4(mobx@6.10.2)(react-dom@18.2.0)(react@18.2.0)
+  react-draggable:
+    specifier: ^4.4.6
+    version: registry.npmmirror.com/react-draggable@4.4.6(react-dom@18.2.0)(react@18.2.0)
   react-i18next:
     specifier: ^13.2.2
     version: registry.npmmirror.com/react-i18next@13.2.2(i18next@23.5.1)(react-dom@18.2.0)(react@18.2.0)
@@ -2210,6 +2213,13 @@ packages:
     version: 1.0.3
     dependencies:
       mimic-response: registry.npmmirror.com/mimic-response@1.0.1
+
+  registry.npmmirror.com/clsx@1.2.1:
+    resolution: {integrity: sha512-EcR6r5a8bj6pu3ycsa/E/cKVGuTgZJZdsyUYHOksG/UHIiKfjxzRxYJpyVBwYaQeOvghal9fcc4PidlgzugAQg==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/clsx/-/clsx-1.2.1.tgz}
+    name: clsx
+    version: 1.2.1
+    engines: {node: '>=6'}
+    dev: false
 
   registry.npmmirror.com/color-convert@1.9.3:
     resolution: {integrity: sha512-QfAUtd+vFdAtFQcC8CCyYt1fYWxSqAiK2cSD6zDB8N3cpsEBAvRxp9zOGg6G/SHHJYAT88/az/IuDGALsNVbGg==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/color-convert/-/color-convert-1.9.3.tgz}
@@ -4483,7 +4493,6 @@ packages:
     name: object-assign
     version: 4.1.1
     engines: {node: '>=0.10.0'}
-    dev: true
 
   registry.npmmirror.com/object-inspect@1.12.3:
     resolution: {integrity: sha512-geUvdk7c+eizMNUDkRpW1wJwgfOiOeHbxBR/hLXK1aT6zmVSO0jsQcs7fj6MGw89jC/cjGfLcNOrtMYtGqm81g==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/object-inspect/-/object-inspect-1.12.3.tgz}
@@ -4792,7 +4801,6 @@ packages:
       loose-envify: registry.npmmirror.com/loose-envify@1.4.0
       object-assign: registry.npmmirror.com/object-assign@4.1.1
       react-is: registry.npmmirror.com/react-is@16.13.1
-    dev: true
 
   registry.npmmirror.com/prr@1.0.1:
     resolution: {integrity: sha512-yPw4Sng1gWghHQWj0B3ZggWUm4qVbPwPFcRG8KyxiU7J2OHFSoEHKS+EZ3fv5l1t9CyCiop6l/ZYeWbrgoQejw==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/prr/-/prr-1.0.1.tgz}
@@ -5480,6 +5488,21 @@ packages:
       loose-envify: registry.npmmirror.com/loose-envify@1.4.0
       react: registry.npmmirror.com/react@18.2.0
       scheduler: registry.npmmirror.com/scheduler@0.23.0
+
+  registry.npmmirror.com/react-draggable@4.4.6(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-LtY5Xw1zTPqHkVmtM3X8MUOxNDOUhv/khTgBgrUvwaS064bwVvxT+q5El0uUFNx5IEPKXuRejr7UqLwBIg5pdw==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/react-draggable/-/react-draggable-4.4.6.tgz}
+    id: registry.npmmirror.com/react-draggable/4.4.6
+    name: react-draggable
+    version: 4.4.6
+    peerDependencies:
+      react: '>= 16.3.0'
+      react-dom: '>= 16.3.0'
+    dependencies:
+      clsx: registry.npmmirror.com/clsx@1.2.1
+      prop-types: registry.npmmirror.com/prop-types@15.8.1
+      react: registry.npmmirror.com/react@18.2.0
+      react-dom: registry.npmmirror.com/react-dom@18.2.0(react@18.2.0)
+    dev: false
 
   registry.npmmirror.com/react-i18next@13.2.2(i18next@23.5.1)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-+nFUkbRByFwnrfDcYqvzBuaeZb+nACHx+fAWN/pZMddWOCJH5hoc21+Sa/N/Lqi6ne6/9wC/qRGOoQhJa6IkEQ==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/react-i18next/-/react-i18next-13.2.2.tgz}

@@ -1,9 +1,10 @@
-interface SVGPencil
+// used in recordering toolbox
+interface SVGPencilProps
     extends Pick<React.SVGProps<SVGSVGElement>, 'className' | 'style' | 'width' | 'height'> {
     opened: boolean
 }
 
-export const SVGPencil = ({ opened }: SVGPencil): React.ReactElement => {
+export const SVGPencil = ({ opened }: SVGPencilProps): React.ReactElement => {
     return opened ? (
         <svg
             version="1.0"

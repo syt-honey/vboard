@@ -78,6 +78,8 @@ export const RecordingPage = observer<React.FC>(() => {
         if (await recorderStore.finish()) {
             recorderStore.destroyed()
 
+            initStatus()
+
             ipcCloseRecordingWindow()
             ipcShowMainWindow()
         }
@@ -92,8 +94,10 @@ export const RecordingPage = observer<React.FC>(() => {
             })
         ) {
             recorderStore.cancel()
-
             recorderStore.destroyed()
+
+            initStatus()
+
             ipcCloseRecordingWindow()
             ipcShowMainWindow()
         }
@@ -156,6 +160,10 @@ export const RecordingPage = observer<React.FC>(() => {
             )}
         </div>
     )
+
+    function initStatus(): void {
+        setBoardOpend(false)
+    }
 })
 
 export default RecordingPage

@@ -16,7 +16,8 @@ import { registerWindowHandler } from './registerChildWindow'
 export const registerBoardWindowMainIPCHandler = (): void => {
     let boardWindow: BrowserWindow | null = null
 
-    ipcMain.on('createBoardWindow', (_, { url }) => {
+    ipcMain.on('createBoardWindow', (e, { url }) => {
+        if (!validateSender(e.senderFrame)) return
         if (boardWindow || !url) return
 
         const { size } = screen.getPrimaryDisplay()
@@ -24,7 +25,7 @@ export const registerBoardWindowMainIPCHandler = (): void => {
             x: 0,
             y: 0,
             width: size.width,
-            // @TODO: why should need to Minus 30
+            // @TODO: why should need to minus 30
             height: size.height - 30,
             frame: false,
             alwaysOnTop: true,
@@ -44,7 +45,9 @@ export const registerBoardWindowMainIPCHandler = (): void => {
     })
 
     // register closeBoard Window handler
-    ipcMain.on('closeBoardWindow', () => {
+    ipcMain.on('closeBoardWindow', (e) => {
+        if (!validateSender(e.senderFrame)) return
+
         boardWindow?.close()
         boardWindow = null
     })
@@ -74,11 +77,13 @@ export const registerMainWindowMainIPCHandler = (): void => {
     mainWindow.loadURL(runtime.baseUrl())
 
     // register showMainWindow&minimizeMainWindow handler
-    ipcMain.on('showMainWindow', () => {
+    ipcMain.on('showMainWindow', (e) => {
+        if (!validateSender(e.senderFrame)) return
         mainWindow!.show()
     })
 
-    ipcMain.on('minimizeMainWindow', () => {
+    ipcMain.on('minimizeMainWindow', (e) => {
+        if (!validateSender(e.senderFrame)) return
         mainWindow!.minimize()
     })
 }
@@ -86,7 +91,8 @@ export const registerMainWindowMainIPCHandler = (): void => {
 export const registerRecordingWindowMainIPCHandler = (): void => {
     let recordingWindow: BrowserWindow | null = null
 
-    ipcMain.on('createRecordingWindow', (_, { url }) => {
+    ipcMain.on('createRecordingWindow', (e, { url }) => {
+        if (!validateSender(e.senderFrame)) return
         if (recordingWindow || !url) return
 
         const primaryDisplay = screen.getPrimaryDisplay()
@@ -115,14 +121,18 @@ export const registerRecordingWindowMainIPCHandler = (): void => {
     })
 
     // register closeRecordingWindow handler
-    ipcMain.on('closeRecordingWindow', () => {
+    ipcMain.on('closeRecordingWindow', (e) => {
+        if (!validateSender(e.senderFrame)) return
+
         recordingWindow?.close()
         recordingWindow = null
     })
 }
 
 export const registerWindowOptionsChangesMainIPCHandler = (title, callback): void => {
-    ipcMain.on('windowOptionsChanges', (_, { title: id, newOptions }) => {
+    ipcMain.on('windowOptionsChanges', (e, { title: id, newOptions }) => {
+        if (!validateSender(e.senderFrame)) return
+
         if (id === title) {
             callback(newOptions)
         }
@@ -130,7 +140,9 @@ export const registerWindowOptionsChangesMainIPCHandler = (title, callback): voi
 }
 
 export const registerGetScreenPrimaryDisplayMainIPCHandler = (): void => {
-    ipcMain.handle('getScreenPrimaryDisplay', () => {
+    ipcMain.handle('getScreenPrimaryDisplay', (e) => {
+        if (!validateSender(e.senderFrame)) return
+
         const { size, workArea, workAreaSize } = screen.getPrimaryDisplay()
         return {
             size,
@@ -141,7 +153,9 @@ export const registerGetScreenPrimaryDisplayMainIPCHandler = (): void => {
 }
 
 export const registerGetScreenMainIPCHandler = (): void => {
-    ipcMain.handle('getScreen', () => {
+    ipcMain.handle('getScreen', (e) => {
+        if (!validateSender(e.senderFrame)) return
+
         return desktopCapturer.getSources({
             types: ['window', 'screen'],
             thumbnailSize: {
@@ -155,7 +169,9 @@ export const registerGetScreenMainIPCHandler = (): void => {
 
 // @TODO: there is a max size 2GB limit of blob.
 export const registerSaveFileMainIPCHandler = (): void => {
-    ipcMain.handle('saveFile', async (_, { arrayBuffer, name }): Promise<boolean> => {
+    ipcMain.handle('saveFile', async (e, { arrayBuffer, name }): Promise<boolean> => {
+        if (!validateSender(e.senderFrame)) return false
+
         const stream = Buffer.from(arrayBuffer)
         const { canceled, filePath } = await dialog.showSaveDialog({
             defaultPath: name,
@@ -182,14 +198,18 @@ export const registerSaveFileMainIPCHandler = (): void => {
 
 // get the audio/video/screen permissions
 export const registerGetDevicesPermissionMainIPCHandler = (): void => {
-    ipcMain.handle('getDevicesPermission', async (_, { mediaType }): Promise<boolean> => {
+    ipcMain.handle('getDevicesPermission', async (e, { mediaType }): Promise<boolean> => {
+        if (!validateSender(e.senderFrame)) return false
+
         return systemPreferences.getMediaAccessStatus(mediaType) === 'granted'
     })
 }
 
 // access to the audio&video permissions (only needed in macOS)
 export const registerRequestDevicesPermissionMainIPCHandler = (): void => {
-    ipcMain.handle('requestDevicesPermission', async (_, { mediaType }): Promise<boolean> => {
+    ipcMain.handle('requestDevicesPermission', async (e, { mediaType }): Promise<boolean> => {
+        if (!validateSender(e.senderFrame)) return false
+
         try {
             if (mediaType === 'screen') {
                 // there is no system API access for screen recording
@@ -226,7 +246,9 @@ export const registerRequestDevicesPermissionMainIPCHandler = (): void => {
 }
 
 export const registerConfirmDialogMainIPCHandler = (): void => {
-    ipcMain.handle('confirmDialog', async (_, options: Partial<Electron.MessageBoxOptions>) => {
+    ipcMain.handle('confirmDialog', async (e, options: Partial<Electron.MessageBoxOptions>) => {
+        if (!validateSender(e.senderFrame)) return
+
         const { response } = await dialog.showMessageBox({
             type: 'question',
             defaultId: 0,
@@ -238,4 +260,11 @@ export const registerConfirmDialogMainIPCHandler = (): void => {
         })
         return response === 0
     })
+}
+
+const validateSender = (frame: Electron.WebFrameMain): boolean => {
+    // Value the host of the URL using an actual URL parser and an allowlist
+    const host = new URL(frame.url).host
+    if (['localhost:5173'].indexOf(new URL(frame.url).host) > -1 || !host) return true
+    return false
 }

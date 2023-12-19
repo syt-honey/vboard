@@ -4,7 +4,7 @@
     align-items: center;
     flex-direction: column;
     padding: 20px;
-    -webkit-user-select: none;
+    user-select: none;
     -webkit-app-region: drag;
 
     .start-btn {
@@ -114,7 +114,7 @@
     height: 100%;
     box-sizing: border-box;
     cursor: pointer;
-    -webkit-user-select: none;
+    user-select: none;
     -webkit-app-region: drag;
 }
 
@@ -214,9 +214,12 @@
     border: 3px solid #00ff00;
     box-sizing: border-box;
     overflow: hidden;
-    cursor: url("data:image/svg+xml,<svg width='24' height='24' xmlns='http://www.w3.org/2000/svg'><g fill='none' fill-rule='evenodd'><circle cx='12' cy='12' r='2.5' stroke='%23ec3455' stroke-linejoin='square'/><circle cx='12' cy='12' r='3.5' stroke='%23ec3455'/></g></svg>") 12 12, auto;
-
-    svg {
+    -webkit-app-region: no-drag;
+    user-select: none;
+    text-align: center;
+    
+    > svg {
+        cursor: url("data:image/svg+xml,<svg width='24' height='24' xmlns='http://www.w3.org/2000/svg'><g fill='none' fill-rule='evenodd'><circle cx='12' cy='12' r='2.5' stroke='%23ec3455' stroke-linejoin='square'/><circle cx='12' cy='12' r='3.5' stroke='%23ec3455'/></g></svg>") 12 12, auto;
         width: 100%;
         height: 100%;
     }
