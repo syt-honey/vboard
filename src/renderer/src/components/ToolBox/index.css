@@ -15,10 +15,11 @@
 .tool-box .text {
     display: inline-block;
     position: relative;
-    width: 52px;
+    width: 58px;
     padding-bottom: 10px;
     font-size: 12px;
     text-align: center;
+    font-family: Monaco;
 }
 
 .tool-box .text::after {
