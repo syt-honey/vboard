@@ -1,6 +1,7 @@
 import { MediaType } from './device'
 
 export type AppActionSync = {
+    getWindowBounds: (args: { title: string }) => Electron.Rectangle | undefined
     getScreenPrimaryDisplay: () => Promise<
         Pick<Electron.Display, 'size' | 'workArea' | 'workAreaSize'>
     >

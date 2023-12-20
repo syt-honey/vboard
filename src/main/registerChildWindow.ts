@@ -24,10 +24,18 @@ export const registerWindowHandler = (features: string): WindowHandlerResponse =
             return { action: 'deny' }
         }
 
-        app.once('browser-window-created', () => {
+        app.once('browser-window-created', (_, window) => {
             if (electronWindowOptions.title) {
                 initNewChildWindow(electronWindowOptions.title)
             }
+
+            // @TODO: need to specify the `tooltip` using an unique id
+            setTimeout(() => {
+                if (window.getTitle() === 'tooltip') {
+                    // ensure tooltip is higher than recording window
+                    window.setAlwaysOnTop(true, 'pop-up-menu', 3)
+                }
+            })
         })
 
         return {
@@ -59,15 +67,15 @@ const applyWindowOptions = (title, newOptions): void => {
 
     if (childWindow) {
         if (
-            (newOptions.x && newOptions.x !== childWindow.getPosition()[0]) ||
-            (newOptions.y && newOptions.y !== childWindow.getPosition()[1])
+            (newOptions.x && newOptions.x !== childWindow.getPosition()?.[0]) ||
+            (newOptions.y && newOptions.y !== childWindow.getPosition()?.[1])
         ) {
             childWindow.setPosition(newOptions.x, newOptions.y)
         }
 
         if (
-            (newOptions.width && newOptions.width !== childWindow.getSize()[0]) ||
-            (newOptions.height && newOptions.height !== childWindow.getSize()[1])
+            (newOptions.width && newOptions.width !== childWindow.getSize()?.[0]) ||
+            (newOptions.height && newOptions.height !== childWindow.getSize()?.[1])
         ) {
             childWindow.setSize(newOptions.width, newOptions.height)
         }

@@ -3,5 +3,6 @@ export enum WindowType {
     CAMERA = 'CAMERA',
     COUNTER = 'COUNTER',
     RECORDING = 'RECORDING',
-    BOARD = 'BOARD'
+    BOARD = 'BOARD',
+    TOOLTIP = 'TOOLTIP'
 }

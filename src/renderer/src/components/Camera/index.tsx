@@ -10,7 +10,6 @@ const CameraContainer = styled.div`
     text-align: center;
     overflow: hidden;
     box-sizing: border-box;
-    cursor: pointer;
     -webkit-user-select: none;
     -webkit-app-region: drag;
 `

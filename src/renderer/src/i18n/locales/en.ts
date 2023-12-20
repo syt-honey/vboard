@@ -1,9 +1,9 @@
 export const en = {
     paused: 'Paused',
-    finish: 'Finish',
+    finish: 'Finish Recording',
     pause: 'Pause',
     resume: 'Resume',
-    cancel: 'Cancel',
+    cancel: 'Cancel Recording',
     start: 'Start recording',
     cancelRecordering: {
         confirmBtn: 'Confirm',
@@ -26,7 +26,14 @@ export const en = {
     camera: 'Camera',
     screen: 'Screen Recording',
 
+    board: {
+        isOn: 'Start the Board',
+        isOff: 'Close the Board'
+    },
+
     devices: {
+        isTurnOn: 'Turn on',
+        isTurnOff: 'Turn off',
         isOn: 'On',
         isOff: 'Off',
         audioinputNoText: 'No Mircophone',

@@ -11,7 +11,7 @@ import {
 } from 'electron'
 import path from 'path'
 
-import { createWindow, WindowType } from './utils'
+import { createWindow, getWindow, WindowType } from './utils'
 import { systemPreferencesShell, runtime } from './script'
 import { registerWindowHandler } from './registerChildWindow'
 
@@ -108,6 +108,7 @@ export const registerRecordingWindowMainIPCHandler = (): void => {
             alwaysOnTop: true,
             transparent: true,
             resizable: false,
+            // Warning: this title doesn't seem to be working well
             title: WindowType.RECORDING,
             url: runtime.baseUrl() + url
         })
@@ -133,6 +134,14 @@ export const registerRecordingWindowMainIPCHandler = (): void => {
 
         recordingWindow?.close()
         recordingWindow = null
+    })
+}
+
+export const registerGetWindowBoundsMainIPCHandler = (): void => {
+    ipcMain.handle('getWindowBounds', (e, { title }) => {
+        if (!validateSender(e.senderFrame)) return
+
+        return getWindow(title)?.getBounds()
     })
 }
 
