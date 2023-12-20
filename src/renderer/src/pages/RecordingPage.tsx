@@ -54,9 +54,8 @@ export const RecordingPage = observer<React.FC>(() => {
                         if (!screenStore.primaryDisplay) {
                             screenStore.initScreenPrimaryDisplay()
                         }
-
-                        setPageLoading(false)
                     }
+                    setPageLoading(false)
                 }
 
                 startRecording()
@@ -75,17 +74,23 @@ export const RecordingPage = observer<React.FC>(() => {
     }, [devicesStore.audioOn])
 
     const handleFinish = useCallback(async () => {
+        if (boardOpened) {
+            handleBoardSwitch()
+        }
+
         if (await recorderStore.finish()) {
             recorderStore.destroyed()
-
-            initStatus()
 
             ipcCloseRecordingWindow()
             ipcShowMainWindow()
         }
-    }, [recorderStore])
+    }, [recorderStore, boardOpened])
 
     const handleCancel = useCallback(async () => {
+        if (boardOpened) {
+            handleBoardSwitch()
+        }
+
         if (
             await ipcSyncByApp('confirmDialog', {
                 title: t('cancelRecordering.title'),
@@ -96,12 +101,10 @@ export const RecordingPage = observer<React.FC>(() => {
             recorderStore.cancel()
             recorderStore.destroyed()
 
-            initStatus()
-
             ipcCloseRecordingWindow()
             ipcShowMainWindow()
         }
-    }, [recorderStore])
+    }, [recorderStore, boardOpened])
 
     const handlePause = useCallback(() => {
         recorderStore.pause()
@@ -160,10 +163,6 @@ export const RecordingPage = observer<React.FC>(() => {
             )}
         </div>
     )
-
-    function initStatus(): void {
-        setBoardOpend(false)
-    }
 })
 
 export default RecordingPage

@@ -1,5 +1,6 @@
 import fs from 'fs'
 import {
+    app,
     screen,
     shell,
     desktopCapturer,
@@ -8,6 +9,7 @@ import {
     systemPreferences,
     BrowserWindow
 } from 'electron'
+import path from 'path'
 
 import { createWindow, WindowType } from './utils'
 import { systemPreferencesShell, runtime } from './script'
@@ -177,27 +179,18 @@ export const registerSaveFileMainIPCHandler = (): void => {
     ipcMain.handle('saveFile', async (e, { arrayBuffer, name }): Promise<boolean> => {
         if (!validateSender(e.senderFrame)) return false
 
+        // @TODO: user should be able to choose the path
+        const filePath = path.join(app.getPath('desktop'), name)
         const stream = Buffer.from(arrayBuffer)
-        const { canceled, filePath } = await dialog.showSaveDialog({
-            defaultPath: name,
-            title: name
-        })
 
-        if (canceled) return false
+        try {
+            fs.writeFileSync(filePath, stream)
 
-        let result = true
-
-        if (filePath) {
-            fs.writeFile(filePath, stream, (err) => {
-                result = false
-
-                if (err) {
-                    console.error(err)
-                }
-            })
+            return true
+        } catch (e) {
+            console.log('[vboard]: saved failed', e)
+            return false
         }
-
-        return result
     })
 }
 
