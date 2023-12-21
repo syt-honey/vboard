@@ -1,9 +1,10 @@
 /**
- * inspired by hyrious, see: https://github.com/hyrious/ink
+ * inspired by [ink](https://github.com/hyrious/ink) written by hyrious
  */
 import { input } from './input'
 import { Line } from './line'
 import { Rect } from './rect'
+import { Ellipse } from './ellipse'
 import { svg } from './common'
 import { Drawable, Weight } from './type'
 
@@ -18,18 +19,10 @@ export class DrawPath<T extends Drawable> {
     private path: T | null = null
     private createPath: () => T
 
-    constructor({
-        el,
-        createPath,
-        startCallback
-    }: {
-        el: HTMLElement
-        createPath: () => T
-        startCallback: () => void
-    }) {
+    constructor({ el, createPath }: { el: HTMLElement; createPath: () => T }) {
         this.el = el
         this.targetEvent = input(this.el, {
-            start: startCallback.bind(this),
+            start: this.start.bind(this),
             update: this.update.bind(this),
             finish: this.finish.bind(this)
         })
@@ -74,8 +67,7 @@ export class DrawLine extends DrawPath<Line> {
     constructor(el: HTMLElement) {
         super({
             el,
-            createPath: () => new Line(svg('path')),
-            startCallback: () => this.start()
+            createPath: () => new Line(svg('path'))
         })
     }
 }
@@ -84,8 +76,16 @@ export class DrawRect extends DrawPath<Rect> {
     constructor(el: HTMLElement) {
         super({
             el,
-            createPath: () => new Rect(svg('path')),
-            startCallback: () => this.start()
+            createPath: () => new Rect(svg('path'))
+        })
+    }
+}
+
+export class DrawEllipse extends DrawPath<Ellipse> {
+    constructor(el: HTMLElement) {
+        super({
+            el,
+            createPath: () => new Ellipse(svg('ellipse'))
         })
     }
 }

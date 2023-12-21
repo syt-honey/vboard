@@ -3,16 +3,12 @@ import { Point } from './type'
 import { BaseShape } from './base'
 
 export class Line extends BaseShape {
-    last: Point | null
-    tail: number
-    defn: string
+    private last: Point | null = null
+    private defn: string = ''
+    private tail: number = 0
 
     constructor(path: SVGElement) {
         super(path)
-
-        this.last = null // previous point
-        this.tail = 0 // length of the last "L(lastpoint)" string
-        this.defn = '' // the "d" of <path>
     }
 
     update(point: Point): void {

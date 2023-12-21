@@ -3,13 +3,11 @@ import { Point } from './type'
 import { BaseShape } from './base'
 
 export class Rect extends BaseShape {
-    start: Point | null
-    defn: string
+    private start: Point | null = null
+    private defn: string = '' // the "d" of <path>
 
     constructor(path: SVGElement) {
         super(path)
-        this.start = null
-        this.defn = '' // the "d" of <path>
     }
 
     update(point: Point): void {

@@ -1,37 +1,34 @@
-import { M, L, Q, mid } from './common'
+import { BaseShape } from './base'
+import { Point } from './type'
 
-export class Path {
-    path: SVGEllipseElement
-    last: { x: number; y: number } | null
-    tail: number
-    defn: string
+export class Ellipse extends BaseShape {
+    private start: Point | null = null
 
-    constructor(path) {
-        this.path = path
-        this.last = null // previous point
-        this.tail = 0 // length of the last "L(lastpoint)" string
-        this.defn = '' // the "d" of <path>
+    // cx, cy are the coordinates of the center of the ellipse
+    // rx is the horizontal radius of the ellipse
+    // ry is the vertical radius of the ellipse
+    private cx: string = ''
+    private cy: string = ''
+    private rx: string = ''
+    private ry: string = ''
+
+    constructor(path: SVGElement) {
+        super(path)
     }
 
-    remove(): void {
-        this.path.remove()
-    }
+    update(point: Point): void {
+        if (this.start) {
+            this.cx = String(this.start.x + (point.x - this.start.x) / 2)
+            this.cy = String(this.start.y + (point.y - this.start.y) / 2)
+            this.rx = String(Math.abs(point.x - this.start.x) / 2)
+            this.ry = String(Math.abs(point.y - this.start.y) / 2)
 
-    update(point): void {
-        if (this.last) {
-            if (this.tail) {
-                this.defn = this.defn.slice(0, -this.tail)
-                this.defn += Q(this.last, mid(this.last, point))
-            } else {
-                this.defn += L(mid(this.last, point))
-            }
-            const tail = L(point)
-            this.tail = tail.length
-            this.defn += tail
-            this.path.setAttribute('d', this.defn)
-            this.last = point
+            this.path.setAttribute('cx', this.cx)
+            this.path.setAttribute('cy', this.cy)
+            this.path.setAttribute('rx', this.rx)
+            this.path.setAttribute('ry', this.ry)
         } else {
-            this.defn = M((this.last = point))
+            this.start = point
         }
     }
 }
