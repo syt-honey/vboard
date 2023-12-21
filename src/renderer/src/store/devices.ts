@@ -1,4 +1,4 @@
-import { runInAction, autorun } from 'mobx'
+import { runInAction } from 'mobx'
 
 import { getSystemDevices } from '../utils'
 import { autoPersistStore } from '../utils/auto-persist-store'
@@ -7,12 +7,14 @@ const LS_VERSION = 1
 
 let isInit = false
 
+const defaultDevices: DevicesList = {
+    audioinput: [],
+    audiooutput: [],
+    videoinput: []
+}
+
 export class Devices {
-    public devices: DevicesList = {
-        audioinput: [],
-        audiooutput: [],
-        videoinput: []
-    }
+    public devices = defaultDevices
 
     public selectedAudioInput: string | null = null
     public selectedAudioOutput: string | null = null
@@ -24,10 +26,6 @@ export class Devices {
 
     constructor() {
         autoPersistStore({ storeLSName: 'DevicesStore', store: this, version: LS_VERSION })
-        autorun(() => {
-            // do something if indeed
-        })
-
         // need time to get the devices
         this.handleDevicesCheck()
     }
@@ -36,10 +34,49 @@ export class Devices {
         return Object.values(this.devices).some((i) => i.length > 0)
     }
 
-    public handleDevicesCheck = async (): Promise<void> => {
-        if (!this.checkDevices) {
-            return await this.initDevices()
+    public isDiff = (target: DevicesList): boolean => {
+        if (!target) return true
+
+        return Object.keys(this.devices).some((t) => {
+            if (this.devices[t].length !== target[t]?.length) return true
+
+            return this.devices[t].some(
+                (m: MediaDeviceInfo) =>
+                    !target[t]?.find((i: MediaDeviceInfo) => i.deviceId === m.deviceId)
+            )
+        })
+    }
+
+    public clearDevices = (): void => {
+        this.devices = {
+            audioinput: [],
+            audiooutput: [],
+            videoinput: []
         }
+
+        this.selectedAudioInput = null
+        this.selectedAudioOutput = null
+        this.selectedVideoInput = null
+
+        this.audioOn = false
+        this.audioOutOn = false
+        this.videoOn = false
+    }
+
+    public handleDevicesCheck = async (): Promise<void> => {
+        if (isInit) return
+        isInit = true
+
+        const devices = await this.getSystemDevices()
+
+        runInAction(() => {
+            if (this.isDiff(devices)) {
+                this.clearDevices()
+                this.devices = devices
+            }
+
+            isInit = false
+        })
     }
 
     public handleDevicesOn = async (isOn: boolean, type: DevicesTypeKey): Promise<void> => {
@@ -99,25 +136,19 @@ export class Devices {
         }
     }
 
-    public initDevices = async (): Promise<void> => {
-        if (isInit) return
-
-        isInit = true
+    public getSystemDevices = async (): Promise<DevicesList> => {
         const devices = await getSystemDevices()
-        runInAction(() => {
-            this.devices = devices.reduce((acc, cur) => {
-                if (!acc[cur.kind]?.find((i) => i.groupId === cur.groupId)) {
-                    if (!acc[cur.kind]) {
-                        acc[cur.kind] = []
-                    }
-                    acc[cur.kind].push(cur)
+
+        return devices.reduce((acc, cur) => {
+            if (!acc[cur.kind]?.find((i) => i.groupId === cur.groupId)) {
+                if (!acc[cur.kind]) {
+                    acc[cur.kind] = []
                 }
+                acc[cur.kind].push(cur)
+            }
 
-                return acc
-            }, this.devices)
-
-            isInit = false
-        })
+            return acc
+        }, defaultDevices)
     }
 }
 

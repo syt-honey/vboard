@@ -13,6 +13,8 @@ import { SVGCamera, SVGMic } from '../components/global'
 import { DevicesContext, PermissionContext } from '../components/StoreProvider'
 import { ipcHideMainWindow, ipcCloseRecordingWindow, ipcCreateRecordingWindow } from '../utils'
 
+// @TODO: those loadings and showPages make me messy, we should refactor it later
+
 export const HomePage = observer<React.FC>(() => {
     const { t } = useTranslation()
     const navigate = useNavigate()
@@ -37,10 +39,6 @@ export const HomePage = observer<React.FC>(() => {
     const [showCounterPage, setShowCounterPage] = useState(false)
     const [cameraLoading, setCameraLoading] = useState(false)
     const [startLoading, setStartLoading] = useState(false)
-
-    useEffect(() => {
-        setShowCameraPage(Boolean(videoOn && selectedVideoInput))
-    }, [videoOn, selectedVideoInput])
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -101,9 +99,17 @@ export const HomePage = observer<React.FC>(() => {
     }, [audioOn])
 
     useEffect(() => {
-        if (videoOn && selectedVideoInput) {
-            setCameraLoading(true)
-        }
+        setCameraLoading(false)
+        setShowCameraPage(false)
+
+        const timer = setTimeout(() => {
+            if (videoOn && selectedVideoInput) {
+                setShowCameraPage(true)
+                setCameraLoading(true)
+            }
+        }, 100)
+
+        return (): void => timer && clearTimeout(timer)
     }, [videoOn, selectedVideoInput])
 
     const callRecording = useCallback((): void => {
