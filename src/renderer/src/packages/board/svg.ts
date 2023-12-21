@@ -1,88 +1,91 @@
-// from: https://github.com/hyrious/ink
-
+/**
+ * inspired by hyrious, see: https://github.com/hyrious/ink
+ */
 import { input } from './input'
-import { mid } from './common'
+import { Line } from './line'
+import { Rect } from './rect'
+import { svg } from './common'
+import { Drawable, Weight } from './type'
 
-function svg(tag = 'svg'): SVGElement {
-    return document.createElementNS('http://www.w3.org/2000/svg', tag)
-}
+export class DrawPath<T extends Drawable> {
+    private el: HTMLElement | null = null
+    private targetEvent: { unsubscribe: () => void } | null = null
 
-const M = ({ x, y }): string => `M${x.toFixed(2)},${y.toFixed(2)}`
-const L = ({ x, y }): string => `L${x.toFixed(2)},${y.toFixed(2)}`
-const Q = (c, { x, y }): string =>
-    `Q${c.x.toFixed(2)},${c.y.toFixed(2)} ${x.toFixed(2)},${y.toFixed(2)}`
-// const C = (c1, c2, { x, y }): string => `C${c1.x},${c1.y} ${c2.x},${c2.y} ${x} ${y}`
+    color: string = 'red'
+    fill: string = 'none'
+    weight: Weight = Weight.Regular
 
-class Path {
-    path: SVGPathElement
-    last: { x: number; y: number } | null
-    tail: number
-    defn: string
+    private path: T | null = null
+    private createPath: () => T
 
-    constructor(path) {
-        this.path = path
-        this.last = null // previous point
-        this.tail = 0 // length of the last "L(lastpoint)" string
-        this.defn = '' // the "d" of <path>
+    constructor({
+        el,
+        createPath,
+        startCallback
+    }: {
+        el: HTMLElement
+        createPath: () => T
+        startCallback: () => void
+    }) {
+        this.el = el
+        this.targetEvent = input(this.el, {
+            start: startCallback.bind(this),
+            update: this.update.bind(this),
+            finish: this.finish.bind(this)
+        })
+
+        this.createPath = createPath
     }
-    remove(): void {
-        this.path.remove()
-    }
-    update(point): void {
-        // UN-OPTIMIZED:
-        // const points = this.points;
-        // points.push({ x, y });
-        // if (points.length < 2) {
-        //   this.path.setAttribute("d", "");
-        // } else {
-        //   const last = points.length - 1;
-        //   let def = M(points[0]) + L(mid(points[0], points[1]));
-        //   for (let i = 1; i < last; ++i) {
-        //     def += Q(points[i], mid(points[i], points[i + 1]));
-        //   }
-        //   def += L(points[last]);
-        //   this.path.setAttribute("d", def);
-        // }
 
-        if (this.last) {
-            if (this.tail) {
-                this.defn = this.defn.slice(0, -this.tail)
-                this.defn += Q(this.last, mid(this.last, point))
-            } else {
-                this.defn += L(mid(this.last, point))
-            }
-            const tail = L(point)
-            this.tail = tail.length
-            this.defn += tail
-            this.path.setAttribute('d', this.defn)
-            this.last = point
-        } else {
-            this.defn = M((this.last = point))
+    start(): void {
+        this.path = this.createPath()
+
+        if (this.el && this.path) {
+            this.el.append(this.path.path)
         }
     }
+
+    update(ev: PointerEvent): void {
+        const { offsetX: x, offsetY: y } = ev
+
+        if (this.path) {
+            this.path.update({ x, y })
+        }
+    }
+
+    finish(): void {
+        this.path = null
+    }
+
+    setColor(color: string): void {
+        this.color = color
+    }
+
+    destroy(): void {
+        if (this.targetEvent) {
+            this.targetEvent.unsubscribe()
+        }
+
+        this.el = null
+    }
 }
 
-export const draw = (el: HTMLElement): void => {
-    let path: Path | null = null
-    input(el, {
-        start() {
-            path = new Path(svg('path'))
-            if (el && path) {
-                el.append(path.path)
-            }
-        },
-        /** @param { PointerEvent } ev */
-        update(ev) {
-            const { offsetX: x, offsetY: y } = ev
-            if (path) {
-                path.update({ x, y })
-            }
-        },
-        finish() {
-            if (path && path.tail === 0) {
-                path.remove()
-            }
-            path = null
-        }
-    })
+export class DrawLine extends DrawPath<Line> {
+    constructor(el: HTMLElement) {
+        super({
+            el,
+            createPath: () => new Line(svg('path')),
+            startCallback: () => this.start()
+        })
+    }
+}
+
+export class DrawRect extends DrawPath<Rect> {
+    constructor(el: HTMLElement) {
+        super({
+            el,
+            createPath: () => new Rect(svg('path')),
+            startCallback: () => this.start()
+        })
+    }
 }

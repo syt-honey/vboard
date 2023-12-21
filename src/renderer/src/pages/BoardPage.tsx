@@ -1,34 +1,46 @@
 import { observer } from 'mobx-react-lite'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 
+import { Board } from '../components/Board'
 import { BoardToolBox, ToolType } from '../components/BoardToolBox'
-import { draw } from '../packages/board/svg'
+
+export enum ShapeType {
+    Rect = 'rect',
+    Circle = 'circle',
+    Arrow = 'arrow',
+    Line = 'line'
+}
 
 export const BoardPage = observer((): React.ReactElement => {
     const [showTool, setShowTool] = useState(false)
     const [selected, setSelected] = useState<ToolType>(ToolType.Pencil)
 
-    useEffect(() => {
-        const el = document.getElementById('svg')
+    const [shape, setShape] = useState<ShapeType>(ShapeType.Line)
 
-        if (el) {
-            draw(el)
-            setShowTool(true)
-        }
+    const onBoardMounted = useCallback(() => {
+        setShowTool(true)
+    }, [showTool])
 
-        return (): void => setShowTool(false)
-    }, [])
+    const handleShapeSelect = useCallback(
+        (type: ToolType): void => {
+            setSelected(type)
+
+            if (type === ToolType.Pencil) {
+                setShape(ShapeType.Line)
+            }
+
+            if (type === ToolType.Rect) {
+                setShape(ShapeType.Rect)
+            }
+        },
+        [selected, shape]
+    )
 
     return (
         <div className="board-page">
-            {showTool && (
-                <BoardToolBox
-                    type={selected}
-                    handleShapeSelect={(type): void => setSelected(type)}
-                />
-            )}
+            {showTool && <BoardToolBox type={selected} handleShapeSelect={handleShapeSelect} />}
 
-            <svg id="svg" fill="none" stroke="currentColor" strokeWidth="2"></svg>
+            <Board shape={shape} onBoardMounted={onBoardMounted} />
         </div>
     )
 })
