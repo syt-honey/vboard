@@ -1,4 +1,4 @@
-export function input(el: HTMLElement, { start, update, finish }): { unsubscribe: () => void } {
+export function input(el: SVGSVGElement, { start, update, finish }): { unsubscribe: () => void } {
     function down(ev): void {
         if (ev.button !== 0) return
         el.setPointerCapture(ev.pointerId)

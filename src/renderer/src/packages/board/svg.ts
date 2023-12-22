@@ -10,7 +10,7 @@ import { svg } from './common'
 import { Drawable, Weight } from './type'
 
 export class DrawPath<T extends Drawable> {
-    private el: HTMLElement | null = null
+    private el: SVGSVGElement | null = null
     private targetEvent: { unsubscribe: () => void } | null = null
 
     color: string = 'red'
@@ -20,7 +20,7 @@ export class DrawPath<T extends Drawable> {
     private path: T | null = null
     private createPath: () => T
 
-    constructor({ el, createPath }: { el: HTMLElement; createPath: () => T }) {
+    constructor({ el, createPath }: { el: SVGSVGElement; createPath: () => T }) {
         this.el = el
         this.el.style.color = this.color
 
@@ -67,7 +67,7 @@ export class DrawPath<T extends Drawable> {
 }
 
 export class DrawLine extends DrawPath<Line> {
-    constructor(el: HTMLElement) {
+    constructor(el: SVGSVGElement) {
         super({
             el,
             createPath: () => new Line(svg('path'))
@@ -76,7 +76,7 @@ export class DrawLine extends DrawPath<Line> {
 }
 
 export class DrawRect extends DrawPath<Rect> {
-    constructor(el: HTMLElement) {
+    constructor(el: SVGSVGElement) {
         super({
             el,
             createPath: () => new Rect(svg('path'))
@@ -85,7 +85,7 @@ export class DrawRect extends DrawPath<Rect> {
 }
 
 export class DrawEllipse extends DrawPath<Ellipse> {
-    constructor(el: HTMLElement) {
+    constructor(el: SVGSVGElement) {
         super({
             el,
             createPath: () => new Ellipse(svg('ellipse'))
@@ -94,7 +94,7 @@ export class DrawEllipse extends DrawPath<Ellipse> {
 }
 
 export class DrawArrow extends DrawPath<Arrow> {
-    constructor(el: HTMLElement) {
+    constructor(el: SVGSVGElement) {
         super({
             el,
             createPath: () => new Arrow(svg('path'))

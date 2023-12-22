@@ -5,7 +5,7 @@ import { useRef } from 'react'
 import Draggable from 'react-draggable'
 import { observer } from 'mobx-react-lite'
 
-import { SVGRect, SVGCircle, SVGArrow, SVGBoardPencil, SVGText, SVGCursor } from '../global'
+import { SVGRect, SVGCircle, SVGArrow, SVGBoardPencil, SVGClear, SVGCursor } from '../global'
 
 export enum ToolType {
     Rect = 'rect',
@@ -13,7 +13,8 @@ export enum ToolType {
     Arrow = 'arrow',
     Pencil = 'pencil',
     Text = 'text',
-    Cursor = 'cursor'
+    Cursor = 'cursor',
+    Clear = 'clear'
 }
 
 export interface BoardToolBoxProps {
@@ -64,9 +65,15 @@ export const BoardToolBox = observer(({ type, handleShapeSelect }: BoardToolBoxP
 
                 <Button
                     type="link"
+                    icon={<SVGClear style={getStyle(ToolType.Clear)} />}
+                    onClick={(): void => handleShapeSelect(ToolType.Clear)}
+                ></Button>
+
+                {/* <Button
+                    type="link"
                     icon={<SVGText style={getStyle(ToolType.Text)} />}
                     onClick={(): void => handleShapeSelect(ToolType.Text)}
-                ></Button>
+                ></Button> */}
             </div>
         </Draggable>
     )

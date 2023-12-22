@@ -15,7 +15,8 @@ export const BoardPage = observer((): React.ReactElement => {
     const [showTool, setShowTool] = useState(false)
     const [selected, setSelected] = useState<ToolType>(ToolType.Pencil)
 
-    const [shape, setShape] = useState<ShapeType>(ShapeType.Line)
+    const [shape, setShape] = useState<ShapeType | null>(ShapeType.Line)
+    const [clear, setClear] = useState(false)
 
     const onBoardMounted = useCallback(() => {
         setShowTool(true)
@@ -23,6 +24,10 @@ export const BoardPage = observer((): React.ReactElement => {
 
     const handleShapeSelect = useCallback(
         (type: ToolType): void => {
+            if (type === ToolType.Clear) {
+                setClear(true)
+                return
+            }
             setSelected(type)
 
             if (type === ToolType.Pencil) {
@@ -40,6 +45,8 @@ export const BoardPage = observer((): React.ReactElement => {
             if (type === ToolType.Arrow) {
                 setShape(ShapeType.Arrow)
             }
+
+            setClear(false)
         },
         [selected, shape]
     )
@@ -48,7 +55,7 @@ export const BoardPage = observer((): React.ReactElement => {
         <div className="board-page">
             {showTool && <BoardToolBox type={selected} handleShapeSelect={handleShapeSelect} />}
 
-            <Board shape={shape} onBoardMounted={onBoardMounted} />
+            <Board shape={shape} clear={clear} onBoardMounted={onBoardMounted} />
         </div>
     )
 })

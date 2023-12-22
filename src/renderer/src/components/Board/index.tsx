@@ -6,13 +6,22 @@ import { DrawRect, DrawLine, DrawEllipse, DrawArrow } from '../../packages/board
 import { ShapeType } from '../../pages/BoardPage'
 
 export interface BoardProps {
-    shape: ShapeType
+    clear: boolean
+    shape: ShapeType | null
     onBoardMounted?: () => void
 }
 
-export const Board = observer(({ shape, onBoardMounted }: BoardProps) => {
-    const svgRef = useRef(null)
+export const Board = observer(({ clear, shape, onBoardMounted }: BoardProps) => {
+    const svgRef = useRef<SVGSVGElement | null>(null)
     const [draw, setDraw] = useState<DrawRect | DrawLine | DrawEllipse | DrawArrow | null>(null)
+
+    useEffect(() => {
+        if (svgRef.current && clear) {
+            while (svgRef.current.firstChild) {
+                svgRef.current.removeChild(svgRef.current.firstChild)
+            }
+        }
+    }, [clear])
 
     useEffect(() => {
         // use this to destroy the current draw instance
@@ -36,7 +45,9 @@ export const Board = observer(({ shape, onBoardMounted }: BoardProps) => {
                 currentDraw = new DrawArrow(svgRef.current)
             }
 
-            setDraw(currentDraw)
+            if (currentDraw) {
+                setDraw(currentDraw)
+            }
         }
 
         return (): void => {
