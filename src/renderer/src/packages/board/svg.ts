@@ -5,6 +5,7 @@ import { input } from './input'
 import { Line } from './line'
 import { Rect } from './rect'
 import { Ellipse } from './ellipse'
+import { Arrow } from './arrow'
 import { svg } from './common'
 import { Drawable, Weight } from './type'
 
@@ -21,6 +22,8 @@ export class DrawPath<T extends Drawable> {
 
     constructor({ el, createPath }: { el: HTMLElement; createPath: () => T }) {
         this.el = el
+        this.el.style.color = this.color
+
         this.targetEvent = input(this.el, {
             start: this.start.bind(this),
             update: this.update.bind(this),
@@ -86,6 +89,15 @@ export class DrawEllipse extends DrawPath<Ellipse> {
         super({
             el,
             createPath: () => new Ellipse(svg('ellipse'))
+        })
+    }
+}
+
+export class DrawArrow extends DrawPath<Arrow> {
+    constructor(el: HTMLElement) {
+        super({
+            el,
+            createPath: () => new Arrow(svg('path'))
         })
     }
 }

@@ -36,6 +36,10 @@ export const BoardPage = observer((): React.ReactElement => {
             if (type === ToolType.Circle) {
                 setShape(ShapeType.Circle)
             }
+
+            if (type === ToolType.Arrow) {
+                setShape(ShapeType.Arrow)
+            }
         },
         [selected, shape]
     )
