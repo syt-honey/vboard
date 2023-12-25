@@ -6,7 +6,7 @@ import {
     ipcSyncByApp,
     generateUniqueFileName,
     sleep
-} from '../utils'
+} from '@renderer/utils'
 import '../../../../lib/fix-webm-duration'
 import { devicesStore } from './devices'
 import { permissionStore } from './permission'

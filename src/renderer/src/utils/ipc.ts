@@ -1,4 +1,4 @@
-import * as ipc from '../types/ipc'
+import * as ipc from '@renderer/types/ipc'
 
 export const ipcSyncByApp = <
     T extends keyof ipc.AppActionSync,
@@ -36,4 +36,16 @@ export const ipcCreateBoardWindow = ({ url }: { url: string }): void => {
 
 export const ipcCloseBoardWindow = (): void => {
     return window.electron.ipcRenderer.send('closeBoardWindow')
+}
+
+export const setBoardWindowIgnoreMouseEvents = ({ ignore }: { ignore: boolean }): void => {
+    return window.electron.ipcRenderer.send('setBoardWindowIgnoreMouseEvents', { ignore })
+}
+
+export const ipcCreateBoardToolWindow = ({ url }: { url: string }): void => {
+    return window.electron.ipcRenderer.send('createBoardToolWindow', { url })
+}
+
+export const ipcCloseBoardToolWindow = (): void => {
+    return window.electron.ipcRenderer.send('closeBoardToolWindow')
 }

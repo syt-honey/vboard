@@ -1,10 +1,10 @@
 import { observer } from 'mobx-react-lite'
 import React, { useContext, useEffect, useMemo } from 'react'
 
-import { CountDown } from '../components'
-import { WindowType } from '../types/window'
-import { ChildWindow } from '../components/ChildWindow'
-import { ScreenContext } from '../components/StoreProvider'
+import { CountDown } from '@renderer/components'
+import { WindowType } from '@renderer/types/window'
+import { ChildWindow } from '@renderer/components/ChildWindow'
+import { ScreenContext } from '@renderer/components/StoreProvider'
 
 export const COUNTDOWN_WINDOW_ID = 'count'
 

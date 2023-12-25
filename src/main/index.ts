@@ -4,6 +4,7 @@ import { electronApp, optimizer } from '@electron-toolkit/utils'
 import {
     registerMainWindowMainIPCHandler,
     registerBoardWindowMainIPCHandler,
+    registerBoardToolWindowMainIPCHandler,
     registerGetWindowBoundsMainIPCHandler,
     registerRecordingWindowMainIPCHandler,
     registerGetScreenPrimaryDisplayMainIPCHandler,
@@ -35,6 +36,7 @@ app.once('ready', () => {
     registerMainWindowMainIPCHandler()
     registerRecordingWindowMainIPCHandler()
     registerBoardWindowMainIPCHandler()
+    registerBoardToolWindowMainIPCHandler()
 
     registerGetWindowBoundsMainIPCHandler()
     registerGetScreenPrimaryDisplayMainIPCHandler()

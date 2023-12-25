@@ -5,13 +5,17 @@ import { useNavigate } from 'react-router-dom'
 import { LoadingOutlined } from '@ant-design/icons'
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
-// import { useAudioAnalyser } from '../hooks'
+// import { useAudioAnalyser } from '@renderer/hooks'
 import { CameraPage } from './CameraPage'
 import { CounterPage } from './CounterPage'
-import { DevicesTypeKey } from '../store/devices'
-import { SVGCamera, SVGMic } from '../components/global'
-import { DevicesContext, PermissionContext } from '../components/StoreProvider'
-import { ipcHideMainWindow, ipcCloseRecordingWindow, ipcCreateRecordingWindow } from '../utils'
+import { DevicesTypeKey } from '@renderer/store/devices'
+import { SVGCamera, SVGMic } from '@renderer/components/global'
+import { DevicesContext, PermissionContext } from '@renderer/components/StoreProvider'
+import {
+    ipcHideMainWindow,
+    ipcCloseRecordingWindow,
+    ipcCreateRecordingWindow
+} from '@renderer/utils'
 
 // @TODO: those loadings and showPages make me messy, we should refactor it later
 

@@ -3,22 +3,23 @@ import { useTranslation } from 'react-i18next'
 import React, { useContext, useEffect, useCallback, useMemo, useState } from 'react'
 
 import { CameraPage } from './CameraPage'
-import { DevicesTypeValue } from '../store'
-import { useAudioAnalyser } from '../hooks'
+import { DevicesTypeValue } from '@renderer/store'
+import { useAudioAnalyser } from '@renderer/hooks'
 import {
     ipcCloseRecordingWindow,
     ipcShowMainWindow,
     ipcSyncByApp,
     ipcCreateBoardWindow,
-    ipcCloseBoardWindow
-} from '../utils'
+    ipcCloseBoardWindow,
+    ipcCloseBoardToolWindow
+} from '@renderer/utils'
 import {
     RecorderContext,
     ScreenContext,
     DevicesContext,
     PermissionContext,
     ToolBox
-} from '../components'
+} from '@renderer/components'
 
 export const RecordingPage = observer<React.FC>(() => {
     const recorderStore = useContext(RecorderContext)
@@ -138,6 +139,7 @@ export const RecordingPage = observer<React.FC>(() => {
     const handleBoardSwitch = useCallback((): void => {
         if (boardOpened) {
             ipcCloseBoardWindow()
+            ipcCloseBoardToolWindow()
         } else {
             ipcCreateBoardWindow({ url: '/board' })
         }

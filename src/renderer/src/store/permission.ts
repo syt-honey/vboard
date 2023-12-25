@@ -1,7 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx'
 
-import { ipcSyncByApp, getUserScreenStream } from '../utils'
-import { DeviceType } from '../types/device'
+import { DeviceType } from '@renderer/types/device'
+import { ipcSyncByApp, getUserScreenStream } from '@renderer/utils'
 
 export class Permission {
     public audioPermission: boolean = false

@@ -1,5 +1,5 @@
 import { makeAutoObservable, runInAction } from 'mobx'
-import { ipcSyncByApp } from '../utils/ipc'
+import { ipcSyncByApp } from '@renderer/utils/ipc'
 
 export class Screen {
     private readonly sourceName: string[] = ['Entire screen', '整个屏幕', 'Screen 1']

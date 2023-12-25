@@ -15,6 +15,47 @@ import { createWindow, getWindow, WindowType } from './utils'
 import { systemPreferencesShell, runtime } from './script'
 import { registerWindowHandler } from './registerChildWindow'
 
+// Why don't we use `setWindowOpenHandler` in boardWindow to register this boardToolWindow?
+// The answer is we should operate boardToolWindow when boardWindow is set to ignore mouse event. Therefore it cannot be set as `setWindowOpenHandler` to create
+export const registerBoardToolWindowMainIPCHandler = (): void => {
+    let boardToolWindow: BrowserWindow | null = null
+
+    ipcMain.on('createBoardToolWindow', (e, { url }) => {
+        if (!validateSender(e.senderFrame)) return
+        if (boardToolWindow || !url) return
+
+        const { size } = screen.getPrimaryDisplay()
+        boardToolWindow = createWindow({
+            x: size.width / 2 - 312 / 2,
+            y: 10,
+            width: 312,
+            height: 52,
+            frame: false,
+            alwaysOnTop: true,
+            transparent: true,
+            resizable: false,
+            title: WindowType.BOARD,
+            url: runtime.baseUrl() + url
+        })
+
+        boardToolWindow.webContents.setWindowOpenHandler(({ features }) => {
+            return registerWindowHandler(features)
+        })
+
+        boardToolWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: false })
+
+        boardToolWindow.setAlwaysOnTop(true, 'pop-up-menu', 2)
+    })
+
+    // register closeBoardTool Window handler
+    ipcMain.on('closeBoardToolWindow', (e) => {
+        if (!validateSender(e.senderFrame)) return
+
+        boardToolWindow?.close()
+        boardToolWindow = null
+    })
+}
+
 export const registerBoardWindowMainIPCHandler = (): void => {
     let boardWindow: BrowserWindow | null = null
 
@@ -44,6 +85,12 @@ export const registerBoardWindowMainIPCHandler = (): void => {
         boardWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: false })
 
         boardWindow.setAlwaysOnTop(true, 'pop-up-menu', 1)
+    })
+
+    ipcMain.on('setBoardWindowIgnoreMouseEvents', (e, { ignore }) => {
+        if (!validateSender(e.senderFrame) || !boardWindow) return
+
+        boardWindow.setIgnoreMouseEvents(!!ignore)
     })
 
     // register closeBoard Window handler

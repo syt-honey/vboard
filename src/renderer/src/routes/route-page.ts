@@ -1,13 +1,15 @@
-import HomePage from '../pages/HomePage'
-import RecordingPage from '../pages/RecordingPage'
-import PermissionPage from '../pages/PermissionPage'
-import BoardPage from '../pages/BoardPage'
+import HomePage from '@renderer/pages/HomePage'
+import BoardPage from '@renderer/pages/BoardPage'
+import RecordingPage from '@renderer/pages/RecordingPage'
+import BoardToolPage from '@renderer/pages/BoardToolPage'
+import PermissionPage from '@renderer/pages/PermissionPage'
 
 export enum RouteNameType {
     HomePage = 'HomePage',
     RecordingPage = 'RecordingPage',
     PermissionPage = 'PermissionPage',
-    BoardPage = 'BoardPage'
+    BoardPage = 'BoardPage',
+    BoardToolPage = 'BoardToolPage'
 }
 
 export type RouterPages = {
@@ -40,5 +42,10 @@ export const routePages: RouterPages = {
         title: 'board',
         component: BoardPage,
         path: '/board'
+    },
+    [RouteNameType.BoardToolPage]: {
+        title: 'board-toolbox',
+        component: BoardToolPage,
+        path: '/board-toolbox'
     }
 }

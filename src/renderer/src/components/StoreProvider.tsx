@@ -1,5 +1,5 @@
 import React, { createContext, FC } from 'react'
-import { screenStore, recorderStore, devicesStore, permissionStore } from '../store'
+import { screenStore, recorderStore, devicesStore, permissionStore } from '@renderer/store'
 
 export const RecorderContext = createContext(recorderStore)
 export const ScreenContext = createContext(screenStore)

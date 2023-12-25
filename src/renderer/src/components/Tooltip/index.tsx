@@ -2,8 +2,8 @@ import React from 'react'
 import { observer } from 'mobx-react-lite'
 import { styled } from 'styled-components'
 
-import { WindowType } from '../../types/window'
 import { ChildWindow } from '../ChildWindow'
+import { WindowType } from '@renderer/types/window'
 
 // Noted: only support one line, and the `max width` of tooltip is set by the props `position: { width }`
 // So do not set too long text while using this tooltip now.

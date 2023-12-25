@@ -1,7 +1,7 @@
 import { runInAction } from 'mobx'
 
-import { getSystemDevices } from '../utils'
-import { autoPersistStore } from '../utils/auto-persist-store'
+import { getSystemDevices } from '@renderer/utils'
+import { autoPersistStore } from '@renderer/utils/auto-persist-store'
 
 const LS_VERSION = 1
 

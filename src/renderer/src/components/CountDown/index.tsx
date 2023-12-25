@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import React, { useState } from 'react'
-import useInterval from '../../hooks/interval'
+import useInterval from '@renderer/hooks/interval'
 
 const CounterContainer = styled.div`
     display: flex;

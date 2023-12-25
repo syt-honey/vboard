@@ -1,11 +1,11 @@
 import { observer } from 'mobx-react-lite'
 import React, { useState, useEffect, useCallback, useMemo, useContext } from 'react'
 
-import { ScreenContext } from '../components/StoreProvider'
-import { getUserCameraStream } from '../utils'
 import { WindowType } from '@renderer/types/window'
-import { ChildWindow } from '../components/ChildWindow'
-import { Camera } from '../components/Camera'
+import { Camera } from '@renderer/components/Camera'
+import { getUserCameraStream } from '@renderer/utils'
+import { ChildWindow } from '@renderer/components/ChildWindow'
+import { ScreenContext } from '@renderer/components/StoreProvider'
 
 export interface CameraPageProps {
     position?: { x?: number; y?: number }

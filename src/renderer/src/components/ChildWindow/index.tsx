@@ -1,11 +1,11 @@
 import { createPortal } from 'react-dom'
 import React, { useEffect, useState } from 'react'
 import { StyleSheetManager } from 'styled-components'
-import baseCssModule from '../../assets/index.less?inline'
 
-import { WindowType } from '../../types/window'
-import { useChangesEffect } from '../../hooks/lifecycle'
-import { ipcWindowOptionsChanges } from '../../utils/ipc'
+import { WindowType } from '@renderer/types/window'
+import { useChangesEffect } from '@renderer/hooks/lifecycle'
+import { ipcWindowOptionsChanges } from '@renderer/utils/ipc'
+import baseCssModule from '@renderer/assets/index.less?inline'
 
 type ChildWindowOptionsProps = Partial<Electron.BrowserWindowConstructorOptions>
 

@@ -4,9 +4,9 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import React, { useCallback, useContext, useMemo, useEffect } from 'react'
 
-import appIcon from '../assets/icon/app.svg'
-import { PermissionContext } from '../components/StoreProvider'
-import { SVGCamera, SVGMic, SVGDesktop } from '../components/global'
+import appIcon from '@renderer/assets/icon/app.svg'
+import { PermissionContext } from '@renderer/components/StoreProvider'
+import { SVGCamera, SVGMic, SVGDesktop } from '@renderer/components/global'
 
 export const PermissionPage = observer<React.FC>(() => {
     const { t } = useTranslation()

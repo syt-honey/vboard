@@ -1,63 +1,100 @@
-import { observer } from 'mobx-react-lite'
-import React, { useCallback, useState } from 'react'
+import React, { useRef, useEffect, useState, useCallback } from 'react'
 
-import { Board } from '../components/Board'
-import { BoardToolBox, ToolType } from '../components/BoardToolBox'
+import useLocalStorageEvent from '@renderer/hooks/share'
+import { ipcCreateBoardToolWindow } from '@renderer/utils'
+import { setBoardWindowIgnoreMouseEvents } from '@renderer/utils/ipc'
+import { DrawArrow, DrawEllipse, DrawLine, DrawRect } from '@renderer/packages/board/svg'
+import {
+    ShapeType,
+    BoardStoreName,
+    BoardStoreOptionsType,
+    defaultBoard,
+    LS_BOARD_VERSION
+} from './board'
 
-export enum ShapeType {
-    Rect = 'rect',
-    Circle = 'circle',
-    Arrow = 'arrow',
-    Line = 'line'
-}
+export const BoardPage = (): React.ReactElement => {
+    const svgRef = useRef<SVGSVGElement | null>(null)
+    const [board, setBoard] = useState<DrawRect | DrawLine | DrawEllipse | DrawArrow | null>(null)
+    const [store, setBoardStore] = useLocalStorageEvent<BoardStoreOptionsType>({
+        key: BoardStoreName,
+        defaultValues: defaultBoard,
+        LS_VERSION: LS_BOARD_VERSION
+    })
 
-export const BoardPage = observer((): React.ReactElement => {
-    const [showTool, setShowTool] = useState(false)
-    const [selected, setSelected] = useState<ToolType>(ToolType.Pencil)
-
-    const [shape, setShape] = useState<ShapeType | null>(ShapeType.Line)
-    const [clear, setClear] = useState(false)
-
-    const onBoardMounted = useCallback(() => {
-        setShowTool(true)
-    }, [showTool])
-
-    const handleShapeSelect = useCallback(
-        (type: ToolType): void => {
-            if (type === ToolType.Clear) {
-                setClear(true)
-                return
+    useEffect(() => {
+        if (svgRef.current && store.clearable) {
+            while (svgRef.current.firstChild) {
+                svgRef.current.removeChild(svgRef.current.firstChild)
             }
-            setSelected(type)
+            updateBoardStore({ ...store, clearable: false })
+        }
+    }, [svgRef.current, store.clearable])
 
-            if (type === ToolType.Pencil) {
-                setShape(ShapeType.Line)
-            }
+    useEffect(() => {
+        let currentBoard: DrawRect | DrawLine | DrawEllipse | DrawArrow | null = null
+        if (svgRef.current) {
+            onBoardMounted?.()
+            currentBoard = getBoard(svgRef.current)
+        }
 
-            if (type === ToolType.Rect) {
-                setShape(ShapeType.Rect)
-            }
+        if (currentBoard) {
+            setBoard(currentBoard)
+        }
 
-            if (type === ToolType.Circle) {
-                setShape(ShapeType.Circle)
-            }
+        return (): void => {
+            currentBoard?.destroy()
+        }
+    }, [store.shape])
 
-            if (type === ToolType.Arrow) {
-                setShape(ShapeType.Arrow)
-            }
+    useEffect(() => {
+        setBoardWindowIgnoreMouseEvents({ ignore: store.ignoreMouseEvents })
+    }, [store.ignoreMouseEvents])
 
-            setClear(false)
+    const updateBoardStore = useCallback(
+        (newOptions: BoardStoreOptionsType) => {
+            setBoardStore(newOptions)
         },
-        [selected, shape]
+        [setBoardStore]
+    )
+
+    const onBoardMounted = (): void => {
+        ipcCreateBoardToolWindow({ url: '/board-toolbox' })
+    }
+
+    const getBoard = useCallback(
+        (el: SVGSVGElement) => {
+            let board: DrawRect | DrawLine | DrawEllipse | DrawArrow | null = null
+            if (store.shape === ShapeType.Line) {
+                board = new DrawLine(el)
+            }
+
+            if (store.shape === ShapeType.Rect) {
+                board = new DrawRect(el)
+            }
+
+            if (store.shape === ShapeType.Circle) {
+                board = new DrawEllipse(el)
+            }
+
+            if (store.shape === ShapeType.Arrow) {
+                board = new DrawArrow(el)
+            }
+
+            return board
+        },
+        [store.shape]
     )
 
     return (
         <div className="board-page">
-            {showTool && <BoardToolBox type={selected} handleShapeSelect={handleShapeSelect} />}
-
-            <Board shape={shape} clear={clear} onBoardMounted={onBoardMounted} />
+            <svg
+                ref={svgRef}
+                fill={board?.fill}
+                stroke={board?.color}
+                strokeWidth={board?.weight}
+            ></svg>
         </div>
     )
-})
+}
 
 export default BoardPage

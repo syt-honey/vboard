@@ -1,11 +1,9 @@
 .board-toolbox {
     display: inline-flex;
     justify-content: center;
-    padding: 10px 20px;
     color: #E8E9EA;
-    background-color: #18222E;
     border-radius: 8px;
-    box-sizing: border-box;
+    -webkit-app-region: no-drag;
 
     .ant-btn + .ant-btn {
         margin-left: 16px;

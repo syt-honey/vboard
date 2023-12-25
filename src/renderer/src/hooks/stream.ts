@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useState } from 'react'
 
-import { AudioAnalyser, getUserAudioStream } from '../utils'
-import { useInterval } from '../hooks/interval'
-import { permissionStore } from '../store'
+import { permissionStore } from '@renderer/store'
+import { useInterval } from '@renderer/hooks/interval'
+import { AudioAnalyser, getUserAudioStream } from '@renderer/utils'
 
 export interface IAudioAnalyser {
     volume: number

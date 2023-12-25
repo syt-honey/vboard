@@ -1,82 +1,100 @@
 import './index.css'
 
 import { Button } from 'antd'
-import { useRef } from 'react'
-import Draggable from 'react-draggable'
+import { useCallback } from 'react'
 import { observer } from 'mobx-react-lite'
 
-import { SVGRect, SVGCircle, SVGArrow, SVGBoardPencil, SVGClear, SVGCursor } from '../global'
-
-export enum ToolType {
-    Rect = 'rect',
-    Circle = 'circle',
-    Arrow = 'arrow',
-    Pencil = 'pencil',
-    Text = 'text',
-    Cursor = 'cursor',
-    Clear = 'clear'
-}
+import { SVGRect, SVGCircle, SVGArrow, SVGBoardPencil, SVGCursor, SVGClear } from '../global'
+import { ShapeType, ToolType, BoardStoreOptionsType } from '@renderer/pages/board'
 
 export interface BoardToolBoxProps {
-    type: ToolType
-    handleShapeSelect: (shape: ToolType) => void
+    store: BoardStoreOptionsType
+    updateBoardStore: (arg: BoardStoreOptionsType) => void
 }
 
-export const BoardToolBox = observer(({ type, handleShapeSelect }: BoardToolBoxProps) => {
-    const nodeRef = useRef(null)
+export const BoardToolBox = observer(
+    ({ store, updateBoardStore }: BoardToolBoxProps): React.ReactElement => {
+        const getStyle = useCallback(
+            (t: ToolType) => {
+                return {
+                    fill: t === store.type ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, .5)'
+                }
+            },
+            [store.type]
+        )
 
-    function getStyle(t): { fill: string } {
-        // @TODO: usually we should use store to manage the state
-        return { fill: t === type ? 'red' : 'white' }
-    }
+        const setToolType = useCallback(
+            (t: ToolType) => {
+                updateBoardStore({
+                    ...store,
+                    type: t,
+                    shape: getShape(t),
+                    ignoreMouseEvents: t === ToolType.Cursor
+                })
+            },
+            [store]
+        )
 
-    return (
-        <Draggable defaultPosition={{ x: 0, y: 10 }} nodeRef={nodeRef}>
-            <div ref={nodeRef} className="board-toolbox">
+        const getShape = (type: ToolType): ShapeType => {
+            switch (type) {
+                case ToolType.Rect:
+                    return ShapeType.Rect
+                case ToolType.Circle:
+                    return ShapeType.Circle
+                case ToolType.Arrow:
+                    return ShapeType.Arrow
+                default:
+                    return ShapeType.Line
+            }
+        }
+
+        const setClear = useCallback(
+            (clearable: boolean) => {
+                updateBoardStore({ ...store, clearable })
+            },
+            [store]
+        )
+
+        return (
+            <div className="board-toolbox">
                 <Button
                     type="link"
                     icon={<SVGRect style={getStyle(ToolType.Rect)} />}
-                    onClick={(): void => handleShapeSelect(ToolType.Rect)}
+                    onClick={(): void => setToolType(ToolType.Rect)}
                 ></Button>
 
                 <Button
                     type="link"
                     icon={<SVGCircle style={getStyle(ToolType.Circle)} />}
-                    onClick={(): void => handleShapeSelect(ToolType.Circle)}
+                    onClick={(): void => setToolType(ToolType.Circle)}
                 ></Button>
 
                 <Button
                     type="link"
                     icon={<SVGArrow style={getStyle(ToolType.Arrow)} />}
-                    onClick={(): void => handleShapeSelect(ToolType.Arrow)}
+                    onClick={(): void => setToolType(ToolType.Arrow)}
                 ></Button>
 
                 <Button
                     type="link"
                     icon={<SVGCursor style={getStyle(ToolType.Cursor)} />}
-                    onClick={(): void => handleShapeSelect(ToolType.Cursor)}
+                    onClick={(): void => setToolType(ToolType.Cursor)}
                 ></Button>
 
                 <Button
                     type="link"
                     icon={<SVGBoardPencil style={getStyle(ToolType.Pencil)} />}
-                    onClick={(): void => handleShapeSelect(ToolType.Pencil)}
+                    onClick={(): void => setToolType(ToolType.Pencil)}
                 ></Button>
 
                 <Button
                     type="link"
-                    icon={<SVGClear style={getStyle(ToolType.Clear)} />}
-                    onClick={(): void => handleShapeSelect(ToolType.Clear)}
+                    icon={<SVGClear style={{ fill: 'rgba(255, 255, 255, .5)' }} />}
+                    onClick={(): void => setClear(true)}
                 ></Button>
-
-                {/* <Button
-                    type="link"
-                    icon={<SVGText style={getStyle(ToolType.Text)} />}
-                    onClick={(): void => handleShapeSelect(ToolType.Text)}
-                ></Button> */}
             </div>
-        </Draggable>
-    )
-})
+        )
+    }
+)
 
 export default BoardToolBox

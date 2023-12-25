@@ -7,8 +7,8 @@ import { LoadingOutlined } from '@ant-design/icons'
 import { useMemo, useState, useEffect, useCallback } from 'react'
 
 import { Tooltip } from '../Tooltip'
-import { formatSeconds } from '../../utils'
-import { Devices, Recorder } from '../../store'
+import { formatSeconds } from '@renderer/utils'
+import { Devices, Recorder } from '@renderer/store'
 import { SVGResume, SVGPause, SVGCancel, SVGCamera, SVGMic, SVGPencil } from '../global'
 
 export interface ToolBoxProps {
