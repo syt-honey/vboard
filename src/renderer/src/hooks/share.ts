@@ -18,7 +18,7 @@ export function useLocalStorageEvent<T extends object>(
     callback?: (arg: unknown) => void
 ): UseLocalStorageEventReturnType<T> {
     const { key, defaultValues, LS_VERSION } = options
-    const [rawStore, setStore] = useState(() => localStorage.getItem(key) || `[null, '{}']`)
+    const [rawStore, setStore] = useState(() => localStorage.getItem(key) || '[null, {}]')
     const [v, store] = useMemo<[number, T]>(() => JSON.parse(rawStore), [rawStore])
 
     useEffect(() => {
