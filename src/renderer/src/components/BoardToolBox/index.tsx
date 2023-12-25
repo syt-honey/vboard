@@ -5,7 +5,7 @@ import { useCallback } from 'react'
 import { observer } from 'mobx-react-lite'
 
 import { SVGRect, SVGCircle, SVGArrow, SVGBoardPencil, SVGCursor, SVGClear } from '../global'
-import { ShapeType, ToolType, BoardStoreOptionsType } from '@renderer/pages/board'
+import { ShapeType, BoardStoreOptionsType } from '@renderer/pages/board'
 
 export interface BoardToolBoxProps {
     store: BoardStoreOptionsType
@@ -14,39 +14,40 @@ export interface BoardToolBoxProps {
 
 export const BoardToolBox = observer(
     ({ store, updateBoardStore }: BoardToolBoxProps): React.ReactElement => {
-        const getStyle = useCallback(
-            (t: ToolType) => {
-                return {
-                    fill: t === store.type ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, .5)'
-                }
-            },
-            [store.type]
+        const getShapeStyle = useCallback(
+            (s: ShapeType) => getColor(s === store.shape && !store.ignoreMouseEvents),
+            [store.shape, store.ignoreMouseEvents]
         )
 
-        const setToolType = useCallback(
-            (t: ToolType) => {
+        const getCursorStyle = useCallback(
+            () => getColor(store.ignoreMouseEvents),
+            [store.ignoreMouseEvents]
+        )
+
+        const getColor = (selected: boolean): { fill: string } => {
+            return {
+                fill: selected ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, .5)'
+            }
+        }
+
+        const setShape = useCallback(
+            (shape: ShapeType) => {
                 updateBoardStore({
                     ...store,
-                    type: t,
-                    shape: getShape(t),
-                    ignoreMouseEvents: t === ToolType.Cursor
+                    shape,
+                    ignoreMouseEvents: false
                 })
             },
             [store]
         )
 
-        const getShape = (type: ToolType): ShapeType => {
-            switch (type) {
-                case ToolType.Rect:
-                    return ShapeType.Rect
-                case ToolType.Circle:
-                    return ShapeType.Circle
-                case ToolType.Arrow:
-                    return ShapeType.Arrow
-                default:
-                    return ShapeType.Line
-            }
-        }
+        const setMouseEventsIgnore = useCallback(() => {
+            const ignore = store.ignoreMouseEvents
+            updateBoardStore({
+                ...store,
+                ignoreMouseEvents: !ignore
+            })
+        }, [store])
 
         const setClear = useCallback(
             (clearable: boolean) => {
@@ -59,37 +60,37 @@ export const BoardToolBox = observer(
             <div className="board-toolbox">
                 <Button
                     type="link"
-                    icon={<SVGRect style={getStyle(ToolType.Rect)} />}
-                    onClick={(): void => setToolType(ToolType.Rect)}
+                    icon={<SVGRect style={getShapeStyle(ShapeType.Rect)} />}
+                    onClick={(): void => setShape(ShapeType.Rect)}
                 ></Button>
 
                 <Button
                     type="link"
-                    icon={<SVGCircle style={getStyle(ToolType.Circle)} />}
-                    onClick={(): void => setToolType(ToolType.Circle)}
+                    icon={<SVGCircle style={getShapeStyle(ShapeType.Circle)} />}
+                    onClick={(): void => setShape(ShapeType.Circle)}
                 ></Button>
 
                 <Button
                     type="link"
-                    icon={<SVGArrow style={getStyle(ToolType.Arrow)} />}
-                    onClick={(): void => setToolType(ToolType.Arrow)}
+                    icon={<SVGArrow style={getShapeStyle(ShapeType.Arrow)} />}
+                    onClick={(): void => setShape(ShapeType.Arrow)}
                 ></Button>
 
                 <Button
                     type="link"
-                    icon={<SVGCursor style={getStyle(ToolType.Cursor)} />}
-                    onClick={(): void => setToolType(ToolType.Cursor)}
+                    icon={<SVGCursor style={getCursorStyle()} />}
+                    onClick={setMouseEventsIgnore}
                 ></Button>
 
                 <Button
                     type="link"
-                    icon={<SVGBoardPencil style={getStyle(ToolType.Pencil)} />}
-                    onClick={(): void => setToolType(ToolType.Pencil)}
+                    icon={<SVGBoardPencil style={getShapeStyle(ShapeType.Line)} />}
+                    onClick={(): void => setShape(ShapeType.Line)}
                 ></Button>
 
                 <Button
                     type="link"
-                    icon={<SVGClear style={{ fill: 'rgba(255, 255, 255, .5)' }} />}
+                    icon={<SVGClear style={getColor(false)} />}
                     onClick={(): void => setClear(true)}
                 ></Button>
             </div>

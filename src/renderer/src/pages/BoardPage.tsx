@@ -12,9 +12,11 @@ import {
     LS_BOARD_VERSION
 } from './board'
 
+export type BoardType = DrawRect | DrawLine | DrawEllipse | DrawArrow
+
 export const BoardPage = (): React.ReactElement => {
     const svgRef = useRef<SVGSVGElement | null>(null)
-    const [board, setBoard] = useState<DrawRect | DrawLine | DrawEllipse | DrawArrow | null>(null)
+    const [board, setBoard] = useState<BoardType | null>(null)
     const [store, setBoardStore] = useLocalStorageEvent<BoardStoreOptionsType>({
         key: BoardStoreName,
         defaultValues: defaultBoard,
@@ -22,6 +24,7 @@ export const BoardPage = (): React.ReactElement => {
     })
 
     useEffect(() => {
+        // if clearable is true, clear all svg child elements
         if (svgRef.current && store.clearable) {
             while (svgRef.current.firstChild) {
                 svgRef.current.removeChild(svgRef.current.firstChild)
@@ -31,7 +34,7 @@ export const BoardPage = (): React.ReactElement => {
     }, [svgRef.current, store.clearable])
 
     useEffect(() => {
-        let currentBoard: DrawRect | DrawLine | DrawEllipse | DrawArrow | null = null
+        let currentBoard: BoardType | null = null
         if (svgRef.current) {
             onBoardMounted?.()
             currentBoard = getBoard(svgRef.current)
@@ -57,13 +60,9 @@ export const BoardPage = (): React.ReactElement => {
         [setBoardStore]
     )
 
-    const onBoardMounted = (): void => {
-        ipcCreateBoardToolWindow({ url: '/board-toolbox' })
-    }
-
     const getBoard = useCallback(
         (el: SVGSVGElement) => {
-            let board: DrawRect | DrawLine | DrawEllipse | DrawArrow | null = null
+            let board: BoardType | null = null
             if (store.shape === ShapeType.Line) {
                 board = new DrawLine(el)
             }
@@ -85,6 +84,9 @@ export const BoardPage = (): React.ReactElement => {
         [store.shape]
     )
 
+    const onBoardMounted = (): void => {
+        ipcCreateBoardToolWindow({ url: '/board-toolbox' })
+    }
     return (
         <div className="board-page">
             <svg

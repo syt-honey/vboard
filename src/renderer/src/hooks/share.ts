@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 
 /**
  * share data between windows using localStorage
- * @param key storage name
+ * @param key: storage name
  * @param callback
  * @returns
  */
@@ -22,7 +22,7 @@ export function useLocalStorageEvent<T extends object>(
     const [v, store] = useMemo<[number, T]>(() => JSON.parse(rawStore), [rawStore])
 
     useEffect(() => {
-        // If there are `defaultValues` and the key length of `store` is 0, we should initial store first.
+        // If there are `defaultValues` and the key length of `store` is 0, we should initialize store first.
         if (!Object.keys(store).length && defaultValues) {
             updateStore(defaultValues, LS_VERSION)
         }
