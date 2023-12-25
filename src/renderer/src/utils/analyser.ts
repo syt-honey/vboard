@@ -22,10 +22,11 @@ export class AudioAnalyser {
     // get volume from 0 to 1
     getVolume(): number {
         this._analyser.getByteFrequencyData(this._dataArray)
-        return (
+
+        const v =
             this._dataArray.reduce((acc, val) => acc + val, 0) /
             this._dataArray.length /
             MAX_POSSIBLE_VOLUME
-        )
+        return v > 1 ? 1 : v
     }
 }
