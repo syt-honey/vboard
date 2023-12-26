@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
 
-import useLocalStorageEvent from '@renderer/hooks/share'
+import { useLocalStorageEvent } from '@renderer/hooks'
 import { BoardToolBox } from '@renderer/components/BoardToolBox'
 import { BoardStoreName, BoardStoreOptionsType, defaultBoard, LS_BOARD_VERSION } from './board'
 

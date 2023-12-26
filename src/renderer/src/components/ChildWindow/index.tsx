@@ -2,8 +2,8 @@ import { createPortal } from 'react-dom'
 import React, { useEffect, useState } from 'react'
 import { StyleSheetManager } from 'styled-components'
 
+import { useChangesEffect } from '@renderer/hooks'
 import { WindowType } from '@renderer/types/window'
-import { useChangesEffect } from '@renderer/hooks/lifecycle'
 import { ipcWindowOptionsChanges } from '@renderer/utils/ipc'
 import baseCssModule from '@renderer/assets/index.less?inline'
 
@@ -47,7 +47,10 @@ export const ChildWindow = function ChildWindow({
         }
 
         return (): void => {
-            newWindow?.close()
+            if (newWindow) {
+                newWindow.close()
+                setNewWindow(null)
+            }
         }
     }, [newWindow])
 

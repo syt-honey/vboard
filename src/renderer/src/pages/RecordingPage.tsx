@@ -33,8 +33,6 @@ export const RecordingPage = observer<React.FC>(() => {
     const { handleDevicesStatusUpdate, videoOn, selectedVideoInput } = devicesStore
     const [pageLoading, setPageLoading] = useState(false)
     const [boardOpened, setBoardOpend] = useState(false)
-    const [windowRect, setWindowRect] = useState<Electron.Rectangle | null>(null)
-
     const showCameraPage = useMemo(
         () => videoOn && selectedVideoInput,
         [videoOn, selectedVideoInput]
@@ -64,13 +62,7 @@ export const RecordingPage = observer<React.FC>(() => {
             }
         }
 
-        const getWindowBounds = async (): Promise<void> => {
-            // @TODO: I don't know why the `WindowType.RECORDING` is not working, we should check it again
-            setWindowRect((await ipcSyncByApp('getWindowBounds', { title: 'Recorder' })) || null)
-        }
-
         checkScreen()
-        getWindowBounds()
 
         return (): void => setPageLoading(false)
     }, [])
@@ -155,7 +147,6 @@ export const RecordingPage = observer<React.FC>(() => {
                 devicesStore={devicesStore}
                 recorderStore={recorderStore}
                 boardOpened={boardOpened}
-                windowRect={windowRect}
                 handleFinish={handleFinish}
                 handleCancel={handleCancel}
                 handlePause={handlePause}

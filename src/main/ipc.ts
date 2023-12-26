@@ -11,7 +11,7 @@ import {
 } from 'electron'
 import path from 'path'
 
-import { createWindow, getWindow, WindowType } from './utils'
+import { createWindow, WindowType } from './utils'
 import { systemPreferencesShell, runtime } from './script'
 import { registerWindowHandler } from './registerChildWindow'
 
@@ -181,14 +181,6 @@ export const registerRecordingWindowMainIPCHandler = (): void => {
 
         recordingWindow?.close()
         recordingWindow = null
-    })
-}
-
-export const registerGetWindowBoundsMainIPCHandler = (): void => {
-    ipcMain.handle('getWindowBounds', (e, { title }) => {
-        if (!validateSender(e.senderFrame)) return
-
-        return getWindow(title)?.getBounds()
     })
 }
 

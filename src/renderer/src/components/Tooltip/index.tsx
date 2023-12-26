@@ -5,6 +5,8 @@ import { styled } from 'styled-components'
 import { ChildWindow } from '../ChildWindow'
 import { WindowType } from '@renderer/types/window'
 
+// Temporarily hidden
+
 // Noted: only support one line, and the `max width` of tooltip is set by the props `position: { width }`
 // So do not set too long text while using this tooltip now.
 
@@ -59,7 +61,8 @@ export const Tooltip = observer(
     ({ position, prefix = '', title, onToolTipMounted }: TooltipProps): React.ReactElement => {
         return (
             <ChildWindow
-                type={WindowType.TOOLTIP}
+                // WindowType.TOOLTIP
+                type={WindowType.BOARD}
                 x={position?.x || 0}
                 y={position?.y || 0}
                 width={position?.width || 200}

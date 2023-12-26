@@ -5,7 +5,6 @@ import {
     registerMainWindowMainIPCHandler,
     registerBoardWindowMainIPCHandler,
     registerBoardToolWindowMainIPCHandler,
-    registerGetWindowBoundsMainIPCHandler,
     registerRecordingWindowMainIPCHandler,
     registerGetScreenPrimaryDisplayMainIPCHandler,
     registerGetScreenMainIPCHandler,
@@ -38,7 +37,6 @@ app.once('ready', () => {
     registerBoardWindowMainIPCHandler()
     registerBoardToolWindowMainIPCHandler()
 
-    registerGetWindowBoundsMainIPCHandler()
     registerGetScreenPrimaryDisplayMainIPCHandler()
     registerGetScreenMainIPCHandler()
     registerSaveFileMainIPCHandler()

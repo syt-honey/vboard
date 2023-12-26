@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 
+import { useInterval } from '@renderer/hooks'
 import { permissionStore } from '@renderer/store'
-import { useInterval } from '@renderer/hooks/interval'
 import { AudioAnalyser, getUserAudioStream } from '@renderer/utils'
 
 export interface IAudioAnalyser {

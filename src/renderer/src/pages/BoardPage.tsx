@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react'
 
-import useLocalStorageEvent from '@renderer/hooks/share'
+import { useLocalStorageEvent } from '@renderer/hooks'
 import { ipcCreateBoardToolWindow } from '@renderer/utils'
 import { setBoardWindowIgnoreMouseEvents } from '@renderer/utils/ipc'
 import { DrawArrow, DrawEllipse, DrawLine, DrawRect } from '@renderer/packages/board/svg'

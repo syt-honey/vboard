@@ -29,11 +29,10 @@ export const registerWindowHandler = (features: string): WindowHandlerResponse =
                 initNewChildWindow(electronWindowOptions.title)
             }
 
-            // @TODO: need to specify the `tooltip` using an unique id
+            // @TODO: need to specify the window using an unique id
             setTimeout(() => {
-                if (window.getTitle() === 'tooltip') {
-                    // ensure tooltip is higher than recording window
-                    window.setAlwaysOnTop(true, 'pop-up-menu', 3)
+                if (window.getTitle() === 'count') {
+                    window.setSkipTaskbar(true)
                 }
             })
         })
@@ -44,7 +43,8 @@ export const registerWindowHandler = (features: string): WindowHandlerResponse =
                 ...electronWindowOptions,
                 webPreferences: {
                     nodeIntegration: true,
-                    sandbox: false
+                    sandbox: false,
+                    backgroundThrottling: false
                 }
             }
         }

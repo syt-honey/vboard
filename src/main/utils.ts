@@ -10,8 +10,7 @@ export enum WindowType {
     CAMERA = 'CAMERA',
     COUNTER = 'COUNTER',
     RECORDING = 'RECORDING',
-    BOARD = 'BOARD',
-    TOOLTIP = 'TOOLTIP'
+    BOARD = 'BOARD'
 }
 
 export const isWindowType = (type: string): boolean =>
@@ -43,7 +42,8 @@ export const createWindow = ({
         webPreferences: {
             nodeIntegration: true,
             preload: runtime.preloadUrl,
-            sandbox: false
+            sandbox: false,
+            backgroundThrottling: false
         }
     })
 
