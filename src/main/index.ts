@@ -44,11 +44,3 @@ app.once('ready', () => {
     registerRequestDevicesPermissionMainIPCHandler()
     registerConfirmDialogMainIPCHandler()
 })
-// @TODO:
-// 1. need to set cameraWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: false })
-// always on top, above the Dock(macOS) and the taskbar(Windows)
-// 2. counterWindow.setAlwaysOnTop(true, 'pop-up-menu')
-// always show on all workspaces
-// 3. counterWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: false })
-// set the window size to the full screen size
-// 4. counterWindow.setSize(width, height - y)

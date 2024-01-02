@@ -110,10 +110,11 @@ export const registerMainWindowMainIPCHandler = (): void => {
     let mainWindow: BrowserWindow | null = null
     mainWindow = createWindow({
         width: 380,
-        height: 470
+        height: 470,
+        resizable: false,
+        fullscreenable: false,
+        autoHideMenuBar: runtime.isWin
     })
-
-    mainWindow.setFullScreenable(false)
 
     mainWindow.on('close', () => {
         BrowserWindow.getAllWindows().forEach((window) => window.destroy())

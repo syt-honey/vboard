@@ -5,7 +5,7 @@ import React, { useContext, useEffect, useCallback, useMemo, useState } from 're
 import { CameraPage } from './CameraPage'
 import { DevicesTypeValue } from '@renderer/store'
 import { useAudioAnalyser, useLocalStorageEvent } from '@renderer/hooks'
-import { BoardStoreName, BoardStoreOptionsType, defaultBoard, LS_BOARD_VERSION } from './board'
+import { BoardStoreName, BoardStoreOptionsType, defaultBoard } from './board'
 import {
     ipcCloseRecordingWindow,
     ipcShowMainWindow,
