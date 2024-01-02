@@ -56,7 +56,7 @@ export const ChildWindow = function ChildWindow({
 
     useChangesEffect(() => {
         // update window options when options changed
-        // only support `position` and `size` now
+        // only support `position`, `size` and `minimumSize` now
         if (options.title) {
             ipcWindowOptionsChanges(options.title, options)
         }
