@@ -11,7 +11,7 @@ type UseLocalStorageEventType<T> = {
     defaultValues?: T
     LS_VERSION?: number
 }
-type UseLocalStorageEventReturnType<T> = [T, (newOptions: T, lv?: number) => void]
+type UseLocalStorageEventReturnType<T> = [T, (newOptions: T, lv?: number) => void, () => void]
 
 export function useLocalStorageEvent<T extends object>(
     options: UseLocalStorageEventType<T>,
@@ -34,6 +34,14 @@ export function useLocalStorageEvent<T extends object>(
         setStore(opts)
     }
 
+    const resetStore = (): void => {
+        if (defaultValues) {
+            updateStore(defaultValues)
+        } else {
+            console.error(`[vboard]: the ${key} defaultValues is required`)
+        }
+    }
+
     useEffect(() => {
         const handleStorageChange = (event): void => {
             if (event.key === key) {
@@ -49,7 +57,7 @@ export function useLocalStorageEvent<T extends object>(
         }
     }, [key, callback])
 
-    return [store, updateStore]
+    return [store, updateStore, resetStore]
 }
 
 export default useLocalStorageEvent

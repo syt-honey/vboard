@@ -4,7 +4,8 @@ import React, { useContext, useEffect, useCallback, useMemo, useState } from 're
 
 import { CameraPage } from './CameraPage'
 import { DevicesTypeValue } from '@renderer/store'
-import { useAudioAnalyser } from '@renderer/hooks'
+import { useAudioAnalyser, useLocalStorageEvent } from '@renderer/hooks'
+import { BoardStoreName, BoardStoreOptionsType, defaultBoard, LS_BOARD_VERSION } from './board'
 import {
     ipcCloseRecordingWindow,
     ipcShowMainWindow,
@@ -32,11 +33,16 @@ export const RecordingPage = observer<React.FC>(() => {
 
     const { handleDevicesStatusUpdate, videoOn, selectedVideoInput } = devicesStore
     const [pageLoading, setPageLoading] = useState(false)
-    const [boardOpened, setBoardOpend] = useState(false)
+    const [boardOpened, setBoardOpened] = useState(false)
     const showCameraPage = useMemo(
         () => videoOn && selectedVideoInput,
         [videoOn, selectedVideoInput]
     )
+
+    const [, , resetStore] = useLocalStorageEvent<BoardStoreOptionsType>({
+        key: BoardStoreName,
+        defaultValues: defaultBoard
+    })
 
     useEffect(() => {
         setPageLoading(true)
@@ -130,13 +136,15 @@ export const RecordingPage = observer<React.FC>(() => {
 
     const handleBoardSwitch = useCallback((): void => {
         if (boardOpened) {
+            resetStore()
+
             ipcCloseBoardWindow()
             ipcCloseBoardToolWindow()
         } else {
             ipcCreateBoardWindow({ url: '/board' })
         }
 
-        setBoardOpend(!boardOpened)
+        setBoardOpened(!boardOpened)
     }, [boardOpened])
 
     return (
