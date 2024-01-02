@@ -65,13 +65,13 @@ export const registerBoardWindowMainIPCHandler = (): void => {
         if (!validateSender(e.senderFrame)) return
         if (boardWindow || !url) return
 
-        const { size } = screen.getPrimaryDisplay()
+        const { size, workArea } = screen.getPrimaryDisplay()
+        const { y } = workArea
         boardWindow = createWindow({
             x: 0,
             y: 0,
             width: size.width,
-            // @TODO: why should need to minus 30
-            height: size.height - 30,
+            height: size.height - y,
             frame: false,
             alwaysOnTop: true,
             transparent: true,

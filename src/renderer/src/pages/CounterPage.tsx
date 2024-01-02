@@ -17,7 +17,6 @@ export const CounterPage = observer(
     ({ onCounterDownFinished, onCounterMounted }: CounterPageProps): React.ReactElement => {
         const screenStore = useContext(ScreenContext)
 
-        // @TODO: need to cover full screen
         const size = useMemo(
             () => screenStore.primaryDisplay?.size || { width: 0, height: 0 },
             [screenStore.primaryDisplay?.size]
