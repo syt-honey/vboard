@@ -44,6 +44,8 @@ export const CounterPage = observer(
                 frame={false}
                 alwaysOnTop
                 transparent
+                skipTaskbar={true}
+                hiddenInMissionControl={true}
                 title={COUNTDOWN_WINDOW_ID}
                 onFinished={onCounterMounted}
             >

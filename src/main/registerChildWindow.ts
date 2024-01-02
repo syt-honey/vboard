@@ -31,7 +31,7 @@ export const registerWindowHandler = (features: string): WindowHandlerResponse =
 
             // @TODO: need to specify the window using an unique id
             setTimeout(() => {
-                if (window.getTitle() === 'count') {
+                if (['count', 'camera'].indexOf(window.getTitle()) > -1) {
                     window.setIgnoreMouseEvents(true)
                     window.setAlwaysOnTop(true, 'pop-up-menu')
                     window.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: false })

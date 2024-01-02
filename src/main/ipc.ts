@@ -34,6 +34,8 @@ export const registerBoardToolWindowMainIPCHandler = (): void => {
             alwaysOnTop: true,
             transparent: true,
             resizable: false,
+            hiddenInMissionControl: true,
+            skipTaskbar: true,
             title: WindowType.BOARD,
             url: runtime.baseUrl() + url
         })
@@ -74,6 +76,8 @@ export const registerBoardWindowMainIPCHandler = (): void => {
             alwaysOnTop: true,
             transparent: true,
             resizable: false,
+            hiddenInMissionControl: true,
+            skipTaskbar: true,
             title: WindowType.BOARD,
             url: runtime.baseUrl() + url
         })
@@ -155,6 +159,8 @@ export const registerRecordingWindowMainIPCHandler = (): void => {
             alwaysOnTop: true,
             transparent: true,
             resizable: false,
+            skipTaskbar: true,
+            hiddenInMissionControl: true,
             // Warning: this title doesn't seem to be working well
             title: WindowType.RECORDING,
             url: runtime.baseUrl() + url

@@ -76,6 +76,8 @@ export const CameraPage = observer(
                 width={200}
                 frame={false}
                 alwaysOnTop
+                hiddenInMissionControl={true}
+                skipTaskbar={true}
                 transparent
                 resizable={false}
                 title={CAMERA_WINDOW_ID}
