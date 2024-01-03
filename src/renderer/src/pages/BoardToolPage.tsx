@@ -1,15 +1,14 @@
-import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
+import { observer } from 'mobx-react-lite'
+import useLocalStorageState from 'electron-localstorage-store'
 
-import { useLocalStorageEvent } from '@renderer/hooks'
 import { BoardToolBox } from '@renderer/components/BoardToolBox'
-import { BoardStoreName, BoardStoreOptionsType, defaultBoard, LS_BOARD_VERSION } from './board'
+import { BoardStoreName, BoardStoreOptionsType, defaultBoard } from './board'
 
 export const BoardToolPage = observer((): React.ReactElement => {
-    const [store, setBoardStore] = useLocalStorageEvent<BoardStoreOptionsType>({
+    const [store, setBoardStore] = useLocalStorageState<BoardStoreOptionsType>({
         key: BoardStoreName,
-        defaultValues: defaultBoard,
-        LS_VERSION: LS_BOARD_VERSION
+        defaultValue: defaultBoard
     })
     const updateBoardStore = useCallback(
         (newOptions: BoardStoreOptionsType) => {

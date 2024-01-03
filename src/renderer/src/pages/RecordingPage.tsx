@@ -4,7 +4,9 @@ import React, { useContext, useEffect, useCallback, useMemo, useState } from 're
 
 import { CameraPage } from './CameraPage'
 import { DevicesTypeValue } from '@renderer/store'
-import { useAudioAnalyser, useLocalStorageEvent } from '@renderer/hooks'
+import useLocalStorageState from 'electron-localstorage-store'
+
+import { useAudioAnalyser } from '@renderer/hooks'
 import { BoardStoreName, BoardStoreOptionsType, defaultBoard } from './board'
 import {
     ipcCloseRecordingWindow,
@@ -39,9 +41,9 @@ export const RecordingPage = observer<React.FC>(() => {
         [videoOn, selectedVideoInput]
     )
 
-    const [, , resetStore] = useLocalStorageEvent<BoardStoreOptionsType>({
+    const [, , resetStore] = useLocalStorageState<BoardStoreOptionsType>({
         key: BoardStoreName,
-        defaultValues: defaultBoard
+        defaultValue: defaultBoard
     })
 
     useEffect(() => {

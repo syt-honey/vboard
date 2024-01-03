@@ -1,26 +1,19 @@
+import useLocalStorageState from 'electron-localstorage-store'
 import React, { useRef, useEffect, useState, useCallback } from 'react'
 
-import { useLocalStorageEvent } from '@renderer/hooks'
 import { ipcCreateBoardToolWindow } from '@renderer/utils'
 import { setBoardWindowIgnoreMouseEvents } from '@renderer/utils/ipc'
 import { DrawArrow, DrawEllipse, DrawLine, DrawRect } from '@renderer/packages/board/svg'
-import {
-    ShapeType,
-    BoardStoreName,
-    BoardStoreOptionsType,
-    defaultBoard,
-    LS_BOARD_VERSION
-} from './board'
+import { ShapeType, BoardStoreName, BoardStoreOptionsType, defaultBoard } from './board'
 
 export type BoardType = DrawRect | DrawLine | DrawEllipse | DrawArrow
 
 export const BoardPage = (): React.ReactElement => {
     const svgRef = useRef<SVGSVGElement | null>(null)
     const [board, setBoard] = useState<BoardType | null>(null)
-    const [store, setBoardStore] = useLocalStorageEvent<BoardStoreOptionsType>({
+    const [store, setBoardStore] = useLocalStorageState<BoardStoreOptionsType>({
         key: BoardStoreName,
-        defaultValues: defaultBoard,
-        LS_VERSION: LS_BOARD_VERSION
+        defaultValue: defaultBoard
     })
 
     useEffect(() => {

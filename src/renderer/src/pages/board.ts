@@ -12,7 +12,6 @@ export interface BoardStoreOptionsType {
 }
 
 export const BoardStoreName = 'BoardStore'
-export const LS_BOARD_VERSION = 1
 
 export const defaultBoard = {
     shape: ShapeType.Line,
