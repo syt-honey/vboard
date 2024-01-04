@@ -9,7 +9,7 @@ import { ShapeType, BoardStoreOptionsType } from '@renderer/pages/board'
 
 export interface BoardToolBoxProps {
     store: BoardStoreOptionsType
-    updateBoardStore: (arg: BoardStoreOptionsType) => void
+    updateBoardStore: (arg: Partial<BoardStoreOptionsType>) => void
 }
 
 export const BoardToolBox = observer(
@@ -20,7 +20,7 @@ export const BoardToolBox = observer(
         )
 
         const getCursorStyle = useCallback(
-            () => getColor(store.ignoreMouseEvents),
+            () => getColor(!!store.ignoreMouseEvents),
             [store.ignoreMouseEvents]
         )
 
@@ -32,21 +32,14 @@ export const BoardToolBox = observer(
 
         const setShape = useCallback(
             (shape: ShapeType) => {
-                updateBoardStore({
-                    ...store,
-                    shape,
-                    ignoreMouseEvents: false
-                })
+                updateBoardStore({ shape, ignoreMouseEvents: false })
             },
             [store]
         )
 
         const setMouseEventsIgnore = useCallback(() => {
             const ignore = store.ignoreMouseEvents
-            updateBoardStore({
-                ...store,
-                ignoreMouseEvents: !ignore
-            })
+            updateBoardStore({ ignoreMouseEvents: !ignore })
         }, [store])
 
         const setClear = useCallback(

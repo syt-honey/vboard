@@ -21,8 +21,8 @@ dependencies:
     specifier: ^5.9.0
     version: registry.npmmirror.com/antd@5.9.0(react-dom@18.2.0)(react@18.2.0)
   electron-localstorage-store:
-    specifier: ^0.0.1
-    version: 0.0.1(react-dom@18.2.0)(react@18.2.0)
+    specifier: ^0.0.3
+    version: 0.0.3(react-dom@18.2.0)(react@18.2.0)
   electron-updater:
     specifier: ^6.1.1
     version: registry.npmmirror.com/electron-updater@6.1.1
@@ -301,8 +301,8 @@ packages:
     dev: true
     optional: true
 
-  /@types/yauzl@2.10.0:
-    resolution: {integrity: sha512-Cn6WYCm0tXv8p6k+A8PvbDG763EDpBoTzHdA+Q/MF6H3sapGjCm9NzoaJncJS9tUKSuCoDs9XHxYYsQDgxR6kw==}
+  /@types/yauzl@2.10.3:
+    resolution: {integrity: sha512-oJoftv0LSuaDZE3Le4DbKX+KS9G36NzOeSap90UIK0yMA/NhKJhqlSGtNDORNRaIbQfzjXDrQa0ytJ6mNRGz/Q==}
     requiresBuild: true
     dependencies:
       '@types/node': registry.npmmirror.com/@types/node@18.17.5
@@ -326,8 +326,8 @@ packages:
     dev: true
     optional: true
 
-  /electron-localstorage-store@0.0.1(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-hR+VCnBqf/xsHUvth7Z/VUetiMLzbXCZdrMx2jdT08daPunKfcx7GBqD5Pw+CTdgRlCIe9szGSm2jXR3TLIMWg==}
+  /electron-localstorage-store@0.0.3(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-bSEYiX6YlQeyUBFOIx/jppgNC+HG/u2pkkt+LRweBfRuH08y8xmfth9uy427iktlXCcUuuW1OmSi0MDyzoAstw==}
     peerDependencies:
       react: ^18.2.0
       react-dom: ^18.2.0
@@ -393,17 +393,14 @@ packages:
     requiresBuild: true
     optional: true
 
-  /needle@3.2.0:
-    resolution: {integrity: sha512-oUvzXnyLiVyVGoianLijF9O/RecZUf7TkBfimjGrLM4eQhXyeJwM6GeAWccwfQ9aa4gMCZKqhAOuLaMIcQxajQ==}
+  /needle@3.3.1:
+    resolution: {integrity: sha512-6k0YULvhpw+RoLNiQCRKOl09Rv1dPLr8hHnVjHqdolKwDrdNyk+Hmrthi4lIGPPz3r39dLx0hsF5s40sZ3Us4Q==}
     engines: {node: '>= 4.4.x'}
     hasBin: true
     requiresBuild: true
     dependencies:
-      debug: registry.npmmirror.com/debug@3.2.7
       iconv-lite: registry.npmmirror.com/iconv-lite@0.6.3
       sax: registry.npmmirror.com/sax@1.2.4
-    transitivePeerDependencies:
-      - supports-color
     optional: true
 
   /rxjs@7.8.1:
@@ -2431,20 +2428,6 @@ packages:
     version: 1.11.10
     dev: false
 
-  registry.npmmirror.com/debug@3.2.7:
-    resolution: {integrity: sha512-CFjzYYAi4ThfiQvizrFQevTTXHtnCqWfe7x1AhgEscTz6ZbLbfoLRLPugTQyBth6f8ZERVUSyWHFD/7Wu4t1XQ==, registry: https://registry.npmjs.org/, tarball: https://registry.npmmirror.com/debug/-/debug-3.2.7.tgz}
-    name: debug
-    version: 3.2.7
-    requiresBuild: true
-    peerDependencies:
-      supports-color: '*'
-    peerDependenciesMeta:
-      supports-color:
-        optional: true
-    dependencies:
-      ms: registry.npmmirror.com/ms@2.1.2
-    optional: true
-
   registry.npmmirror.com/debug@4.3.4:
     resolution: {integrity: sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==, registry: https://registry.npmjs.org/, tarball: https://registry.npmmirror.com/debug/-/debug-4.3.4.tgz}
     name: debug
@@ -3112,7 +3095,7 @@ packages:
       get-stream: registry.npmmirror.com/get-stream@5.2.0
       yauzl: registry.npmmirror.com/yauzl@2.10.0
     optionalDependencies:
-      '@types/yauzl': 2.10.0
+      '@types/yauzl': 2.10.3
     transitivePeerDependencies:
       - supports-color
 
@@ -4128,10 +4111,8 @@ packages:
       image-size: 0.5.5
       make-dir: 2.1.0
       mime: 1.6.0
-      needle: 3.2.0
+      needle: 3.3.1
       source-map: 0.6.1
-    transitivePeerDependencies:
-      - supports-color
 
   registry.npmmirror.com/levn@0.4.1:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==, registry: https://registry.npmjs.org/, tarball: https://registry.npmmirror.com/levn/-/levn-0.4.1.tgz}

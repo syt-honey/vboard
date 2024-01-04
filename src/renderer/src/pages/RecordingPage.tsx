@@ -1,10 +1,10 @@
 import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
+import useLocalStorageState from 'electron-localstorage-store'
 import React, { useContext, useEffect, useCallback, useMemo, useState } from 'react'
 
 import { CameraPage } from './CameraPage'
 import { DevicesTypeValue } from '@renderer/store'
-import useLocalStorageState from 'electron-localstorage-store'
 
 import { useAudioAnalyser } from '@renderer/hooks'
 import { BoardStoreName, BoardStoreOptionsType, defaultBoard } from './board'

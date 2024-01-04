@@ -4,7 +4,7 @@ import React, { useRef, useEffect, useState, useCallback } from 'react'
 import { ipcCreateBoardToolWindow } from '@renderer/utils'
 import { setBoardWindowIgnoreMouseEvents } from '@renderer/utils/ipc'
 import { DrawArrow, DrawEllipse, DrawLine, DrawRect } from '@renderer/packages/board/svg'
-import { ShapeType, BoardStoreName, BoardStoreOptionsType, defaultBoard } from './board'
+import { ShapeType, BoardStoreName, BoardStoreOptionsType } from './board'
 
 export type BoardType = DrawRect | DrawLine | DrawEllipse | DrawArrow
 
@@ -12,8 +12,7 @@ export const BoardPage = (): React.ReactElement => {
     const svgRef = useRef<SVGSVGElement | null>(null)
     const [board, setBoard] = useState<BoardType | null>(null)
     const [store, setBoardStore] = useLocalStorageState<BoardStoreOptionsType>({
-        key: BoardStoreName,
-        defaultValue: defaultBoard
+        key: BoardStoreName
     })
 
     useEffect(() => {
@@ -22,7 +21,7 @@ export const BoardPage = (): React.ReactElement => {
             while (svgRef.current.firstChild) {
                 svgRef.current.removeChild(svgRef.current.firstChild)
             }
-            updateBoardStore({ ...store, clearable: false })
+            updateBoardStore({ clearable: false })
         }
     }, [svgRef.current, store.clearable])
 
@@ -47,7 +46,7 @@ export const BoardPage = (): React.ReactElement => {
     }, [store.ignoreMouseEvents])
 
     const updateBoardStore = useCallback(
-        (newOptions: BoardStoreOptionsType) => {
+        (newOptions: Partial<BoardStoreOptionsType>) => {
             setBoardStore(newOptions)
         },
         [setBoardStore]

@@ -24,7 +24,7 @@
     "@electron-toolkit/utils": "^2.0.0",
     "@electron/remote": "^2.0.11",
     "antd": "^5.9.0",
-    "electron-localstorage-store": "^0.0.1",
+    "electron-localstorage-store": "^0.0.3",
     "electron-updater": "^6.1.1",
     "i18next": "^23.5.1",
     "less": "^4.2.0",
