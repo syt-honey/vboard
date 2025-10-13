@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0.1] - 2025-10-05
+
+### Added33
+- 333Complete overhaul of the recording architecture with segmented recording, memory monitor, and whiteboard/countdown flow.
+- New UI for Home, Recording Area Selector, Countdown, Settings, and Recording Toolbar with gradient themes and notifications.
+- Auto-update integration using `electron-updater`.
+- System sleep handling that saves current segments, stops recording, and shows system notifications.
+
 ## [2.0.0] - 2025-10-05
 
 ### Added
