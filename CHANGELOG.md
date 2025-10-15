@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.0.0] - 2025-10-04
+## [2.0.0] - 2025-10-05
 
 ### Added
 - Complete overhaul of the recording architecture with segmented recording, memory monitor, and whiteboard/countdown flow.
